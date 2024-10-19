@@ -8,7 +8,7 @@ import SessionProvider from "@/components/SessionProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "My App",
+  title: "Beauty IMS",
   description: "A simple app with authentication",
 };
 
