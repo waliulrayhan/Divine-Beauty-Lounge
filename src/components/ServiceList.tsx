@@ -2,72 +2,109 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { toast } from 'react-toastify';
 
 interface Service {
   id: string;
   name: string;
   description: string;
-  charge: number;
-  dateAdded: string;
-  addedBy: string;
+  serviceCharge: number;
+  createdAt: string;
+  createdBy: {
+    username: string;
+  };
 }
 
 export default function ServiceList() {
+  const { data: session } = useSession();
   const [services, setServices] = useState<Service[]>([]);
-  const [newService, setNewService] = useState({ name: '', description: '', charge: '' });
+  const [newService, setNewService] = useState({ name: '', description: '', serviceCharge: '' });
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const { data: session } = useSession();
 
   useEffect(() => {
-    // Fetch services from API
-    // For now, we'll use mock data
-    setServices([
-      { id: '1', name: 'Service 1', description: 'Description 1', charge: 100, dateAdded: '2023-05-01', addedBy: 'Admin 1' },
-      { id: '2', name: 'Service 2', description: 'Description 2', charge: 200, dateAdded: '2023-05-02', addedBy: 'Admin 2' },
-    ]);
+    fetchServices();
   }, []);
+
+  const fetchServices = async () => {
+    try {
+      const response = await fetch('/api/services');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || `HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setServices(data);
+    } catch (error) {
+      console.error('Error fetching services:', error);
+      toast.error(`Failed to load services: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (editingService) {
-      setEditingService({ ...editingService, [name]: name === 'charge' ? parseFloat(value) : value });
+      setEditingService({ ...editingService, [name]: value });
     } else {
       setNewService({ ...newService, [name]: value });
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingService) {
-      // Update existing service
-      const updatedServices = services.map(service => 
-        service.id === editingService.id ? editingService : service
-      );
-      setServices(updatedServices);
+    try {
+      const serviceData = editingService || newService;
+      const serviceCharge = parseFloat(serviceData.serviceCharge.toString());
+      if (isNaN(serviceCharge)) {
+        throw new Error('Invalid service charge amount');
+      }
+      if (editingService) {
+        // Update existing service
+        const response = await fetch(`/api/services/${editingService.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...serviceData, serviceCharge }),
+        });
+        if (!response.ok) throw new Error('Failed to update service');
+        await fetchServices();
+        toast.success('Service updated successfully');
+      } else {
+        // Add new service
+        const response = await fetch('/api/services', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...serviceData, serviceCharge }),
+        });
+        if (!response.ok) throw new Error('Failed to add service');
+        await fetchServices();
+        toast.success('Service added successfully');
+      }
+      setNewService({ name: '', description: '', serviceCharge: '' });
       setEditingService(null);
-    } else {
-      // Add new service
-      const service: Service = {
-        id: Date.now().toString(),
-        ...newService,
-        charge: parseFloat(newService.charge),
-        dateAdded: new Date().toISOString().split('T')[0],
-        addedBy: session?.user?.name || 'Unknown',
-      };
-      setServices([...services, service]);
-      setNewService({ name: '', description: '', charge: '' });
+      setShowForm(false);
+    } catch (error) {
+      console.error('Error submitting service:', error);
+      toast.error('Failed to save service. Please ensure all fields are valid.');
     }
-    setShowForm(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this service?')) {
+      try {
+        const response = await fetch(`/api/services/${id}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('Failed to delete service');
+        await fetchServices();
+        toast.success('Service deleted successfully');
+      } catch (error) {
+        console.error('Error deleting service:', error);
+        toast.error('Failed to delete service. Please try again.');
+      }
+    }
   };
 
   const handleEdit = (service: Service) => {
     setEditingService(service);
     setShowForm(true);
-  };
-
-  const handleDelete = (id: string) => {
-    setServices(services.filter(service => service.id !== id));
   };
 
   return (
@@ -112,12 +149,12 @@ export default function ServiceList() {
             ></textarea>
           </div>
           <div className="mb-4">
-            <label htmlFor="charge" className="block text-sm font-medium text-gray-700">Service Charge</label>
+            <label htmlFor="serviceCharge" className="block text-sm font-medium text-gray-700">Service Charge</label>
             <input
               type="number"
-              id="charge"
-              name="charge"
-              value={editingService ? editingService.charge : newService.charge}
+              id="serviceCharge"
+              name="serviceCharge"
+              value={editingService ? editingService.serviceCharge : newService.serviceCharge}
               onChange={handleInputChange}
               required
               min="0"
@@ -142,9 +179,9 @@ export default function ServiceList() {
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Charge</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Added</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Added By</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Charge</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created By</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -153,9 +190,13 @@ export default function ServiceList() {
               <tr key={service.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-black">{service.name}</td>
                 <td className="px-6 py-4 text-black">{service.description}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-black">${service.charge.toFixed(2)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-black">{service.dateAdded}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-black">{service.addedBy}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-black">
+                  ${service.serviceCharge.toFixed(2)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-black">
+                  {new Date(service.createdAt).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-black">{service.createdBy.username}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex space-x-2">
                     <button onClick={() => alert(`View details for ${service.name}`)} className="text-blue-600 hover:text-blue-900">View</button>
