@@ -3,13 +3,19 @@
 import React from 'react';
 
 interface DashboardContentProps {
-  user: any;
+  user: {
+    username: string;
+    email: string;
+    role: string;
+  } | null;
 }
 
 const DashboardContent: React.FC<DashboardContentProps> = ({ user }) => {
   return (
     <div className="container mx-auto px-6 py-8">
-      <h3 className="text-gray-700 text-3xl font-medium">Welcome, {user?.name}</h3>
+      <h3 className="text-gray-700 text-3xl font-medium">
+        Welcome, {user?.username || 'Guest'}
+      </h3>
       <div className="mt-4">
         <div className="flex flex-wrap -mx-6">
           <div className="w-full px-6 sm:w-1/2 xl:w-1/3">

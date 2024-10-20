@@ -1,6 +1,6 @@
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import prisma from "@/lib/prisma";
+import prisma from "@/lib/prisma"; // Make sure this path matches your actual prisma client path
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -42,7 +42,7 @@ export const authOptions: AuthOptions = {
     signIn: "/login", // Redirect to your login page on failed sign-in
   },
   session: {
-    strategy: "jwt", // This is where the type error occurred; 'jwt' is the correct value
+    strategy: "jwt", // The correct session strategy
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
