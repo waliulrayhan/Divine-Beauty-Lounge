@@ -29,17 +29,27 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session || !session.user?.email) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     const { name, description, serviceCharge } = await request.json();
+
+    // Fetch the user based on the email in the session
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email }
+    });
+
+    if (!user) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
+
     const service = await prisma.service.create({
       data: {
         name,
         description,
         serviceCharge: parseFloat(serviceCharge),
-        createdBy: { connect: { id: session.user.id } }
+        createdBy: { connect: { id: user.id } }
       }
     });
     return NextResponse.json(service);
