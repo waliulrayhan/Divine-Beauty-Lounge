@@ -4,7 +4,7 @@ import { signOut } from "next-auth/react";
 import { useState } from "react";
 
 export default function Dashboard({ user }: { user: any }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -13,7 +13,7 @@ export default function Dashboard({ user }: { user: any }) {
   return (
     <div className="min-h-screen flex bg-gray-100">
       {/* Sidebar */}
-      <div className={`bg-indigo-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition duration-200 ease-in-out`}>
+      <div className={`bg-indigo-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition duration-200 ease-in-out z-20`}>
         <nav>
           <a href="#" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700">Service List</a>
           <a href="#" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700">Product List</a>
@@ -24,11 +24,11 @@ export default function Dashboard({ user }: { user: any }) {
       </div>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <nav className="bg-white shadow-lg">
+        <nav className="bg-white shadow-lg z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16">
               <div className="flex items-center">
-                <button onClick={toggleSidebar} className="text-gray-500 focus:outline-none focus:text-gray-600 md:hidden">
+                <button onClick={toggleSidebar} className="text-gray-500 focus:outline-none focus:text-gray-600">
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
