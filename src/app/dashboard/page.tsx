@@ -1,14 +1,26 @@
-import { getServerSession } from "next-auth/next";
-import { redirect } from "next/navigation";
-import { authOptions } from "../api/auth/[...nextauth]/route";
-import Dashboard from "@/components/Dashboard";
+"use client"
 
-export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
+import { NextPage } from 'next';
+import { useSession } from 'next-auth/react';
+import Dashboard from '../../components/Dashboard';
+import DashboardContent from '../../components/DashboardContent';
 
-  if (!session) {
-    redirect("/");
+const DashboardPage: NextPage = () => {
+  const { data: session, status } = useSession();
+
+  if (status === 'loading') {
+    return <div>Loading...</div>;
   }
 
-  return <Dashboard user={session.user} />;
-}
+  if (!session) {
+    return <div>Access Denied</div>;
+  }
+
+  return (
+    <Dashboard user={session.user}>
+      <DashboardContent user={session.user} />
+    </Dashboard>
+  );
+};
+
+export default DashboardPage;
