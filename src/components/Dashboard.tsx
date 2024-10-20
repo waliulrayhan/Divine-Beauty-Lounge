@@ -2,8 +2,9 @@
 
 import { signOut } from "next-auth/react";
 import { useState } from "react";
+import Link from 'next/link';
 
-export default function Dashboard({ user }: { user: any }) {
+export default function Dashboard({ user, children }: { user: any, children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const toggleSidebar = () => {
@@ -15,7 +16,8 @@ export default function Dashboard({ user }: { user: any }) {
       {/* Sidebar */}
       <div className={`bg-indigo-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition duration-200 ease-in-out z-20`}>
         <nav>
-          <a href="#" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700">Service List</a>
+          <Link href="/dashboard" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700">Dashboard</Link>
+          <Link href="/service-list" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700">Service List</Link>
           <a href="#" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700">Product List</a>
           <a href="#" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700">Stock In</a>
           <a href="#" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700">Stock Out</a>
@@ -56,11 +58,7 @@ export default function Dashboard({ user }: { user: any }) {
         </nav>
 
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200">
-          <div className="container mx-auto px-6 py-8">
-            <h3 className="text-gray-700 text-3xl font-medium">Welcome, {user?.name}</h3>
-            {/* Rest of the dashboard content */}
-            {/* ... */}
-          </div>
+          {children}
         </main>
       </div>
     </div>
