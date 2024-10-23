@@ -140,6 +140,7 @@ export default function UserManagement() {
       ...user,
       jobStartDate: new Date(user.jobStartDate).toISOString().split('T')[0],
       jobEndDate: user.jobEndDate ? new Date(user.jobEndDate).toISOString().split('T')[0] : '',
+      permissions: typeof user.permissions === 'string' ? JSON.parse(user.permissions) : user.permissions,
     });
     setShowForm(true);
   };

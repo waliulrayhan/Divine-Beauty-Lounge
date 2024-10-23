@@ -12,12 +12,20 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
   try {
     const userData = await request.json();
+    console.log('Updating user with data:', userData); // For debugging
+
     const user = await prisma.user.update({
       where: { id: params.id },
       data: {
-        ...userData,
+        employeeId: userData.employeeId,
+        username: userData.username,
+        email: userData.email,
+        phoneNumber: userData.phoneNumber,
+        nidNumber: userData.nidNumber,
         jobStartDate: new Date(userData.jobStartDate),
         jobEndDate: userData.jobEndDate ? new Date(userData.jobEndDate) : null,
+        isActive: userData.isActive,
+        role: userData.role,
         permissions: userData.permissions,
       },
     });
@@ -25,7 +33,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   } catch (error) {
     console.error('Error updating user:', error);
     return NextResponse.json(
-      { error: 'Failed to update user' },
+      { error: (error as Error).message || 'Failed to update user' },
       { status: 500 }
     );
   }
@@ -51,4 +59,3 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     );
   }
 }
-
