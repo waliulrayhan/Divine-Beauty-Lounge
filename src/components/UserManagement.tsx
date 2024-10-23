@@ -10,7 +10,6 @@ interface User {
   username: string;
   email: string;
   phoneNumber: string;
-  password: string;
   nidNumber: string;
   jobStartDate: string;
   jobEndDate: string | null;
@@ -24,17 +23,20 @@ interface User {
   };
 }
 
+interface NewUser extends Omit<User, 'id'> {
+  password?: string;
+}
+
 type PermissionKey = 'service' | 'product' | 'stockIn' | 'stockOut';
 
 export default function UserManagement() {
   const { data: session } = useSession();
   const [users, setUsers] = useState<User[]>([]);
-  const [newUser, setNewUser] = useState<Omit<User, 'id'>>({
+  const [newUser, setNewUser] = useState<NewUser>({
     employeeId: '',
     username: '',
     email: '',
     phoneNumber: '',
-    password: '',
     nidNumber: '',
     jobStartDate: '',
     jobEndDate: '',
@@ -94,13 +96,20 @@ export default function UserManagement() {
     try {
       const url = editingUser ? `/api/users/${editingUser.id}` : '/api/users';
       const method = editingUser ? 'PUT' : 'POST';
+      const userData = {
+        ...newUser,
+        permissions: JSON.stringify(newUser.permissions),
+      };
+      
+      // Remove password field if it's empty or if we're editing
+      if (editingUser || !userData.password) {
+        delete userData.password;
+      }
+
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...newUser,
-          permissions: JSON.stringify(newUser.permissions),
-        }),
+        body: JSON.stringify(userData),
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -115,7 +124,6 @@ export default function UserManagement() {
         username: '',
         email: '',
         phoneNumber: '',
-        password: '',
         nidNumber: '',
         jobStartDate: '',
         jobEndDate: '',
@@ -176,7 +184,6 @@ export default function UserManagement() {
             username: '',
             email: '',
             phoneNumber: '',
-            password: '',
             nidNumber: '',
             jobStartDate: '',
             jobEndDate: '',
@@ -245,17 +252,6 @@ export default function UserManagement() {
               />
             </div>
             <div>
-              <label className="block mb-2">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={newUser.password}
-                onChange={handleInputChange}
-                required
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
               <label className="block mb-2">NID Number</label>
               <input
                 type="text"
@@ -313,6 +309,19 @@ export default function UserManagement() {
                 <option value="SUPER_ADMIN">Super Admin</option>
               </select>
             </div>
+            {!editingUser && (
+              <div>
+                <label className="block mb-2">Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={newUser.password || ''}
+                  onChange={handleInputChange}
+                  required={!editingUser}
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            )}
           </div>
           <div className="mt-4">
             <h4 className="font-semibold mb-2">Permissions</h4>
