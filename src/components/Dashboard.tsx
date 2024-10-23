@@ -55,12 +55,14 @@ export default function Dashboard({ user, children }: DashboardProps) {
           >
             Stock Out
           </a>
-          <a
-            href="#"
-            className="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700"
-          >
-            User Management
-          </a>
+          {user.role === 'SUPER_ADMIN' && (
+            <Link
+              href="/user-management"
+              className="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700"
+            >
+              User Management
+            </Link>
+          )}
         </nav>
       </div>
 

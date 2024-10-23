@@ -16,14 +16,21 @@ datasource db {
 // Add your models here
 
 model User {
-  id        String    @id @default(uuid())
-  username  String    @unique
-  email     String    @unique
-  password  String
-  role      UserRole
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  services  Service[]
+  id            String    @id @default(uuid())
+  employeeId    String    @unique
+  username      String    @unique
+  email         String    @unique
+  phoneNumber   String
+  password      String
+  nidNumber     String    @unique
+  jobStartDate  DateTime
+  jobEndDate    DateTime?
+  isActive      Boolean   @default(true)
+  role          UserRole
+  permissions   Json
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  services      Service[]
 }
 
 model Service {
