@@ -45,19 +45,77 @@ export async function POST(request: NextRequest) {
 
   try {
     const userData = await request.json();
+    console.log('Received user data:', userData); // Add this line for debugging
+
     const user = await prisma.user.create({
       data: {
-        ...userData,
+        employeeId: userData.employeeId,
+        username: userData.username,
+        email: userData.email,
+        phoneNumber: userData.phoneNumber,
+        password: userData.password,
+        nidNumber: userData.nidNumber,
         jobStartDate: new Date(userData.jobStartDate),
         jobEndDate: userData.jobEndDate ? new Date(userData.jobEndDate) : null,
-        permissions: userData.permissions, // Already stringified in the component
+        isActive: userData.isActive,
+        role: userData.role,
+        permissions: userData.permissions,
       },
     });
     return NextResponse.json(user);
   } catch (error) {
     console.error('Error creating user:', error);
     return NextResponse.json(
-      { error: 'Failed to create user' },
+      { error: (error as Error).message || 'Failed to create user' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || session.user?.role !== 'SUPER_ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const userData = await request.json();
+    const user = await prisma.user.update({
+      where: { id: params.id },
+      data: {
+        ...userData,
+        jobStartDate: new Date(userData.jobStartDate),
+        jobEndDate: userData.jobEndDate ? new Date(userData.jobEndDate) : null,
+        permissions: userData.permissions,
+      },
+    });
+    return NextResponse.json(user);
+  } catch (error) {
+    console.error('Error updating user:', error);
+    return NextResponse.json(
+      { error: 'Failed to update user' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || session.user?.role !== 'SUPER_ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    await prisma.user.delete({
+      where: { id: params.id },
+    });
+    return NextResponse.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete user' },
       { status: 500 }
     );
   }

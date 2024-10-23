@@ -47,6 +47,7 @@ export default function UserManagement() {
       stockOut: [],
     },
   });
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
@@ -91,18 +92,24 @@ export default function UserManagement() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/users', {
-        method: 'POST',
+      const url = editingUser ? `/api/users/${editingUser.id}` : '/api/users';
+      const method = editingUser ? 'PUT' : 'POST';
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...newUser,
           permissions: JSON.stringify(newUser.permissions),
         }),
       });
-      if (!response.ok) throw new Error('Failed to create user');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Failed to ${editingUser ? 'update' : 'create'} user`);
+      }
       await fetchUsers();
-      toast.success('User created successfully');
+      toast.success(`User ${editingUser ? 'updated' : 'created'} successfully`);
       setShowForm(false);
+      setEditingUser(null);
       setNewUser({
         employeeId: '',
         username: '',
@@ -122,8 +129,34 @@ export default function UserManagement() {
         },
       });
     } catch (error) {
-      console.error('Error creating user:', error);
-      toast.error('Failed to create user');
+      console.error(`Error ${editingUser ? 'updating' : 'creating'} user:`, error);
+      toast.error((error as Error).message || `Failed to ${editingUser ? 'update' : 'create'} user`);
+    }
+  };
+
+  const handleEdit = (user: User) => {
+    setEditingUser(user);
+    setNewUser({
+      ...user,
+      jobStartDate: new Date(user.jobStartDate).toISOString().split('T')[0],
+      jobEndDate: user.jobEndDate ? new Date(user.jobEndDate).toISOString().split('T')[0] : '',
+    });
+    setShowForm(true);
+  };
+
+  const handleDelete = async (userId: string) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      try {
+        const response = await fetch(`/api/users/${userId}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) throw new Error('Failed to delete user');
+        await fetchUsers();
+        toast.success('User deleted successfully');
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        toast.error('Failed to delete user');
+      }
     }
   };
 
@@ -135,7 +168,28 @@ export default function UserManagement() {
     <div className="container mx-auto px-4 py-8 text-black">
       <h2 className="text-2xl font-bold mb-4">User Management</h2>
       <button
-        onClick={() => setShowForm(true)}
+        onClick={() => {
+          setEditingUser(null);
+          setNewUser({
+            employeeId: '',
+            username: '',
+            email: '',
+            phoneNumber: '',
+            password: '',
+            nidNumber: '',
+            jobStartDate: '',
+            jobEndDate: '',
+            isActive: true,
+            role: 'NORMAL_ADMIN',
+            permissions: {
+              service: [],
+              product: [],
+              stockIn: [],
+              stockOut: [],
+            },
+          });
+          setShowForm(true);
+        }}
         className="bg-blue-500 text-white px-4 py-2 rounded mb-4 hover:bg-blue-600 transition duration-300"
       >
         Add New User
@@ -143,7 +197,7 @@ export default function UserManagement() {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-4">Add New User</h3>
+          <h3 className="text-xl font-semibold mb-4">{editingUser ? 'Edit User' : 'Add New User'}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block mb-2">Employee ID</label>
@@ -251,6 +305,7 @@ export default function UserManagement() {
                 name="role"
                 value={newUser.role}
                 onChange={handleInputChange}
+                required
                 className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="NORMAL_ADMIN">Normal Admin</option>
@@ -281,7 +336,7 @@ export default function UserManagement() {
             ))}
           </div>
           <button type="submit" className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-300">
-            Create User
+            {editingUser ? 'Update User' : 'Create User'}
           </button>
         </form>
       )}
@@ -307,8 +362,8 @@ export default function UserManagement() {
                 <td className="py-3 px-6 text-left">{user.role}</td>
                 <td className="py-3 px-6 text-left">{user.isActive ? 'Yes' : 'No'}</td>
                 <td className="py-3 px-6 text-left">
-                  <button className="text-blue-500 hover:text-blue-700 mr-2 transition duration-300">Edit</button>
-                  <button className="text-red-500 hover:text-red-700 transition duration-300">Delete</button>
+                  <button onClick={() => handleEdit(user)} className="text-blue-500 hover:text-blue-700 mr-2 transition duration-300">Edit</button>
+                  <button onClick={() => handleDelete(user.id)} className="text-red-500 hover:text-red-700 transition duration-300">Delete</button>
                 </td>
               </tr>
             ))}
