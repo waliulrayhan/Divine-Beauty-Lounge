@@ -334,7 +334,7 @@ export default function UserManagement() {
                       <input
                         type="checkbox"
                         name={`${feature}-${action}`}
-                        checked={newUser.permissions[feature].includes(action)}
+                        checked={newUser.permissions[feature].includes(action) || (!editingUser && action === 'view')}
                         onChange={handlePermissionChange}
                         className="mr-1 focus:ring-2 focus:ring-blue-500"
                       />
