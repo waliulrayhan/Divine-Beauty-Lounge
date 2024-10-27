@@ -37,12 +37,12 @@ export default function Dashboard({ user, children }: DashboardProps) {
           >
             Service List
           </Link>
-          <a
-            href="#"
+          <Link
+            href="/product-list"
             className="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700"
           >
             Product List
-          </a>
+          </Link>
           <a
             href="#"
             className="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700"
