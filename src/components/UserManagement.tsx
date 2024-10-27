@@ -423,7 +423,9 @@ export default function UserManagement() {
                 <div className="mt-4">
                   <strong className="font-medium text-gray-700">Permissions:</strong>
                   <div className="mt-2 grid grid-cols-2 gap-2">
-                    {Object.entries(JSON.parse(selectedUser.permissions as string)).map(([key, value]) => (
+                    {Object.entries(typeof selectedUser.permissions === 'string' 
+                      ? JSON.parse(selectedUser.permissions) 
+                      : selectedUser.permissions).map(([key, value]) => (
                       <div key={key} className="bg-gray-100 p-2 rounded">
                         <h6 className="font-medium text-gray-700 mb-1">{key.charAt(0).toUpperCase() + key.slice(1)}</h6>
                         <div className="flex flex-wrap">
