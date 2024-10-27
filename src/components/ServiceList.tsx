@@ -29,6 +29,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
   });
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
 
   useEffect(() => {
     console.log("Permissions received:", permissions);
@@ -105,6 +106,10 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
         toast.error('Failed to delete service');
       }
     }
+  };
+
+  const handleViewDetails = (service: Service) => {
+    setSelectedService(service);
   };
 
   const canCreate = permissions.includes('create');
@@ -189,6 +194,9 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
                 <td className="py-3 px-6 text-left">{service.createdBy.username}</td>
                 <td className="py-3 px-6 text-left">{new Date(service.createdAt).toLocaleString()}</td>
                 <td className="py-3 px-6 text-left">
+                  <button onClick={() => handleViewDetails(service)} className="text-green-500 hover:text-green-700 mr-2">
+                    View Details
+                  </button>
                   <button onClick={() => handleEdit(service)} className="text-blue-500 hover:text-blue-700 mr-2">
                     Edit
                   </button>
@@ -201,6 +209,39 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
           </tbody>
         </table>
       </div>
+
+      {selectedService && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="my-modal">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3 text-center">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">{selectedService.name} Details</h3>
+              <div className="mt-2 px-7 py-3">
+                <p className="text-sm text-gray-500">
+                  <strong>Description:</strong> {selectedService.description}
+                </p>
+                <p className="text-sm text-gray-500">
+                  <strong>Service Charge:</strong> ${selectedService.serviceCharge.toFixed(2)}
+                </p>
+                <p className="text-sm text-gray-500">
+                  <strong>Created By:</strong> {selectedService.createdBy.username}
+                </p>
+                <p className="text-sm text-gray-500">
+                  <strong>Created At:</strong> {new Date(selectedService.createdAt).toLocaleString()}
+                </p>
+              </div>
+              <div className="items-center px-4 py-3">
+                <button
+                  id="ok-btn"
+                  className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  onClick={() => setSelectedService(null)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
