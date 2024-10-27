@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    console.log("Sending permissions:", user.permissions);
     return NextResponse.json({ permissions: user.permissions });
   } catch (error) {
     console.error('Error fetching user permissions:', error);
