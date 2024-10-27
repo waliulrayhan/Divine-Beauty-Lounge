@@ -35,6 +35,11 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [productInputs, setProductInputs] = useState([{
+    name: '',
+    description: '',
+    serviceId: '',
+  }]);
 
   useEffect(() => {
     console.log("Received permissions:", permissions);
@@ -70,32 +75,54 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setNewProduct(prev => ({ ...prev, [name]: value }));
+    const newInputs = [...productInputs];
+    newInputs[index] = {
+      ...newInputs[index],
+      [name]: value,
+    };
+    setProductInputs(newInputs);
+  };
+
+  const addProductInput = () => {
+    setProductInputs([...productInputs, {
+      name: '',
+      description: '',
+      serviceId: '',
+    }]);
+  };
+
+  const removeProductInput = (index: number) => {
+    const newInputs = productInputs.filter((_, i) => i !== index);
+    setProductInputs(newInputs);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const url = editingProduct ? `/api/products/${editingProduct.id}` : '/api/products';
-      const method = editingProduct ? 'PUT' : 'POST';
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newProduct),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const responses = await Promise.all(
+        productInputs.map(product =>
+          fetch('/api/products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(product),
+          })
+        )
+      );
+
+      const hasError = responses.some(response => !response.ok);
+      if (hasError) {
+        throw new Error('One or more products failed to create');
       }
+
       await fetchProducts();
-      toast.success(`Product ${editingProduct ? 'updated' : 'created'} successfully`);
+      toast.success(`${productInputs.length} product(s) created successfully`);
       setShowForm(false);
-      setEditingProduct(null);
-      setNewProduct({ name: '', description: '', serviceId: '' });
+      setProductInputs([{ name: '', description: '', serviceId: '' }]);
     } catch (error) {
-      console.error(`Error ${editingProduct ? 'updating' : 'creating'} product:`, error);
-      toast.error(`Failed to ${editingProduct ? 'update' : 'create'} product`);
+      console.error('Error creating products:', error);
+      toast.error('Failed to create products');
     }
   };
 
@@ -153,46 +180,79 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-4 text-black">{editingProduct ? 'Edit Product' : 'Add New Product'}</h3>
-          <div className="mb-4">
-            <label className="block mb-2 text-black">Product Name</label>
-            <input
-              type="text"
-              name="name"
-              value={newProduct.name}
-              onChange={handleInputChange}
-              required
-              className="w-full p-2 border rounded text-black"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block mb-2 text-black">Description</label>
-            <textarea
-              name="description"
-              value={newProduct.description}
-              onChange={handleInputChange}
-              required
-              className="w-full p-2 border rounded text-black"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block mb-2 text-black">Service</label>
-            <select
-              name="serviceId"
-              value={newProduct.serviceId}
-              onChange={handleInputChange}
-              required
-              className="w-full p-2 border rounded text-black"
+          <h3 className="text-xl font-semibold mb-4 text-black">Add New Products</h3>
+          
+          {productInputs.map((product, index) => (
+            <div key={index} className="mb-6 p-4 border rounded">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="text-lg font-medium text-black">Product #{index + 1}</h4>
+                {productInputs.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeProductInput(index)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+
+              <div className="mb-4">
+                <label className="block mb-2 text-black">Product Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={product.name}
+                  onChange={(e) => handleInputChange(index, e)}
+                  required
+                  className="w-full p-2 border rounded text-black"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block mb-2 text-black">Description</label>
+                <textarea
+                  name="description"
+                  value={product.description}
+                  onChange={(e) => handleInputChange(index, e)}
+                  required
+                  className="w-full p-2 border rounded text-black"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block mb-2 text-black">Service</label>
+                <select
+                  name="serviceId"
+                  value={product.serviceId}
+                  onChange={(e) => handleInputChange(index, e)}
+                  required
+                  className="w-full p-2 border rounded text-black"
+                >
+                  <option value="">Select a service</option>
+                  {services.map(service => (
+                    <option key={service.id} value={service.id}>{service.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          ))}
+
+          <div className="flex gap-4">
+            <button
+              type="button"
+              onClick={addProductInput}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
             >
-              <option value="">Select a service</option>
-              {services.map(service => (
-                <option key={service.id} value={service.id}>{service.name}</option>
-              ))}
-            </select>
+              Add Another Product
+            </button>
+            <button
+              type="submit"
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            >
+              Create Products
+            </button>
           </div>
-          <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">
-            {editingProduct ? 'Update Product' : 'Create Product'}
-          </button>
         </form>
       )}
 
