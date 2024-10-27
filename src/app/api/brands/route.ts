@@ -27,3 +27,43 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch brands' }, { status: 500 });
   }
 }
+
+export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const { productId, name } = await request.json();
+
+    // Check if brand already exists
+    const existingBrand = await prisma.brand.findFirst({
+      where: {
+        productId,
+        name: {
+          equals: name,
+          mode: 'insensitive', // Case-insensitive comparison
+        },
+      },
+    });
+
+    if (existingBrand) {
+      return NextResponse.json(existingBrand);
+    }
+
+    // Create new brand if it doesn't exist
+    const brand = await prisma.brand.create({
+      data: {
+        productId,
+        name,
+      },
+    });
+
+    return NextResponse.json(brand);
+  } catch (error) {
+    console.error('Error creating brand:', error);
+    return NextResponse.json({ error: 'Failed to create brand' }, { status: 500 });
+  }
+}

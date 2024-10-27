@@ -48,6 +48,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   const [editingStockIn, setEditingStockIn] = useState<StockIn | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [selectedStockIn, setSelectedStockIn] = useState<StockIn | null>(null);
+  const [inputProducts, setInputProducts] = useState<{ [key: number]: Product[] }>({});
 
   useEffect(() => {
     fetchStockIns();
@@ -82,7 +83,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     }
   };
 
-  const fetchProducts = async (serviceId: string) => {
+  const fetchProducts = async (serviceId: string, index: number) => {
     try {
       const response = await fetch(`/api/products?serviceId=${serviceId}`);
       if (!response.ok) {
@@ -90,6 +91,10 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
       }
       const data = await response.json();
       setProducts(data);
+      setInputProducts(prev => ({
+        ...prev,
+        [index]: data
+      }));
     } catch (error) {
       console.error('Error fetching products:', error);
       toast.error('Failed to load products');
@@ -102,17 +107,28 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     newInputs[index] = {
       ...newInputs[index],
       [name]: name === 'quantity' || name === 'pricePerUnit' 
-        ? Number(value) // Changed from parseFloat to Number to handle the leading zeros
+        ? Number(value)
         : value
     };
     setStockInInputs(newInputs);
     
     if (name === 'serviceId') {
-      fetchProducts(value);
+      fetchProducts(value, index);
     }
   };
 
   const addAnotherStockIn = () => {
+    const currentIndex = stockInInputs.length;
+    // Copy products from the last entry if they exist
+    if (currentIndex > 0) {
+      const lastIndex = currentIndex - 1;
+      if (inputProducts[lastIndex]) {
+        setInputProducts(prev => ({
+          ...prev,
+          [currentIndex]: inputProducts[lastIndex]
+        }));
+      }
+    }
     setStockInInputs([...stockInInputs, {
       serviceId: '',
       productId: '',
@@ -130,9 +146,40 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     }
   };
 
+  // Add a function to create a new brand
+  const createBrand = async (productId: string, brandName: string) => {
+    try {
+      const response = await fetch('/api/brands', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, name: brandName }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create brand');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating brand:', error);
+      throw error;
+    }
+  };
+
+  // Update handleSubmit to create brands before creating stock ins
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // First, create any new brands
+      await Promise.all(
+        stockInInputs.map(async (stockIn) => {
+          if (stockIn.productId && stockIn.brandName) {
+            await createBrand(stockIn.productId, stockIn.brandName);
+          }
+        })
+      );
+
+      // Then create the stock ins
       const responses = await Promise.all(
         stockInInputs.map(stockIn =>
           fetch('/api/stock-in', {
@@ -180,7 +227,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     // Fetch products for the selected service
     const serviceId = services.find(s => s.name === stockIn.serviceName)?.id;
     if (serviceId) {
-      fetchProducts(serviceId);
+      fetchProducts(serviceId, 0); // Pass 0 as index since we're editing a single item
     }
     
     setShowForm(true);
@@ -274,11 +321,13 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                     className="w-full p-2 border rounded text-black"
                   >
                     <option value="">Select a product</option>
-                    {products.map(product => (
-                      <option key={product.id} value={product.id}>
-                        {product.name}
-                      </option>
-                    ))}
+                    {(inputProducts[index] || [])
+                      .filter(product => !stockIn.serviceId || product.serviceId === stockIn.serviceId)
+                      .map(product => (
+                        <option key={product.id} value={product.id}>
+                          {product.name}
+                        </option>
+                      ))}
                   </select>
                 </div>
                 <div>
@@ -298,13 +347,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                     type="number"
                     name="quantity"
                     value={stockIn.quantity === 0 ? '' : stockIn.quantity}
-                    onChange={(e) => {
-                      const val = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
-                      handleInputChange(index, {
-                        ...e,
-                        target: { ...e.target, value: val.toString(), name: 'quantity' }
-                      });
-                    }}
+                    onChange={(e) => handleInputChange(index, e)}
                     required
                     min="1"
                     className="w-full p-2 border rounded text-black"
@@ -316,20 +359,14 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                     type="number"
                     name="pricePerUnit"
                     value={stockIn.pricePerUnit === 0 ? '' : stockIn.pricePerUnit}
-                    onChange={(e) => {
-                      const val = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                      handleInputChange(index, {
-                        ...e,
-                        target: { ...e.target, value: val.toString(), name: 'pricePerUnit' }
-                      });
-                    }}
+                    onChange={(e) => handleInputChange(index, e)}
                     required
                     min="0"
                     step="0.01"
                     className="w-full p-2 border rounded text-black"
                   />
                 </div>
-                <div>
+                <div className="col-span-2">
                   <label className="block mb-2 text-black">Comments</label>
                   <textarea
                     name="comments"
