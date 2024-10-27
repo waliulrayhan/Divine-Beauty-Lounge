@@ -271,28 +271,26 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
         <table className="w-full bg-white shadow-md rounded mb-4">
           <thead>
             <tr className="bg-gray-200 text-black uppercase text-sm leading-normal">
-              <th className="py-3 px-6 text-left">Product</th>
-              <th className="py-3 px-6 text-left">Service</th>
+              <th className="py-3 px-6 text-left">Date</th>
+              <th className="py-3 px-6 text-left">User Name</th>
               <th className="py-3 px-6 text-left">Brand Name</th>
+              <th className="py-3 px-6 text-left">Product Name</th>
+              <th className="py-3 px-6 text-left">Service Name</th>
               <th className="py-3 px-6 text-left">Quantity</th>
-              <th className="py-3 px-6 text-left">Price Per Unit</th>
-              <th className="py-3 px-6 text-left">Comments</th>
-              <th className="py-3 px-6 text-left">Created By</th>
-              <th className="py-3 px-6 text-left">Created At</th>
+              <th className="py-3 px-6 text-left">Unit Price</th>
               <th className="py-3 px-6 text-left">Actions</th>
             </tr>
           </thead>
           <tbody className="text-black text-sm font-light">
             {stockIns.map(stockIn => (
               <tr key={stockIn.id} className="border-b border-gray-200 hover:bg-gray-100">
+                <td className="py-3 px-6 text-left">{new Date(stockIn.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Dhaka' })}</td>
+                <td className="py-3 px-6 text-left">{stockIn.createdBy}</td>
+                <td className="py-3 px-6 text-left">{stockIn.brandName}</td>
                 <td className="py-3 px-6 text-left">{stockIn.productName}</td>
                 <td className="py-3 px-6 text-left">{stockIn.serviceName}</td>
-                <td className="py-3 px-6 text-left">{stockIn.brandName}</td>
                 <td className="py-3 px-6 text-left">{stockIn.quantity}</td>
                 <td className="py-3 px-6 text-left">${stockIn.pricePerUnit.toFixed(2)}</td>
-                <td className="py-3 px-6 text-left">{stockIn.comments}</td>
-                <td className="py-3 px-6 text-left">{stockIn.createdBy}</td>
-                <td className="py-3 px-6 text-left">{new Date(stockIn.createdAt).toLocaleString()}</td>
                 <td className="py-3 px-6 text-left">
                   {canEdit && (
                     <button onClick={() => handleEdit(stockIn)} className="text-blue-500 hover:text-blue-700 mr-2">
