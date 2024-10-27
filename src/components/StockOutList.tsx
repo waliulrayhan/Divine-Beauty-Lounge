@@ -15,11 +15,18 @@ interface Product {
   serviceId: string;
 }
 
+interface Brand {
+  id: string;
+  name: string;
+}
+
 interface StockOut {
   id: string;
   productId: string;
   productName: string;
   serviceName: string;
+  brandId: string;
+  brandName: string;
   quantity: number;
   comments: string;
   createdBy: string;
@@ -35,9 +42,11 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
   const [stockOuts, setStockOuts] = useState<StockOut[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [newStockOut, setNewStockOut] = useState({
     serviceId: "",
     productId: "",
+    brandId: "",
     quantity: 0,
     comments: "",
   });
@@ -91,11 +100,29 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
     }
   };
 
+  const fetchBrands = async (productId: string) => {
+    try {
+      const response = await fetch(`/api/brands?productId=${productId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setBrands(data);
+    } catch (error) {
+      console.error("Error fetching brands:", error);
+      toast.error("Failed to load brands");
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setNewStockOut(prev => ({ ...prev, [name]: value }));
     if (name === 'serviceId') {
       fetchProducts(value);
+      setNewStockOut(prev => ({ ...prev, productId: '', brandId: '' }));
+    } else if (name === 'productId') {
+      fetchBrands(value);
+      setNewStockOut(prev => ({ ...prev, brandId: '' }));
     }
   };
 
@@ -119,6 +146,7 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
       setNewStockOut({
         serviceId: '',
         productId: '',
+        brandId: '',
         quantity: 0,
         comments: '',
       });
@@ -133,11 +161,13 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
     setNewStockOut({
       serviceId: services.find(s => s.name === stockOut.serviceName)?.id || "",
       productId: stockOut.productId,
+      brandId: stockOut.brandId,
       quantity: stockOut.quantity,
       comments: stockOut.comments,
     });
     setShowForm(true);
     fetchProducts(services.find(s => s.name === stockOut.serviceName)?.id || "");
+    fetchBrands(stockOut.productId);
   };
 
   const handleDelete = async (id: string) => {
@@ -210,6 +240,21 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
               </select>
             </div>
             <div>
+              <label className="block mb-2 text-black">Brand</label>
+              <select
+                name="brandId"
+                value={newStockOut.brandId}
+                onChange={handleInputChange}
+                required
+                className="w-full p-2 border rounded text-black"
+              >
+                <option value="">Select a brand</option>
+                {brands.map(brand => (
+                  <option key={brand.id} value={brand.id}>{brand.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
               <label className="block mb-2 text-black">Quantity</label>
               <input
                 type="number"
@@ -241,10 +286,10 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
         <table className="w-full bg-white shadow-md rounded mb-4">
           <thead>
             <tr className="bg-gray-200 text-black uppercase text-sm leading-normal">
+              <th className="py-3 px-6 text-left">Brand Name</th>
               <th className="py-3 px-6 text-left">Product</th>
               <th className="py-3 px-6 text-left">Service</th>
               <th className="py-3 px-6 text-left">Quantity</th>
-              <th className="py-3 px-6 text-left">Comments</th>
               <th className="py-3 px-6 text-left">Created By</th>
               <th className="py-3 px-6 text-left">Created At</th>
               <th className="py-3 px-6 text-left">Actions</th>
@@ -256,10 +301,10 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
                 key={stockOut.id}
                 className="border-b border-gray-200 hover:bg-gray-100"
               >
+                <td className="py-3 px-6 text-left">{stockOut.brandName}</td>
                 <td className="py-3 px-6 text-left">{stockOut.productName}</td>
                 <td className="py-3 px-6 text-left">{stockOut.serviceName}</td>
                 <td className="py-3 px-6 text-left">{stockOut.quantity}</td>
-                <td className="py-3 px-6 text-left">{stockOut.comments}</td>
                 <td className="py-3 px-6 text-left">{stockOut.createdBy}</td>
                 <td className="py-3 px-6 text-left">
                   {new Date(stockOut.createdAt).toLocaleString()}

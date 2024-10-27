@@ -20,6 +20,9 @@ export async function GET(request: NextRequest) {
             },
           },
         },
+        brand: {
+          select: { name: true },
+        },
         createdBy: {
           select: { username: true },
         },
@@ -31,6 +34,8 @@ export async function GET(request: NextRequest) {
       productId: stockOut.productId,
       productName: stockOut.product.name,
       serviceName: stockOut.product.service.name,
+      brandId: stockOut.brandId,
+      brandName: stockOut.brand.name,
       quantity: stockOut.quantity,
       comments: stockOut.comments,
       createdBy: stockOut.createdBy.username,
@@ -51,10 +56,11 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { productId, quantity, comments } = await request.json();
+    const { productId, brandId, quantity, comments } = await request.json();
     const stockOut = await prisma.stockOut.create({
       data: {
         product: { connect: { id: productId } },
+        brand: { connect: { id: brandId } },
         quantity: parseInt(quantity),
         comments,
         createdBy: { connect: { email: session.user.email } },
