@@ -20,8 +20,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    console.log("Sending permissions:", user.permissions);
-    return NextResponse.json({ permissions: user.permissions });
+    // Parse the permissions if they're stored as a string
+    const permissions = typeof user.permissions === 'string' 
+      ? JSON.parse(user.permissions)
+      : user.permissions;
+
+    console.log("Sending permissions:", permissions); // For debugging
+    return NextResponse.json({ permissions });
   } catch (error) {
     console.error('Error fetching user permissions:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

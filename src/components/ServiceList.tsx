@@ -3,16 +3,17 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { toast } from 'react-toastify';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface Service {
   id: string;
   name: string;
   description: string;
   serviceCharge: number;
-  createdAt: string;
   createdBy: {
     username: string;
   };
+  createdAt: string;
 }
 
 interface ServiceListProps {
@@ -30,6 +31,16 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const { can, loading } = usePermissions('service');
+
+  // Check permissions
+  const canCreate = permissions.includes('create');
+  const canEdit = permissions.includes('edit');
+  const canDelete = permissions.includes('delete');
+  const canView = permissions.includes('view');
+
+  console.log("Current permissions:", permissions); // For debugging
+  console.log("Can view:", canView); // For debugging
 
   useEffect(() => {
     console.log("Permissions received:", permissions);
@@ -112,23 +123,78 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
     setSelectedService(service);
   };
 
-  const canCreate = permissions.includes('create');
-  const canEdit = permissions.includes('edit');
-  const canDelete = permissions.includes('delete');
-
-  console.log("Can create:", canCreate);
-  console.log("Can edit:", canEdit);
-  console.log("Can delete:", canDelete);
-
   return (
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-2xl font-bold mb-4 text-black">Service List</h2>
-      <button
-        onClick={() => setShowForm(true)}
-        className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
-      >
-        Add New Service
-      </button>
+
+      {/* Only show Add New Service button if user has create permission */}
+      {canCreate && (
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
+        >
+          Add New Service
+        </button>
+      )}
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="py-3 px-4 text-left">Name</th>
+              <th className="py-3 px-4 text-left">Description</th>
+              <th className="py-3 px-4 text-left">Service Charge</th>
+              <th className="py-3 px-4 text-left">Created By</th>
+              <th className="py-3 px-4 text-left">Created At</th>
+              <th className="py-3 px-4 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="text-gray-700">
+            {services.map((service) => (
+              <tr key={service.id} className="border-b hover:bg-gray-50">
+                <td className="py-3 px-4">{service.name}</td>
+                <td className="py-3 px-4">{service.description}</td>
+                <td className="py-3 px-4">${service.serviceCharge}</td>
+                <td className="py-3 px-4">{service.createdBy?.username}</td>
+                <td className="py-3 px-4">
+                  {new Date(service.createdAt).toLocaleDateString()}
+                </td>
+                <td className="py-3 px-4">
+                  {/* Only show View button if user has view permission */}
+                  {canView && (
+                    <button
+                      onClick={() => handleViewDetails(service)}
+                      className="text-blue-500 hover:text-blue-700 mr-2"
+                    >
+                      View
+                    </button>
+                  )}
+                  
+                  {/* Only show Edit button if user has edit permission */}
+                  {canEdit && (
+                    <button
+                      onClick={() => handleEdit(service)}
+                      className="text-green-500 hover:text-green-700 mr-2"
+                    >
+                      Edit
+                    </button>
+                  )}
+                  
+                  {/* Only show Delete button if user has delete permission */}
+                  {canDelete && (
+                    <button
+                      onClick={() => handleDelete(service.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      Delete
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow-md">
@@ -172,43 +238,6 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
           </button>
         </form>
       )}
-
-      <div className="overflow-x-auto">
-        <table className="w-full bg-white shadow-md rounded mb-4">
-          <thead>
-            <tr className="bg-gray-200 text-black uppercase text-sm leading-normal">
-              <th className="py-3 px-6 text-left">Name</th>
-              <th className="py-3 px-6 text-left">Description</th>
-              <th className="py-3 px-6 text-left">Service Charge</th>
-              <th className="py-3 px-6 text-left">Created By</th>
-              <th className="py-3 px-6 text-left">Created At</th>
-              <th className="py-3 px-6 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="text-black text-sm font-light">
-            {services.map(service => (
-              <tr key={service.id} className="border-b border-gray-200 hover:bg-gray-100">
-                <td className="py-3 px-6 text-left whitespace-nowrap">{service.name}</td>
-                <td className="py-3 px-6 text-left">{service.description}</td>
-                <td className="py-3 px-6 text-left">${service.serviceCharge.toFixed(2)}</td>
-                <td className="py-3 px-6 text-left">{service.createdBy.username}</td>
-                <td className="py-3 px-6 text-left">{new Date(service.createdAt).toLocaleString()}</td>
-                <td className="py-3 px-6 text-left">
-                  <button onClick={() => handleViewDetails(service)} className="text-green-500 hover:text-green-700 mr-2">
-                    View Details
-                  </button>
-                  <button onClick={() => handleEdit(service)} className="text-blue-500 hover:text-blue-700 mr-2">
-                    Edit
-                  </button>
-                  <button onClick={() => handleDelete(service.id)} className="text-red-500 hover:text-red-700">
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
 
       {selectedService && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="my-modal">

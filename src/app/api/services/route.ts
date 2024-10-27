@@ -33,6 +33,24 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    // Check if user has create permission
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { permissions: true, role: true }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    const permissions = typeof user.permissions === 'string' 
+      ? JSON.parse(user.permissions) 
+      : user.permissions;
+
+    if (!permissions?.service?.includes('create') && user.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ error: 'Permission denied' }, { status: 403 });
+    }
+
     const { name, description, serviceCharge } = await request.json();
     const service = await prisma.service.create({
       data: {

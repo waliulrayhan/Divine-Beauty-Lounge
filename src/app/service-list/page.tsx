@@ -15,10 +15,19 @@ const ServiceListPage: NextPage = () => {
   useEffect(() => {
     const fetchPermissions = async () => {
       if (session?.user?.email) {
-        const response = await fetch('/api/user/permissions');
-        const data = await response.json();
-        console.log("Fetched permissions:", data.permissions);
-        setPermissions(data.permissions.service || []);
+        try {
+          const response = await fetch('/api/user/permissions');
+          const data = await response.json();
+          console.log("Raw permissions data:", data); // For debugging
+          
+          // Handle the permissions data structure
+          const servicePermissions = data.permissions.service || [];
+          console.log("Service permissions:", servicePermissions); // For debugging
+          
+          setPermissions(servicePermissions);
+        } catch (error) {
+          console.error("Error fetching permissions:", error);
+        }
       }
     };
 
