@@ -6,7 +6,7 @@ import { authOptions } from '../auth/[...nextauth]/route';
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user?.role !== 'SUPER_ADMIN') {
+  if (!session || !['SUPER_ADMIN', 'NORMAL_ADMIN'].includes(session.user?.role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         jobEndDate: true,
         isActive: true,
         role: true,
-        permissions: true,
+        permissions: session.user.role === 'SUPER_ADMIN', // Only include permissions for SUPER_ADMIN
       },
     });
     return NextResponse.json(users);

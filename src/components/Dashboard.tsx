@@ -63,6 +63,14 @@ export default function Dashboard({ user, children }: DashboardProps) {
               User Management
             </Link>
           )}
+          {user.role === 'NORMAL_ADMIN' && (
+            <Link
+              href="/users"
+              className="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700"
+            >
+              Users
+            </Link>
+          )}
         </nav>
       </div>
 
