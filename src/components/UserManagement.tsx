@@ -43,10 +43,10 @@ export default function UserManagement() {
     isActive: true,
     role: 'NORMAL_ADMIN',
     permissions: {
-      service: [],
-      product: [],
-      stockIn: [],
-      stockOut: [],
+      service: ['view'],
+      product: ['view'],
+      stockIn: ['view'],
+      stockOut: ['view'],
     },
   });
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -97,9 +97,18 @@ export default function UserManagement() {
     try {
       const url = editingUser ? `/api/users/${editingUser.id}` : '/api/users';
       const method = editingUser ? 'PUT' : 'POST';
+      
+      // Ensure all features have 'view' permission before submission
+      const updatedPermissions = { ...newUser.permissions };
+      (['service', 'product', 'stockIn', 'stockOut'] as const).forEach(feature => {
+        if (!updatedPermissions[feature].includes('view')) {
+          updatedPermissions[feature] = ['view', ...updatedPermissions[feature]];
+        }
+      });
+
       const userData = {
         ...newUser,
-        permissions: JSON.stringify(newUser.permissions),
+        permissions: JSON.stringify(updatedPermissions),
       };
       
       // Remove password field if it's empty or if we're editing
@@ -131,10 +140,10 @@ export default function UserManagement() {
         isActive: true,
         role: 'NORMAL_ADMIN',
         permissions: {
-          service: [],
-          product: [],
-          stockIn: [],
-          stockOut: [],
+          service: ['view'],
+          product: ['view'],
+          stockIn: ['view'],
+          stockOut: ['view'],
         },
       });
     } catch (error) {
@@ -195,10 +204,10 @@ export default function UserManagement() {
             isActive: true,
             role: 'NORMAL_ADMIN',
             permissions: {
-              service: [],
-              product: [],
-              stockIn: [],
-              stockOut: [],
+              service: ['view'],
+              product: ['view'],
+              stockIn: ['view'],
+              stockOut: ['view'],
             },
           });
           setShowForm(true);
