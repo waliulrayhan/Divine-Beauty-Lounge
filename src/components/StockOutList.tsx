@@ -100,6 +100,7 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
     setNewStockOut((prev) => ({ ...prev, [name]: value }));
     if (name === "serviceId") {
       fetchProducts(value);
+      setNewStockOut((prev) => ({ ...prev, productId: "" }));
     }
   };
 
@@ -119,9 +120,6 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       await fetchStockOuts();
-      toast.success(
-        `Stock out ${editingStockOut ? "updated" : "created"} successfully`
-      );
       setShowForm(false);
       setEditingStockOut(null);
       setNewStockOut({
@@ -130,72 +128,63 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
         quantity: 0,
         comments: "",
       });
+      toast.success(
+        `Stock out ${editingStockOut ? "updated" : "created"} successfully`
+      );
     } catch (error) {
-      console.error(
-        `Error ${editingStockOut ? "updating" : "creating"} stock out:`,
-        error
-      );
-      toast.error(
-        `Failed to ${editingStockOut ? "update" : "create"} stock out`
-      );
+      console.error("Error submitting stock out:", error);
+      toast.error("Failed to submit stock out");
     }
   };
 
   const handleEdit = (stockOut: StockOut) => {
     setEditingStockOut(stockOut);
     setNewStockOut({
-      serviceId:
-        services.find((s) => s.name === stockOut.serviceName)?.id || "",
+      serviceId: services.find(s => s.name === stockOut.serviceName)?.id || "",
       productId: stockOut.productId,
       quantity: stockOut.quantity,
       comments: stockOut.comments,
     });
-    fetchProducts(
-      services.find((s) => s.name === stockOut.serviceName)?.id || ""
-    );
     setShowForm(true);
+    fetchProducts(services.find(s => s.name === stockOut.serviceName)?.id || "");
   };
 
-  const handleDelete = async (stockOutId: string) => {
-    if (
-      window.confirm("Are you sure you want to delete this stock out record?")
-    ) {
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this stock out?")) {
       try {
-        const response = await fetch(`/api/stock-out/${stockOutId}`, {
+        const response = await fetch(`/api/stock-out/${id}`, {
           method: "DELETE",
         });
-        if (!response.ok) throw new Error("Failed to delete stock out");
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         await fetchStockOuts();
-        toast.success("Stock out record deleted successfully");
+        toast.success("Stock out deleted successfully");
       } catch (error) {
         console.error("Error deleting stock out:", error);
-        toast.error("Failed to delete stock out record");
+        toast.error("Failed to delete stock out");
       }
     }
   };
 
-  const isSuperAdmin = session?.user?.role === "SUPER_ADMIN";
-  const canCreate = isSuperAdmin || permissions.includes("create");
-  const canEdit = isSuperAdmin || permissions.includes("edit");
-  const canDelete = isSuperAdmin || permissions.includes("delete");
+  const canCreate = permissions.includes("create");
+  const canEdit = permissions.includes("edit");
+  const canDelete = permissions.includes("delete");
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-2xl font-bold mb-4 text-black">Stock Out List</h2>
       {canCreate && (
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => setShowForm(!showForm)}
           className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
         >
-          Add New Stock Out
+          {showForm ? "Cancel" : "Add New Stock Out"}
         </button>
       )}
 
       {showForm && (
-        <form
-          onSubmit={handleSubmit}
-          className="mb-8 bg-white p-6 rounded-lg shadow-md"
-        >
+        <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-xl font-semibold mb-4 text-black">
             {editingStockOut ? "Edit Stock Out" : "Add New Stock Out"}
           </h3>
@@ -225,6 +214,7 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
                 onChange={handleInputChange}
                 required
                 className="w-full p-2 border rounded text-black"
+                disabled={!newStockOut.serviceId}
               >
                 <option value="">Select a product</option>
                 {products.map((product) => (
