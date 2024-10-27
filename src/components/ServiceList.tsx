@@ -32,6 +32,11 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
   const [showForm, setShowForm] = useState(false);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const { can, loading } = usePermissions('service');
+  const [serviceInputs, setServiceInputs] = useState([{
+    name: '',
+    description: '',
+    serviceCharge: 0,
+  }]);
 
   // Check permissions
   const canCreate = permissions.includes('create');
@@ -61,35 +66,56 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setNewService(prev => ({
-      ...prev,
+    const newInputs = [...serviceInputs];
+    newInputs[index] = {
+      ...newInputs[index],
       [name]: name === 'serviceCharge' ? parseFloat(value) : value,
-    }));
+    };
+    setServiceInputs(newInputs);
+  };
+
+  const addServiceInput = () => {
+    setServiceInputs([...serviceInputs, {
+      name: '',
+      description: '',
+      serviceCharge: 0,
+    }]);
+  };
+
+  const removeServiceInput = (index: number) => {
+    const newInputs = serviceInputs.filter((_, i) => i !== index);
+    setServiceInputs(newInputs);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const url = editingService ? `/api/services/${editingService.id}` : '/api/services';
-      const method = editingService ? 'PUT' : 'POST';
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newService),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      // Handle multiple services creation
+      const responses = await Promise.all(
+        serviceInputs.map(service =>
+          fetch('/api/services', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(service),
+          })
+        )
+      );
+
+      // Check if all requests were successful
+      const hasError = responses.some(response => !response.ok);
+      if (hasError) {
+        throw new Error('One or more services failed to create');
       }
+
       await fetchServices();
-      toast.success(`Service ${editingService ? 'updated' : 'created'} successfully`);
+      toast.success(`${serviceInputs.length} service(s) created successfully`);
       setShowForm(false);
-      setEditingService(null);
-      setNewService({ name: '', description: '', serviceCharge: 0 });
+      setServiceInputs([{ name: '', description: '', serviceCharge: 0 }]);
     } catch (error) {
-      console.error(`Error ${editingService ? 'updating' : 'creating'} service:`, error);
-      toast.error(`Failed to ${editingService ? 'update' : 'create'} service`);
+      console.error('Error creating services:', error);
+      toast.error('Failed to create services');
     }
   };
 
@@ -198,44 +224,77 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-4 text-black">{editingService ? 'Edit Service' : 'Add New Service'}</h3>
-          <div className="mb-4">
-            <label className="block mb-2 text-black">Service Name</label>
-            <input
-              type="text"
-              name="name"
-              value={newService.name}
-              onChange={handleInputChange}
-              required
-              className="w-full p-2 border rounded text-black"
-            />
+          <h3 className="text-xl font-semibold mb-4 text-black">Add New Services</h3>
+          
+          {serviceInputs.map((service, index) => (
+            <div key={index} className="mb-6 p-4 border rounded">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="text-lg font-medium text-black">Service #{index + 1}</h4>
+                {serviceInputs.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeServiceInput(index)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+
+              <div className="mb-4">
+                <label className="block mb-2 text-black">Service Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={service.name}
+                  onChange={(e) => handleInputChange(index, e)}
+                  required
+                  className="w-full p-2 border rounded text-black"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block mb-2 text-black">Description</label>
+                <textarea
+                  name="description"
+                  value={service.description}
+                  onChange={(e) => handleInputChange(index, e)}
+                  required
+                  className="w-full p-2 border rounded text-black"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block mb-2 text-black">Service Charge</label>
+                <input
+                  type="number"
+                  name="serviceCharge"
+                  value={service.serviceCharge}
+                  onChange={(e) => handleInputChange(index, e)}
+                  required
+                  min="0"
+                  step="0.01"
+                  className="w-full p-2 border rounded text-black"
+                />
+              </div>
+            </div>
+          ))}
+
+          <div className="flex gap-4">
+            <button
+              type="button"
+              onClick={addServiceInput}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              Add Another Service
+            </button>
+            <button
+              type="submit"
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            >
+              Create Services
+            </button>
           </div>
-          <div className="mb-4">
-            <label className="block mb-2 text-black">Description</label>
-            <textarea
-              name="description"
-              value={newService.description}
-              onChange={handleInputChange}
-              required
-              className="w-full p-2 border rounded text-black"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block mb-2 text-black">Service Charge</label>
-            <input
-              type="number"
-              name="serviceCharge"
-              value={newService.serviceCharge}
-              onChange={handleInputChange}
-              required
-              min="0"
-              step="0.01"
-              className="w-full p-2 border rounded text-black"
-            />
-          </div>
-          <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">
-            {editingService ? 'Update Service' : 'Create Service'}
-          </button>
         </form>
       )}
 
