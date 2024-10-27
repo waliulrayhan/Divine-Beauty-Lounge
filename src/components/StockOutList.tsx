@@ -197,10 +197,12 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
   const canCreate = isSuperAdmin || permissions.includes('create');
   const canEdit = isSuperAdmin || permissions.includes('edit');
   const canDelete = isSuperAdmin || permissions.includes('delete');
+  const canView = isSuperAdmin || permissions.includes('view');
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-2xl font-bold mb-4 text-black">Stock Out List</h2>
+
       {canCreate && (
         <button
           onClick={() => setShowForm(true)}
@@ -288,7 +290,7 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
       )}
 
       <div className="overflow-x-auto">
-        <table className="w-full bg-white shadow-md rounded mb-4">
+        <table className="min-w-full bg-white">
           <thead>
             <tr className="bg-gray-200 text-black uppercase text-sm leading-normal">
               <th className="py-3 px-6 text-left">Date</th>
@@ -300,42 +302,39 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
               <th className="py-3 px-6 text-left">Actions</th>
             </tr>
           </thead>
-          <tbody className="text-black text-sm font-light">
+          <tbody className="text-gray-700">
             {stockOuts.map((stockOut) => (
-              <tr
-                key={stockOut.id}
-                className="border-b border-gray-200 hover:bg-gray-100"
-              >
-                <td className="py-3 px-6 text-left">
-                  {new Date(stockOut.createdAt).toLocaleString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                  })}
-                </td>
-                <td className="py-3 px-6 text-left">{stockOut.createdBy}</td>
-                <td className="py-3 px-6 text-left">{stockOut.brandName}</td>
-                <td className="py-3 px-6 text-left">{stockOut.productName}</td>
-                <td className="py-3 px-6 text-left">{stockOut.serviceName}</td>
-                <td className="py-3 px-6 text-left">{stockOut.quantity}</td>
-                <td className="py-3 px-6 text-left">
+              <tr key={stockOut.id} className="border-b hover:bg-gray-50">
+                <td className="py-3 px-4">{new Date(stockOut.createdAt).toLocaleString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true
+                })}</td>
+                <td className="py-3 px-4">{stockOut.createdBy}</td>
+                <td className="py-3 px-4">{stockOut.brandName}</td>
+                <td className="py-3 px-4">{stockOut.productName}</td>
+                <td className="py-3 px-4">{stockOut.serviceName}</td>
+                <td className="py-3 px-4">{stockOut.quantity}</td>
+                <td className="py-3 px-4">
                   <button
                     onClick={() => handleViewDetails(stockOut)}
-                    className="text-green-500 hover:text-green-700 mr-2"
+                    className="text-blue-500 hover:text-blue-700 mr-2"
                   >
-                    View Details
+                    View
                   </button>
+                  
                   {canEdit && (
                     <button
                       onClick={() => handleEdit(stockOut)}
-                      className="text-blue-500 hover:text-blue-700 mr-2"
+                      className="text-green-500 hover:text-green-700 mr-2"
                     >
                       Edit
                     </button>
                   )}
+                  
                   {canDelete && (
                     <button
                       onClick={() => handleDelete(stockOut.id)}

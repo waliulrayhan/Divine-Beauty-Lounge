@@ -133,6 +133,7 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
   const canCreate = isSuperAdmin || permissions.includes('create');
   const canEdit = isSuperAdmin || permissions.includes('edit');
   const canDelete = isSuperAdmin || permissions.includes('delete');
+  const canView = permissions.includes('view');
 
   console.log("Can create:", canCreate);
   console.log("Can edit:", canEdit);
