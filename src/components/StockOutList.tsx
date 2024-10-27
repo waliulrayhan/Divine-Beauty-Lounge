@@ -18,6 +18,7 @@ interface Product {
 interface Brand {
   id: string;
   name: string;
+  productId: string;  // Add this line
 }
 
 interface StockOut {
@@ -43,13 +44,13 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
   const [services, setServices] = useState<Service[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
-  const [newStockOut, setNewStockOut] = useState({
-    serviceId: "",
-    productId: "",
-    brandId: "",
+  const [stockOutInputs, setStockOutInputs] = useState([{
+    serviceId: '',
+    productId: '',
+    brandId: '',
     quantity: 0,
-    comments: "",
-  });
+    comments: '',
+  }]);
   const [editingStockOut, setEditingStockOut] = useState<StockOut | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [selectedStockOut, setSelectedStockOut] = useState<StockOut | null>(null);
@@ -115,15 +116,19 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setNewStockOut(prev => ({ ...prev, [name]: value }));
+    const newInputs = [...stockOutInputs];
+    newInputs[index] = {
+      ...newInputs[index],
+      [name]: name === 'quantity' ? Number(value) : value
+    };
+    setStockOutInputs(newInputs);
+    
     if (name === 'serviceId') {
       fetchProducts(value);
-      setNewStockOut(prev => ({ ...prev, productId: '', brandId: '' }));
     } else if (name === 'productId') {
       fetchBrands(value);
-      setNewStockOut(prev => ({ ...prev, brandId: '' }));
     }
   };
 
@@ -135,37 +140,37 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newStockOut),
+        body: JSON.stringify(stockOutInputs),
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       await fetchStockOuts();
-      toast.success(`Stock out ${editingStockOut ? 'updated' : 'created'} successfully`);
+      toast.success(`Stock outs ${editingStockOut ? 'updated' : 'created'} successfully`);
       setShowForm(false);
       setEditingStockOut(null);
-      setNewStockOut({
+      setStockOutInputs([{
         serviceId: '',
         productId: '',
         brandId: '',
         quantity: 0,
         comments: '',
-      });
+      }]);
     } catch (error) {
-      console.error(`Error ${editingStockOut ? 'updating' : 'creating'} stock out:`, error);
-      toast.error(`Failed to ${editingStockOut ? 'update' : 'create'} stock out`);
+      console.error(`Error ${editingStockOut ? 'updating' : 'creating'} stock outs:`, error);
+      toast.error(`Failed to ${editingStockOut ? 'update' : 'create'} stock outs`);
     }
   };
 
   const handleEdit = (stockOut: StockOut) => {
     setEditingStockOut(stockOut);
-    setNewStockOut({
+    setStockOutInputs([{
       serviceId: services.find(s => s.name === stockOut.serviceName)?.id || "",
       productId: stockOut.productId,
       brandId: stockOut.brandId,
       quantity: stockOut.quantity,
       comments: stockOut.comments,
-    });
+    }]);
     setShowForm(true);
     fetchProducts(services.find(s => s.name === stockOut.serviceName)?.id || "");
     fetchBrands(stockOut.productId);
@@ -193,6 +198,23 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
     setSelectedStockOut(stockOut);
   };
 
+  const addAnotherStockOut = () => {
+    setStockOutInputs([...stockOutInputs, {
+      serviceId: '',
+      productId: '',
+      brandId: '',
+      quantity: 0,
+      comments: '',
+    }]);
+  };
+
+  const removeStockOut = (index: number) => {
+    if (stockOutInputs.length > 1) {
+      const newInputs = stockOutInputs.filter((_, i) => i !== index);
+      setStockOutInputs(newInputs);
+    }
+  };
+
   const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN';
   const canCreate = isSuperAdmin || permissions.includes('create');
   const canEdit = isSuperAdmin || permissions.includes('edit');
@@ -214,77 +236,119 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-4 text-black">{editingStockOut ? 'Edit Stock Out' : 'Add New Stock Out'}</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-2 text-black">Service</label>
-              <select
-                name="serviceId"
-                value={newStockOut.serviceId}
-                onChange={handleInputChange}
-                required
-                className="w-full p-2 border rounded text-black"
-              >
-                <option value="">Select a service</option>
-                {services.map(service => (
-                  <option key={service.id} value={service.id}>{service.name}</option>
-                ))}
-              </select>
+          <h3 className="text-xl font-semibold mb-4 text-black">
+            {editingStockOut ? 'Edit Stock Out' : 'Add New Stock Out'}
+          </h3>
+
+          {stockOutInputs.map((stockOut, index) => (
+            <div key={index} className="mb-6 p-4 border rounded">
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="text-lg font-medium text-black">Stock Out #{index + 1}</h4>
+                {!editingStockOut && stockOutInputs.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeStockOut(index)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    Remove Entry
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-2 text-black">Service</label>
+                  <select
+                    name="serviceId"
+                    value={stockOut.serviceId}
+                    onChange={(e) => handleInputChange(index, e)}
+                    required
+                    className="w-full p-2 border rounded text-black"
+                  >
+                    <option value="">Select a service</option>
+                    {services.map(service => (
+                      <option key={service.id} value={service.id}>{service.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-black">Product</label>
+                  <select
+                    name="productId"
+                    value={stockOut.productId}
+                    onChange={(e) => handleInputChange(index, e)}
+                    required
+                    className="w-full p-2 border rounded text-black"
+                  >
+                    <option value="">Select a product</option>
+                    {products
+                      .filter(product => !stockOut.serviceId || product.serviceId === stockOut.serviceId)
+                      .map(product => (
+                        <option key={product.id} value={product.id}>{product.name}</option>
+                      ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-black">Brand</label>
+                  <select
+                    name="brandId"
+                    value={stockOut.brandId}
+                    onChange={(e) => handleInputChange(index, e)}
+                    required
+                    className="w-full p-2 border rounded text-black"
+                  >
+                    <option value="">Select a brand</option>
+                    {brands
+                      .filter(brand => !stockOut.productId || brand.productId === stockOut.productId)
+                      .map(brand => (
+                        <option key={brand.id} value={brand.id}>{brand.name}</option>
+                      ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-black">Quantity</label>
+                  <input
+                    type="number"
+                    name="quantity"
+                    value={stockOut.quantity === 0 ? '' : stockOut.quantity}
+                    onChange={(e) => handleInputChange(index, e)}
+                    required
+                    min="1"
+                    className="w-full p-2 border rounded text-black"
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <label className="block mb-2 text-black">Comments</label>
+                  <textarea
+                    name="comments"
+                    value={stockOut.comments}
+                    onChange={(e) => handleInputChange(index, e)}
+                    className="w-full p-2 border rounded text-black"
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block mb-2 text-black">Product</label>
-              <select
-                name="productId"
-                value={newStockOut.productId}
-                onChange={handleInputChange}
-                required
-                className="w-full p-2 border rounded text-black"
-              >
-                <option value="">Select a product</option>
-                {products.map(product => (
-                  <option key={product.id} value={product.id}>{product.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block mb-2 text-black">Brand</label>
-              <select
-                name="brandId"
-                value={newStockOut.brandId}
-                onChange={handleInputChange}
-                required
-                className="w-full p-2 border rounded text-black"
-              >
-                <option value="">Select a brand</option>
-                {brands.map(brand => (
-                  <option key={brand.id} value={brand.id}>{brand.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block mb-2 text-black">Quantity</label>
-              <input
-                type="number"
-                name="quantity"
-                value={newStockOut.quantity}
-                onChange={handleInputChange}
-                required
-                min="1"
-                className="w-full p-2 border rounded text-black"
-              />
-            </div>
-            <div>
-              <label className="block mb-2 text-black">Comments</label>
-              <textarea
-                name="comments"
-                value={newStockOut.comments}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded text-black"
-              />
-            </div>
-          </div>
-          <button type="submit" className="mt-4 bg-green-500 text-white px-4 py-2 rounded">
-            {editingStockOut ? 'Update Stock Out' : 'Create Stock Out'}
+          ))}
+
+          {!editingStockOut && (
+            <button
+              type="button"
+              onClick={addAnotherStockOut}
+              className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+            >
+              Add Another Entry
+            </button>
+          )}
+
+          <button
+            type="submit"
+            className="bg-green-500 text-white px-4 py-2 rounded"
+          >
+            {editingStockOut ? 'Update Stock Out' : 'Create Stock Out(s)'}
           </button>
         </form>
       )}
