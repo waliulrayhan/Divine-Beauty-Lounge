@@ -47,6 +47,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   });
   const [editingStockIn, setEditingStockIn] = useState<StockIn | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [selectedStockIn, setSelectedStockIn] = useState<StockIn | null>(null);
 
   useEffect(() => {
     fetchStockIns();
@@ -162,6 +163,10 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
         toast.error('Failed to delete stock in record');
       }
     }
+  };
+
+  const handleViewDetails = (stockIn: StockIn) => {
+    setSelectedStockIn(stockIn);
   };
 
   const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN';
@@ -292,6 +297,12 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                 <td className="py-3 px-6 text-left">{stockIn.quantity}</td>
                 <td className="py-3 px-6 text-left">${stockIn.pricePerUnit.toFixed(2)}</td>
                 <td className="py-3 px-6 text-left">
+                  <button 
+                    onClick={() => handleViewDetails(stockIn)} 
+                    className="text-green-500 hover:text-green-700 mr-2"
+                  >
+                    View Details
+                  </button>
                   {canEdit && (
                     <button onClick={() => handleEdit(stockIn)} className="text-blue-500 hover:text-blue-700 mr-2">
                       Edit
@@ -308,6 +319,36 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
           </tbody>
         </table>
       </div>
+
+      {selectedStockIn && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="my-modal">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3 text-center">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">Stock In Details</h3>
+              <div className="mt-2 px-7 py-3 text-left">
+                <p className="text-sm text-gray-500"><strong>Product:</strong> {selectedStockIn.productName}</p>
+                <p className="text-sm text-gray-500"><strong>Service:</strong> {selectedStockIn.serviceName}</p>
+                <p className="text-sm text-gray-500"><strong>Brand:</strong> {selectedStockIn.brandName}</p>
+                <p className="text-sm text-gray-500"><strong>Quantity:</strong> {selectedStockIn.quantity}</p>
+                <p className="text-sm text-gray-500"><strong>Price Per Unit:</strong> ${selectedStockIn.pricePerUnit.toFixed(2)}</p>
+                <p className="text-sm text-gray-500"><strong>Total Value:</strong> ${(selectedStockIn.quantity * selectedStockIn.pricePerUnit).toFixed(2)}</p>
+                <p className="text-sm text-gray-500"><strong>Comments:</strong> {selectedStockIn.comments}</p>
+                <p className="text-sm text-gray-500"><strong>Created By:</strong> {selectedStockIn.createdBy}</p>
+                <p className="text-sm text-gray-500"><strong>Created At:</strong> {new Date(selectedStockIn.createdAt).toLocaleString()}</p>
+              </div>
+              <div className="items-center px-4 py-3">
+                <button
+                  id="ok-btn"
+                  className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  onClick={() => setSelectedStockIn(null)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
