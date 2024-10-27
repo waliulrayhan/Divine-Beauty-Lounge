@@ -51,6 +51,7 @@ export default function UserManagement() {
   });
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -167,6 +168,10 @@ export default function UserManagement() {
         toast.error('Failed to delete user');
       }
     }
+  };
+
+  const handleViewDetails = (user: User) => {
+    setSelectedUser(user);
   };
 
   if (session?.user?.role !== 'SUPER_ADMIN') {
@@ -372,6 +377,7 @@ export default function UserManagement() {
                 <td className="py-3 px-6 text-left">{user.role}</td>
                 <td className="py-3 px-6 text-left">{user.isActive ? 'Yes' : 'No'}</td>
                 <td className="py-3 px-6 text-left">
+                  <button onClick={() => handleViewDetails(user)} className="text-green-500 hover:text-green-700 mr-2 transition duration-300">View Details</button>
                   <button onClick={() => handleEdit(user)} className="text-blue-500 hover:text-blue-700 mr-2 transition duration-300">Edit</button>
                   <button onClick={() => handleDelete(user.id)} className="text-red-500 hover:text-red-700 transition duration-300">Delete</button>
                 </td>
@@ -380,6 +386,71 @@ export default function UserManagement() {
           </tbody>
         </table>
       </div>
+
+      {selectedUser && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" onClick={() => setSelectedUser(null)}>
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white" onClick={e => e.stopPropagation()}>
+            <div className="mt-3">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">User Details</h3>
+              <div className="mt-2 px-7 py-3">
+                <p className="text-sm text-gray-500 mb-2">
+                  <strong className="font-medium text-gray-700">Employee ID:</strong> {selectedUser.employeeId}
+                </p>
+                <p className="text-sm text-gray-500 mb-2">
+                  <strong className="font-medium text-gray-700">Username:</strong> {selectedUser.username}
+                </p>
+                <p className="text-sm text-gray-500 mb-2">
+                  <strong className="font-medium text-gray-700">Email:</strong> {selectedUser.email}
+                </p>
+                <p className="text-sm text-gray-500 mb-2">
+                  <strong className="font-medium text-gray-700">Phone Number:</strong> {selectedUser.phoneNumber}
+                </p>
+                <p className="text-sm text-gray-500 mb-2">
+                  <strong className="font-medium text-gray-700">NID Number:</strong> {selectedUser.nidNumber}
+                </p>
+                <p className="text-sm text-gray-500 mb-2">
+                  <strong className="font-medium text-gray-700">Job Start Date:</strong> {new Date(selectedUser.jobStartDate).toLocaleDateString()}
+                </p>
+                <p className="text-sm text-gray-500 mb-2">
+                  <strong className="font-medium text-gray-700">Job End Date:</strong> {selectedUser.jobEndDate ? new Date(selectedUser.jobEndDate).toLocaleDateString() : 'N/A'}
+                </p>
+                <p className="text-sm text-gray-500 mb-2">
+                  <strong className="font-medium text-gray-700">Active:</strong> {selectedUser.isActive ? 'Yes' : 'No'}
+                </p>
+                <p className="text-sm text-gray-500 mb-2">
+                  <strong className="font-medium text-gray-700">Role:</strong> {selectedUser.role}
+                </p>
+                <div className="mt-4">
+                  <strong className="font-medium text-gray-700">Permissions:</strong>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {Object.entries(JSON.parse(selectedUser.permissions as string)).map(([key, value]) => (
+                      <div key={key} className="bg-gray-100 p-2 rounded">
+                        <h6 className="font-medium text-gray-700 mb-1">{key.charAt(0).toUpperCase() + key.slice(1)}</h6>
+                        <div className="flex flex-wrap">
+                          {['view', 'create', 'edit', 'delete'].map(action => (
+                            <span key={action} className={`mr-2 ${(value as string[]).includes(action) ? 'text-green-500' : 'text-red-500'}`}>
+                              {action.charAt(0).toUpperCase() + action.slice(1)} {(value as string[]).includes(action) ? '✓' : '✗'}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="items-center px-4 py-3">
+              <button
+                id="ok-btn"
+                className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                onClick={() => setSelectedUser(null)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
