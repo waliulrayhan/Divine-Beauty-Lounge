@@ -10,8 +10,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const { searchParams } = new URL(request.url);
+  const serviceId = searchParams.get('serviceId');
+
   try {
     const products = await prisma.product.findMany({
+      where: serviceId ? { serviceId: serviceId } : {},
       include: {
         service: {
           select: { name: true },
