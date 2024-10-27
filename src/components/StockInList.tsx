@@ -37,14 +37,14 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   const [stockIns, setStockIns] = useState<StockIn[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [newStockIn, setNewStockIn] = useState({
+  const [stockInInputs, setStockInInputs] = useState([{
     serviceId: '',
     productId: '',
     brandName: '',
     quantity: 0,
     pricePerUnit: 0,
     comments: '',
-  });
+  }]);
   const [editingStockIn, setEditingStockIn] = useState<StockIn | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [selectedStockIn, setSelectedStockIn] = useState<StockIn | null>(null);
@@ -96,56 +96,93 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setNewStockIn(prev => ({ ...prev, [name]: value }));
+    const newInputs = [...stockInInputs];
+    newInputs[index] = {
+      ...newInputs[index],
+      [name]: name === 'quantity' || name === 'pricePerUnit' 
+        ? Number(value) // Changed from parseFloat to Number to handle the leading zeros
+        : value
+    };
+    setStockInInputs(newInputs);
+    
     if (name === 'serviceId') {
       fetchProducts(value);
+    }
+  };
+
+  const addAnotherStockIn = () => {
+    setStockInInputs([...stockInInputs, {
+      serviceId: '',
+      productId: '',
+      brandName: '',
+      quantity: 0,
+      pricePerUnit: 0,
+      comments: '',
+    }]);
+  };
+
+  const removeStockIn = (index: number) => {
+    if (stockInInputs.length > 1) {
+      const newInputs = stockInInputs.filter((_, i) => i !== index);
+      setStockInInputs(newInputs);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const url = editingStockIn ? `/api/stock-in/${editingStockIn.id}` : '/api/stock-in';
-      const method = editingStockIn ? 'PUT' : 'POST';
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newStockIn),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const responses = await Promise.all(
+        stockInInputs.map(stockIn =>
+          fetch('/api/stock-in', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(stockIn),
+          })
+        )
+      );
+
+      const hasError = responses.some(response => !response.ok);
+      if (hasError) {
+        throw new Error('One or more stock ins failed to create');
       }
+
       await fetchStockIns();
-      toast.success(`Stock in ${editingStockIn ? 'updated' : 'created'} successfully`);
+      toast.success(`${stockInInputs.length} stock in(s) created successfully`);
       setShowForm(false);
-      setEditingStockIn(null);
-      setNewStockIn({
+      setStockInInputs([{
         serviceId: '',
         productId: '',
         brandName: '',
         quantity: 0,
         pricePerUnit: 0,
         comments: '',
-      });
+      }]);
     } catch (error) {
-      console.error(`Error ${editingStockIn ? 'updating' : 'creating'} stock in:`, error);
-      toast.error(`Failed to ${editingStockIn ? 'update' : 'create'} stock in`);
+      console.error('Error creating stock ins:', error);
+      toast.error('Failed to create stock ins');
     }
   };
 
   const handleEdit = (stockIn: StockIn) => {
     setEditingStockIn(stockIn);
-    setNewStockIn({
+    // When editing, we only want one input form
+    setStockInInputs([{
       serviceId: services.find(s => s.name === stockIn.serviceName)?.id || '',
       productId: stockIn.productId,
       brandName: stockIn.brandName,
       quantity: stockIn.quantity,
       pricePerUnit: stockIn.pricePerUnit,
-      comments: stockIn.comments,
-    });
-    fetchProducts(services.find(s => s.name === stockIn.serviceName)?.id || '');
+      comments: stockIn.comments || '',
+    }]);
+    
+    // Fetch products for the selected service
+    const serviceId = services.find(s => s.name === stockIn.serviceName)?.id;
+    if (serviceId) {
+      fetchProducts(serviceId);
+    }
+    
     setShowForm(true);
   };
 
@@ -190,86 +227,136 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-4 text-black">{editingStockIn ? 'Edit Stock In' : 'Add New Stock In'}</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-2 text-black">Service</label>
-              <select
-                name="serviceId"
-                value={newStockIn.serviceId}
-                onChange={handleInputChange}
-                required
-                className="w-full p-2 border rounded text-black"
-              >
-                <option value="">Select a service</option>
-                {services.map(service => (
-                  <option key={service.id} value={service.id}>{service.name}</option>
-                ))}
-              </select>
+          <h3 className="text-xl font-semibold mb-4 text-black">
+            {editingStockIn ? 'Edit Stock In' : 'Add New Stock In'}
+          </h3>
+
+          {stockInInputs.map((stockIn, index) => (
+            <div key={index} className="mb-6 p-4 border rounded">
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="text-lg font-medium text-black">Stock In #{index + 1}</h4>
+                {!editingStockIn && stockInInputs.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeStockIn(index)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    Remove Entry
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-2 text-black">Service</label>
+                  <select
+                    name="serviceId"
+                    value={stockIn.serviceId}
+                    onChange={(e) => handleInputChange(index, e)}
+                    required
+                    className="w-full p-2 border rounded text-black"
+                  >
+                    <option value="">Select a service</option>
+                    {services.map(service => (
+                      <option key={service.id} value={service.id}>
+                        {service.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block mb-2 text-black">Product</label>
+                  <select
+                    name="productId"
+                    value={stockIn.productId}
+                    onChange={(e) => handleInputChange(index, e)}
+                    required
+                    className="w-full p-2 border rounded text-black"
+                  >
+                    <option value="">Select a product</option>
+                    {products.map(product => (
+                      <option key={product.id} value={product.id}>
+                        {product.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block mb-2 text-black">Brand Name</label>
+                  <input
+                    type="text"
+                    name="brandName"
+                    value={stockIn.brandName}
+                    onChange={(e) => handleInputChange(index, e)}
+                    required
+                    className="w-full p-2 border rounded text-black"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2 text-black">Quantity</label>
+                  <input
+                    type="number"
+                    name="quantity"
+                    value={stockIn.quantity === 0 ? '' : stockIn.quantity}
+                    onChange={(e) => {
+                      const val = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
+                      handleInputChange(index, {
+                        ...e,
+                        target: { ...e.target, value: val.toString(), name: 'quantity' }
+                      });
+                    }}
+                    required
+                    min="1"
+                    className="w-full p-2 border rounded text-black"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2 text-black">Price Per Unit</label>
+                  <input
+                    type="number"
+                    name="pricePerUnit"
+                    value={stockIn.pricePerUnit === 0 ? '' : stockIn.pricePerUnit}
+                    onChange={(e) => {
+                      const val = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                      handleInputChange(index, {
+                        ...e,
+                        target: { ...e.target, value: val.toString(), name: 'pricePerUnit' }
+                      });
+                    }}
+                    required
+                    min="0"
+                    step="0.01"
+                    className="w-full p-2 border rounded text-black"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2 text-black">Comments</label>
+                  <textarea
+                    name="comments"
+                    value={stockIn.comments}
+                    onChange={(e) => handleInputChange(index, e)}
+                    className="w-full p-2 border rounded text-black"
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block mb-2 text-black">Product</label>
-              <select
-                name="productId"
-                value={newStockIn.productId}
-                onChange={handleInputChange}
-                required
-                className="w-full p-2 border rounded text-black"
-              >
-                <option value="">Select a product</option>
-                {products.map(product => (
-                  <option key={product.id} value={product.id}>{product.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block mb-2 text-black">Brand Name</label>
-              <input
-                type="text"
-                name="brandName"
-                value={newStockIn.brandName}
-                onChange={handleInputChange}
-                required
-                className="w-full p-2 border rounded text-black"
-              />
-            </div>
-            <div>
-              <label className="block mb-2 text-black">Quantity</label>
-              <input
-                type="number"
-                name="quantity"
-                value={newStockIn.quantity}
-                onChange={handleInputChange}
-                required
-                min="1"
-                className="w-full p-2 border rounded text-black"
-              />
-            </div>
-            <div>
-              <label className="block mb-2 text-black">Price Per Unit</label>
-              <input
-                type="number"
-                name="pricePerUnit"
-                value={newStockIn.pricePerUnit}
-                onChange={handleInputChange}
-                required
-                min="0"
-                step="0.01"
-                className="w-full p-2 border rounded text-black"
-              />
-            </div>
-            <div>
-              <label className="block mb-2 text-black">Comments</label>
-              <textarea
-                name="comments"
-                value={newStockIn.comments}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded text-black"
-              />
-            </div>
-          </div>
-          <button type="submit" className="mt-4 bg-green-500 text-white px-4 py-2 rounded">
-            {editingStockIn ? 'Update Stock In' : 'Create Stock In'}
+          ))}
+
+          {!editingStockIn && (
+            <button
+              type="button"
+              onClick={addAnotherStockIn}
+              className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+            >
+              Add Another Entry
+            </button>
+          )}
+
+          <button
+            type="submit"
+            className="bg-green-500 text-white px-4 py-2 rounded"
+          >
+            {editingStockIn ? 'Update Stock In' : 'Create Stock In(s)'}
           </button>
         </form>
       )}
