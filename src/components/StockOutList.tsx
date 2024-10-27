@@ -91,49 +91,40 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
     }
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setNewStockOut((prev) => ({ ...prev, [name]: value }));
-    if (name === "serviceId") {
+    setNewStockOut(prev => ({ ...prev, [name]: value }));
+    if (name === 'serviceId') {
       fetchProducts(value);
-      setNewStockOut((prev) => ({ ...prev, productId: "" }));
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const url = editingStockOut
-        ? `/api/stock-out/${editingStockOut.id}`
-        : "/api/stock-out";
-      const method = editingStockOut ? "PUT" : "POST";
+      const url = editingStockOut ? `/api/stock-out/${editingStockOut.id}` : '/api/stock-out';
+      const method = editingStockOut ? 'PUT' : 'POST';
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newStockOut),
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       await fetchStockOuts();
+      toast.success(`Stock out ${editingStockOut ? 'updated' : 'created'} successfully`);
       setShowForm(false);
       setEditingStockOut(null);
       setNewStockOut({
-        serviceId: "",
-        productId: "",
+        serviceId: '',
+        productId: '',
         quantity: 0,
-        comments: "",
+        comments: '',
       });
-      toast.success(
-        `Stock out ${editingStockOut ? "updated" : "created"} successfully`
-      );
     } catch (error) {
-      console.error("Error submitting stock out:", error);
-      toast.error("Failed to submit stock out");
+      console.error(`Error ${editingStockOut ? 'updating' : 'creating'} stock out:`, error);
+      toast.error(`Failed to ${editingStockOut ? 'update' : 'create'} stock out`);
     }
   };
 
@@ -167,27 +158,26 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
     }
   };
 
-  const canCreate = permissions.includes("create");
-  const canEdit = permissions.includes("edit");
-  const canDelete = permissions.includes("delete");
+  const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN';
+  const canCreate = isSuperAdmin || permissions.includes('create');
+  const canEdit = isSuperAdmin || permissions.includes('edit');
+  const canDelete = isSuperAdmin || permissions.includes('delete');
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-2xl font-bold mb-4 text-black">Stock Out List</h2>
       {canCreate && (
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => setShowForm(true)}
           className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
         >
-          {showForm ? "Cancel" : "Add New Stock Out"}
+          Add New Stock Out
         </button>
       )}
 
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-4 text-black">
-            {editingStockOut ? "Edit Stock Out" : "Add New Stock Out"}
-          </h3>
+          <h3 className="text-xl font-semibold mb-4 text-black">{editingStockOut ? 'Edit Stock Out' : 'Add New Stock Out'}</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block mb-2 text-black">Service</label>
@@ -199,10 +189,8 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
                 className="w-full p-2 border rounded text-black"
               >
                 <option value="">Select a service</option>
-                {services.map((service) => (
-                  <option key={service.id} value={service.id}>
-                    {service.name}
-                  </option>
+                {services.map(service => (
+                  <option key={service.id} value={service.id}>{service.name}</option>
                 ))}
               </select>
             </div>
@@ -214,13 +202,10 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
                 onChange={handleInputChange}
                 required
                 className="w-full p-2 border rounded text-black"
-                disabled={!newStockOut.serviceId}
               >
                 <option value="">Select a product</option>
-                {products.map((product) => (
-                  <option key={product.id} value={product.id}>
-                    {product.name}
-                  </option>
+                {products.map(product => (
+                  <option key={product.id} value={product.id}>{product.name}</option>
                 ))}
               </select>
             </div>
@@ -246,11 +231,8 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
               />
             </div>
           </div>
-          <button
-            type="submit"
-            className="mt-4 bg-green-500 text-white px-4 py-2 rounded"
-          >
-            {editingStockOut ? "Update Stock Out" : "Create Stock Out"}
+          <button type="submit" className="mt-4 bg-green-500 text-white px-4 py-2 rounded">
+            {editingStockOut ? 'Update Stock Out' : 'Create Stock Out'}
           </button>
         </form>
       )}
