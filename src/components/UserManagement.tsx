@@ -190,7 +190,7 @@ export default function UserManagement() {
   return (
     <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-800">User Management</h2>
+        <h2 className="text-2xl font-bold text-gray-800">User Management</h2>
         <button
           onClick={() => {
             setEditingUser(null);

@@ -188,8 +188,8 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
   return (
     <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-800">Product Management</h2>
-        {canCreate && (
+      <h2 className="text-2xl font-bold text-black">Product Management</h2>
+      {canCreate && (
           <button
             onClick={() => setShowForm(true)}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition duration-200 flex items-center gap-2 shadow-lg"
