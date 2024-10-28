@@ -57,40 +57,61 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { productId, brandId, quantity, comments } = await request.json();
+    const stockOutItems = await request.json();
     
-    console.log('Stock out request:', {
-      productId,
-      brandId,
-      quantity,
-      comments
-    });
-    
-    // Check available stock
-    const availableStock = await getAvailableStock(productId, brandId);
-    
-    console.log('Available stock:', availableStock);
-    
-    if (quantity > availableStock) {
+    if (!Array.isArray(stockOutItems)) {
+      return NextResponse.json({ error: 'Invalid request format' }, { status: 400 });
+    }
+
+    // Check available stock and get brand names for all items first
+    const stockChecks = await Promise.all(
+      stockOutItems.map(async ({ productId, brandId, quantity }) => {
+        const availableStock = await getAvailableStock(productId, brandId);
+        // Fetch brand information
+        const brand = await prisma.brand.findUnique({
+          where: { id: brandId },
+          select: { name: true }
+        });
+
+        return {
+          productId,
+          brandId,
+          brandName: brand?.name || 'Unknown Brand',
+          requested: quantity,
+          available: availableStock,
+          isValid: quantity <= availableStock
+        };
+      })
+    );
+
+    // If any item has insufficient stock, return error
+    const insufficientStock = stockChecks.find(check => !check.isValid);
+    if (insufficientStock) {
       return NextResponse.json({
-        error: `Insufficient stock. Available: ${availableStock}, Requested: ${quantity}`
+        error: `Insufficient stock for one or more items. Brand "${insufficientStock.brandName}": Available: ${insufficientStock.available}, Requested: ${insufficientStock.requested}`
       }, { status: 400 });
     }
 
-    const stockOut = await prisma.stockOut.create({
-      data: {
-        product: { connect: { id: productId } },
-        brand: { connect: { id: brandId } },
-        quantity: parseInt(quantity),
-        comments,
-        createdBy: { connect: { email: session.user.email } },
-      },
-    });
-    return NextResponse.json(stockOut);
+    // Create all stock outs in a transaction
+    const createdStockOuts = await prisma.$transaction(
+      stockOutItems.map(item => 
+        prisma.stockOut.create({
+          data: {
+            product: { connect: { id: item.productId } },
+            brand: { connect: { id: item.brandId } },
+            quantity: parseInt(item.quantity),
+            comments: item.comments || null,
+            createdBy: { connect: { email: session.user.email! } }, // Add non-null assertion
+          },
+        })
+      )
+    );
+
+    return NextResponse.json(createdStockOuts);
   } catch (error) {
-    console.error('Error creating stock out:', error);
+    console.error('Error creating stock outs:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to create stock out' },
+      { error: error instanceof Error ? error.message : 'Failed to create stock outs' },
       { status: 500 }
     );
   }

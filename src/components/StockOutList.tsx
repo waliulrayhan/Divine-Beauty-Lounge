@@ -147,7 +147,7 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
     try {
       // Validate that required fields are filled
       const hasEmptyFields = stockOutInputs.some(
-        input => !input.serviceId || !input.productId || !input.brandId || !input.quantity
+        input => !input.productId || !input.brandId || !input.quantity
       );
 
       if (hasEmptyFields) {
@@ -155,25 +155,19 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
         return;
       }
 
-      const url = editingStockOut ? `/api/stock-out/${editingStockOut.id}` : '/api/stock-out';
-      const method = editingStockOut ? 'PUT' : 'POST';
+      const response = await fetch('/api/stock-out', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(stockOutInputs), // Send entire array of inputs
+      });
 
-      // Create stock outs one by one to handle errors better
-      for (const stockOut of stockOutInputs) {
-        const response = await fetch(url, {
-          method,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(stockOut), // Send single stockOut object, not array
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || `Failed to ${method.toLowerCase()} stock out`);
-        }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create stock outs');
       }
 
       await fetchStockOuts();
-      toast.success(`Stock out${stockOutInputs.length > 1 ? 's' : ''} ${editingStockOut ? 'updated' : 'created'} successfully`);
+      toast.success(`Stock outs created successfully`);
       
       // Reset form
       setShowForm(false);
@@ -186,7 +180,7 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
         comments: '',
       }]);
     } catch (error) {
-      console.error(`Error ${editingStockOut ? 'updating' : 'creating'} stock outs:`, error);
+      console.error('Error creating stock outs:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to process stock outs');
     }
   };
