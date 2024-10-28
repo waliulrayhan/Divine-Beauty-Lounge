@@ -29,6 +29,7 @@ const BrandManagement: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState('');
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchBrands();
@@ -49,6 +50,8 @@ const BrandManagement: React.FC = () => {
     } catch (error) {
       console.error('Error fetching brands:', error);
       toast.error('Failed to load brands');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -183,6 +186,14 @@ const BrandManagement: React.FC = () => {
     setShowForm(false);
     resetForm();
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">
