@@ -359,37 +359,36 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
           )}
         </div>
       </div>
-
       {showForm && (
-        <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-4 text-black">
+        <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow-lg">
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">
             {editingStockIn ? 'Edit Stock In' : 'Add New Stock In'}
           </h3>
 
           {stockInInputs.map((stockIn, index) => (
-            <div key={index} className="mb-6 p-4 border rounded">
+            <div key={index} className="mb-6 p-4 border border-gray-200 rounded-md">
               <div className="flex justify-between items-center mb-4">
-                <h4 className="text-lg font-medium text-black">Stock In #{index + 1}</h4>
+                <h4 className="text-lg font-medium text-gray-700">Stock In #{index + 1}</h4>
                 {!editingStockIn && stockInInputs.length > 1 && (
                   <button
                     type="button"
                     onClick={() => removeStockIn(index)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-red-500 hover:text-red-700 transition-colors duration-200"
                   >
                     Remove Entry
                   </button>
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block mb-2 text-black">Service</label>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Service</label>
                   <select
                     name="serviceId"
                     value={stockIn.serviceId}
                     onChange={(e) => handleInputChange(index, e)}
                     required
-                    className="w-full p-2 border rounded text-black"
+                    className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Select a service</option>
                     {services.map(service => (
@@ -400,13 +399,13 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                   </select>
                 </div>
                 <div>
-                  <label className="block mb-2 text-black">Product</label>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Product</label>
                   <select
                     name="productId"
                     value={stockIn.productId}
                     onChange={(e) => handleInputChange(index, e)}
                     required
-                    className="w-full p-2 border rounded text-black"
+                    className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Select a product</option>
                     {(inputProducts[index] || [])
@@ -419,15 +418,14 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                   </select>
                 </div>
                 <div className="relative">
-                  <label className="block mb-2 text-black">Brand</label>
-                  <div className="brand-input-container relative">
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Brand</label>
+                  <div className="relative">
                     <input
                       type="text"
                       name="brandName"
                       value={stockIn.brandName}
                       onChange={(e) => {
                         handleInputChange(index, e);
-                        // Only show suggestions if a product is selected
                         if (stockIn.productId) {
                           const searchTerm = e.target.value.toLowerCase();
                           const filtered = (inputBrands[index] || [])
@@ -446,7 +444,6 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                         }
                       }}
                       onFocus={() => {
-                        // Only show suggestions if a product is selected
                         if (stockIn.productId) {
                           const filtered = (inputBrands[index] || [])
                             .filter(brand => brand.productId === stockIn.productId);
@@ -460,16 +457,16 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                           }));
                         }
                       }}
-                      className="w-full p-2 border rounded text-black"
+                      className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
                       placeholder={stockIn.productId ? "Select or type new brand name" : "Select a product first"}
                       disabled={!stockIn.productId}
                     />
                     {showBrandSuggestions[index] && filteredBrands[index]?.length > 0 && (
-                      <div className="absolute z-10 w-full bg-white border rounded-b mt-1 max-h-60 overflow-y-auto">
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                         {filteredBrands[index].map(brand => (
                           <div
                             key={brand.id}
-                            className="p-2 hover:bg-gray-100 cursor-pointer text-black"
+                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-700 transition-colors duration-200"
                             onClick={() => {
                               const newInputs = [...stockInInputs];
                               newInputs[index] = {
@@ -492,7 +489,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                   </div>
                 </div>
                 <div>
-                  <label className="block mb-2 text-black">Quantity</label>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Quantity</label>
                   <input
                     type="number"
                     name="quantity"
@@ -500,11 +497,11 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                     onChange={(e) => handleInputChange(index, e)}
                     required
                     min="1"
-                    className="w-full p-2 border rounded text-black"
+                    className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block mb-2 text-black">Price Per Unit</label>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Price Per Unit</label>
                   <input
                     type="number"
                     name="pricePerUnit"
@@ -513,38 +510,40 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                     required
                     min="0"
                     step="0.01"
-                    className="w-full p-2 border rounded text-black"
+                    className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-                <div className="col-span-2">
-                  <label className="block mb-2 text-black">Comments</label>
+                <div className="md:col-span-2">
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Comments</label>
                   <textarea
                     name="comments"
                     value={stockIn.comments}
                     onChange={(e) => handleInputChange(index, e)}
-                    className="w-full p-2 border rounded text-black"
+                    className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 min-h-[100px]"
                   />
                 </div>
               </div>
             </div>
           ))}
 
-          {!editingStockIn && (
-            <button
-              type="button"
-              onClick={addAnotherStockIn}
-              className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
-            >
-              Add Another Entry
-            </button>
-          )}
+          <div className="flex gap-4 mt-6">
+            {!editingStockIn && (
+              <button
+                type="button"
+                onClick={addAnotherStockIn}
+                className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition duration-200"
+              >
+                Add Another Entry
+              </button>
+            )}
 
-          <button
-            type="submit"
-            className="bg-green-500 text-white px-4 py-2 rounded"
-          >
-            {editingStockIn ? 'Update Stock In' : 'Create Stock In(s)'}
-          </button>
+            <button
+              type="submit"
+              className="px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition duration-200"
+            >
+              {editingStockIn ? 'Update Stock In' : 'Create Stock In(s)'}
+            </button>
+          </div>
         </form>
       )}
 
