@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
+import { getAvailableStock } from '@/lib/stockCalculations';
 
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -57,6 +58,25 @@ export async function POST(request: NextRequest) {
 
   try {
     const { productId, brandId, quantity, comments } = await request.json();
+    
+    console.log('Stock out request:', {
+      productId,
+      brandId,
+      quantity,
+      comments
+    });
+    
+    // Check available stock
+    const availableStock = await getAvailableStock(productId, brandId);
+    
+    console.log('Available stock:', availableStock);
+    
+    if (quantity > availableStock) {
+      return NextResponse.json({
+        error: `Insufficient stock. Available: ${availableStock}, Requested: ${quantity}`
+      }, { status: 400 });
+    }
+
     const stockOut = await prisma.stockOut.create({
       data: {
         product: { connect: { id: productId } },
@@ -69,6 +89,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(stockOut);
   } catch (error) {
     console.error('Error creating stock out:', error);
-    return NextResponse.json({ error: 'Failed to create stock out' }, { status: 500 });
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Failed to create stock out' },
+      { status: 500 }
+    );
   }
 }
