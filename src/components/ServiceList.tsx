@@ -192,8 +192,6 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Name</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Description</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Service Charge</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Created By</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Created At</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Actions</th>
               </tr>
             </thead>
@@ -202,18 +200,14 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
                 <tr key={service.id} className="hover:bg-gray-50 transition duration-150">
                   <td className="px-6 py-4 text-sm text-black">{service.name}</td>
                   <td className="px-6 py-4 text-sm text-black">{service.description}</td>
-                  <td className="px-6 py-4 text-sm text-black">${service.serviceCharge}</td>
-                  <td className="px-6 py-4 text-sm text-black">{service.createdBy?.username}</td>
-                  <td className="px-6 py-4 text-sm text-black">
-                    {new Date(service.createdAt).toLocaleDateString()}
-                  </td>
+                  <td className="px-6 py-4 text-sm text-black">{service.serviceCharge} Tk</td>
                   <td className="px-6 py-4 text-sm space-x-2">
                     {canView && (
                       <button
                         onClick={() => handleViewDetails(service)}
                         className="text-blue-600 hover:text-blue-800 font-medium"
                       >
-                        View
+                        View Details
                       </button>
                     )}
                     {canEdit && (
@@ -241,7 +235,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900/75 backdrop-blur-sm flex items-center justify-center p-4">
           <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-black">
@@ -345,46 +339,49 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
           </form>
         </div>
       )}
-
       {selectedService && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-black">{selectedService.name} Details</h3>
-              <button
-                onClick={() => setSelectedService(null)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-sm font-medium text-black">Description</h4>
-                <p className="text-black">{selectedService.description}</p>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full transform transition-all">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  {selectedService.name} Details
+                </h3>
+                <button
+                  onClick={() => setSelectedService(null)}
+                  className="rounded-full p-1.5 text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-              <div>
-                <h4 className="text-sm font-medium text-black">Service Charge</h4>
-                <p className="text-black">${selectedService.serviceCharge.toFixed(2)}</p>
+              
+              <div className="space-y-6">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="text-sm font-semibold text-gray-500 mb-2">Description</h4>
+                  <p className="text-gray-900">{selectedService.description}</p>
+                </div>
+                
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="text-sm font-semibold text-gray-500 mb-2">Service Charge</h4>
+                  <p className="text-gray-900 text-lg font-medium">
+                    ${selectedService.serviceCharge.toFixed(2)}
+                  </p>
+                </div>
+                
+                <div className="flex gap-4">
+                  <div className="flex-1 bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Created By</h4>
+                    <p className="text-gray-900">{selectedService.createdBy.username}</p>
+                  </div>
+                  
+                  <div className="flex-1 bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Created At</h4>
+                    <p className="text-gray-900">{new Date(selectedService.createdAt).toLocaleString()}</p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <h4 className="text-sm font-medium text-black">Created By</h4>
-                <p className="text-black">{selectedService.createdBy.username}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-black">Created At</h4>
-                <p className="text-black">{new Date(selectedService.createdAt).toLocaleString()}</p>
-              </div>
-            </div>
-            <div className="mt-6">
-              <button
-                onClick={() => setSelectedService(null)}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
-              >
-                Close
-              </button>
             </div>
           </div>
         </div>
