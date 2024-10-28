@@ -10,18 +10,25 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { searchParams } = new URL(request.url);
-  const productId = searchParams.get('productId');
-
-  if (!productId) {
-    return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
-  }
-
   try {
     const brands = await prisma.brand.findMany({
-      where: { productId: productId },
+      include: {
+        product: {
+          select: { name: true },
+        },
+      },
+      orderBy: {
+        name: 'asc'
+      },
     });
-    return NextResponse.json(brands);
+
+    const formattedBrands = brands.map(brand => ({
+      id: brand.id,
+      name: brand.name,
+      productName: brand.product.name,
+    }));
+
+    return NextResponse.json(formattedBrands);
   } catch (error) {
     console.error('Error fetching brands:', error);
     return NextResponse.json({ error: 'Failed to fetch brands' }, { status: 500 });
@@ -31,36 +38,20 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (!session?.user?.email || session.user.role !== 'SUPER_ADMIN') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    const { productId, name } = await request.json();
-
-    // Check if brand already exists
-    const existingBrand = await prisma.brand.findFirst({
-      where: {
-        productId,
-        name: {
-          equals: name,
-          mode: 'insensitive', // Case-insensitive comparison
-        },
-      },
-    });
-
-    if (existingBrand) {
-      return NextResponse.json(existingBrand);
-    }
-
-    // Create new brand if it doesn't exist
+    const { name, productId } = await request.json();
     const brand = await prisma.brand.create({
       data: {
-        productId,
         name,
+        product: {
+          connect: { id: productId }
+        }
       },
     });
-
     return NextResponse.json(brand);
   } catch (error) {
     console.error('Error creating brand:', error);

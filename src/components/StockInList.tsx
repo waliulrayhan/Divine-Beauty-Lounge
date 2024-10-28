@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { toast } from 'react-toastify';
+import Link from 'next/link';
 
 interface Service {
   id: string;
@@ -552,6 +553,15 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
             </div>
           </div>
         </div>
+      )}
+
+      {session?.user?.role === 'SUPER_ADMIN' && (
+        <Link
+          href="/brand-management"
+          className="bg-purple-500 text-white px-4 py-2 rounded mb-4 inline-block hover:bg-purple-600 transition duration-300"
+        >
+          Manage Brand Name
+        </Link>
       )}
     </div>
   );

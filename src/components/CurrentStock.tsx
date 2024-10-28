@@ -63,7 +63,7 @@ const CurrentStock: React.FC = () => {
                 <td className="py-3 px-6 text-center">{item.totalStockIn}</td>
                 <td className="py-3 px-6 text-center">{item.totalStockOut}</td>
                 <td className={`py-3 px-6 text-center font-medium ${
-                  item.currentStock <= 10 ? 'text-red-500' : 'text-green-500'
+                  item.currentStock <= 2 ? 'text-red-500' : 'text-green-500'
                 }`}>
                   {item.currentStock}
                 </td>
