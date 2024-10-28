@@ -32,6 +32,13 @@ interface StockInListProps {
   permissions: string[];
 }
 
+// Add Brand interface
+interface Brand {
+  id: string;
+  name: string;
+  productId: string;
+}
+
 const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   const { data: session } = useSession();
   const [stockIns, setStockIns] = useState<StockIn[]>([]);
@@ -49,6 +56,9 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   const [showForm, setShowForm] = useState(false);
   const [selectedStockIn, setSelectedStockIn] = useState<StockIn | null>(null);
   const [inputProducts, setInputProducts] = useState<{ [key: number]: Product[] }>({});
+  const [inputBrands, setInputBrands] = useState<{ [key: number]: Brand[] }>({});
+  const [showBrandSuggestions, setShowBrandSuggestions] = useState<{ [key: number]: boolean }>({});
+  const [filteredBrands, setFilteredBrands] = useState<{ [key: number]: Brand[] }>({});
 
   useEffect(() => {
     fetchStockIns();
@@ -101,6 +111,27 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     }
   };
 
+  const fetchBrands = async (productId: string, index: number) => {
+    try {
+      const response = await fetch(`/api/brands?productId=${productId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setInputBrands(prev => ({
+        ...prev,
+        [index]: data
+      }));
+      setFilteredBrands(prev => ({
+        ...prev,
+        [index]: data
+      }));
+    } catch (error) {
+      console.error("Error fetching brands:", error);
+      toast.error("Failed to load brands");
+    }
+  };
+
   const handleInputChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     const newInputs = [...stockInInputs];
@@ -114,12 +145,39 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     
     if (name === 'serviceId') {
       fetchProducts(value, index);
+    } else if (name === 'productId') {
+      fetchBrands(value, index);
+    } else if (name === 'brandName') {
+      // Filter brands based on input
+      const filtered = inputBrands[index]?.filter(brand => 
+        brand.name.toLowerCase().includes(value.toLowerCase())
+      ) || [];
+      setFilteredBrands(prev => ({
+        ...prev,
+        [index]: filtered
+      }));
+      setShowBrandSuggestions(prev => ({
+        ...prev,
+        [index]: true
+      }));
     }
+  };
+
+  const handleBrandSelect = (index: number, brandName: string) => {
+    const newInputs = [...stockInInputs];
+    newInputs[index] = {
+      ...newInputs[index],
+      brandName
+    };
+    setStockInInputs(newInputs);
+    setShowBrandSuggestions(prev => ({
+      ...prev,
+      [index]: false
+    }));
   };
 
   const addAnotherStockIn = () => {
     const currentIndex = stockInInputs.length;
-    // Copy products from the last entry if they exist
     if (currentIndex > 0) {
       const lastIndex = currentIndex - 1;
       if (inputProducts[lastIndex]) {
@@ -146,7 +204,6 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     }
   };
 
-  // Add a function to create a new brand
   const createBrand = async (productId: string, brandName: string) => {
     try {
       const response = await fetch('/api/brands', {
@@ -166,11 +223,9 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     }
   };
 
-  // Update handleSubmit to create brands before creating stock ins
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // First, create any new brands
       await Promise.all(
         stockInInputs.map(async (stockIn) => {
           if (stockIn.productId && stockIn.brandName) {
@@ -179,7 +234,6 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
         })
       );
 
-      // Then create the stock ins
       const responses = await Promise.all(
         stockInInputs.map(stockIn =>
           fetch('/api/stock-in', {
@@ -214,7 +268,6 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
 
   const handleEdit = (stockIn: StockIn) => {
     setEditingStockIn(stockIn);
-    // When editing, we only want one input form
     setStockInInputs([{
       serviceId: services.find(s => s.name === stockIn.serviceName)?.id || '',
       productId: stockIn.productId,
@@ -224,10 +277,9 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
       comments: stockIn.comments || '',
     }]);
     
-    // Fetch products for the selected service
     const serviceId = services.find(s => s.name === stockIn.serviceName)?.id;
     if (serviceId) {
-      fetchProducts(serviceId, 0); // Pass 0 as index since we're editing a single item
+      fetchProducts(serviceId, 0);
     }
     
     setShowForm(true);
@@ -332,14 +384,32 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                 </div>
                 <div>
                   <label className="block mb-2 text-black">Brand Name</label>
-                  <input
-                    type="text"
-                    name="brandName"
-                    value={stockIn.brandName}
-                    onChange={(e) => handleInputChange(index, e)}
-                    required
-                    className="w-full p-2 border rounded text-black"
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="brandName"
+                      value={stockIn.brandName}
+                      onChange={(e) => handleInputChange(index, e)}
+                      onFocus={() => setShowBrandSuggestions(prev => ({ ...prev, [index]: true }))}
+                      required
+                      className="w-full p-2 border rounded text-black"
+                      placeholder="Type to search or add new brand"
+                      autoComplete="off"
+                    />
+                    {showBrandSuggestions[index] && filteredBrands[index]?.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 overflow-y-auto">
+                        {filteredBrands[index].map(brand => (
+                          <div
+                            key={brand.id}
+                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-black"
+                            onClick={() => handleBrandSelect(index, brand.name)}
+                          >
+                            {brand.name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className="block mb-2 text-black">Quantity</label>
