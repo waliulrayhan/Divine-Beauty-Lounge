@@ -36,41 +36,66 @@ const CurrentStock: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="text-center p-4">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-4 text-black">Current Stock</h2>
-      <div className="overflow-x-auto">
-        <table className="w-full bg-white shadow-md rounded mb-4">
-          <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
-              <th className="py-3 px-6 text-left">Brand Name</th>
-              <th className="py-3 px-6 text-left">Product</th>
-              <th className="py-3 px-6 text-left">Service</th>
-              <th className="py-3 px-6 text-center">Total Stock In</th>
-              <th className="py-3 px-6 text-center">Total Stock Out</th>
-              <th className="py-3 px-6 text-center">Current Stock</th>
-            </tr>
-          </thead>
-          <tbody className="text-gray-600 text-sm">
-            {stockItems.map(item => (
-              <tr key={item.id} className="border-b border-gray-200 hover:bg-gray-100">
-                <td className="py-3 px-6 text-left font-medium">{item.brandName}</td>
-                <td className="py-3 px-6 text-left">{item.productName}</td>
-                <td className="py-3 px-6 text-left">{item.serviceName}</td>
-                <td className="py-3 px-6 text-center">{item.totalStockIn}</td>
-                <td className="py-3 px-6 text-center">{item.totalStockOut}</td>
-                <td className={`py-3 px-6 text-center font-medium ${
-                  item.currentStock <= 2 ? 'text-red-500' : 'text-green-500'
-                }`}>
-                  {item.currentStock}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-3xl font-extrabold text-gray-900">Current Stock Overview</h2>
+          {/* <div className="flex space-x-3">
+            <button 
+              onClick={fetchCurrentStock}
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Refresh Stock
+            </button>
+          </div> */}
+        </div>
+
+        <div className="bg-white shadow-xl rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brand Name</th>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                  <th scope="col" className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Stock In</th>
+                  <th scope="col" className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Stock Out</th>
+                  <th scope="col" className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Current Stock</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {stockItems.map(item => (
+                  <tr key={item.id} className="hover:bg-gray-50 transition-colors duration-200">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.brandName}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.productName}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.serviceName}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">{item.totalStockIn}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">{item.totalStockOut}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className={`inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium
+                        ${item.currentStock <= 2 
+                          ? 'text-red-800' 
+                          : item.currentStock <= 5
+                            ? 'text-yellow-800'
+                            : 'text-green-800'
+                        }`}>
+                        {item.currentStock}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );

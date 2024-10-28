@@ -337,16 +337,28 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-4 text-black">Stock In List</h2>
-
-      {canCreate && (
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
-        >
-          Add New Stock In
-        </button>
-      )}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-black">Stock In List</h2>
+        <div className="space-x-4">
+          {canCreate && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1"
+            >
+              Add New Stock In
+            </button>
+          )}
+          
+          {session?.user?.role === 'SUPER_ADMIN' && (
+            <Link
+              href="/brand-management"
+              className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 inline-block"
+            >
+              Manage Brand Name
+            </Link>
+          )}
+        </div>
+      </div>
 
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow-md">
@@ -620,15 +632,6 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
             </div>
           </div>
         </div>
-      )}
-
-      {session?.user?.role === 'SUPER_ADMIN' && (
-        <Link
-          href="/brand-management"
-          className="bg-purple-500 text-white px-4 py-2 rounded mb-4 inline-block hover:bg-purple-600 transition duration-300"
-        >
-          Manage Brand Name
-        </Link>
       )}
     </div>
   );
