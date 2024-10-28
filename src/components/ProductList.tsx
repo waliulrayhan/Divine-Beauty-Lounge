@@ -101,38 +101,57 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const responses = await Promise.all(
-        productInputs.map(product =>
-          fetch('/api/products', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(product),
-          })
-        )
-      );
+      if (editingProduct) {
+        // Handle edit
+        const response = await fetch(`/api/products/${editingProduct.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(productInputs[0]),
+        });
 
-      const hasError = responses.some(response => !response.ok);
-      if (hasError) {
-        throw new Error('One or more products failed to create');
+        if (!response.ok) {
+          throw new Error('Failed to update product');
+        }
+
+        toast.success('Product updated successfully');
+      } else {
+        // Handle create (existing code)
+        const responses = await Promise.all(
+          productInputs.map(product =>
+            fetch('/api/products', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(product),
+            })
+          )
+        );
+
+        const hasError = responses.some(response => !response.ok);
+        if (hasError) {
+          throw new Error('One or more products failed to create');
+        }
+
+        toast.success(`${productInputs.length} product(s) created successfully`);
       }
 
       await fetchProducts();
-      toast.success(`${productInputs.length} product(s) created successfully`);
       setShowForm(false);
+      setEditingProduct(null);
       setProductInputs([{ name: '', description: '', serviceId: '' }]);
     } catch (error) {
-      console.error('Error creating products:', error);
-      toast.error('Failed to create products');
+      console.error('Error saving products:', error);
+      toast.error(editingProduct ? 'Failed to update product' : 'Failed to create products');
     }
   };
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
-    setNewProduct({
+    // Reset the productInputs array with the current product data
+    setProductInputs([{
       name: product.name,
       description: product.description,
       serviceId: product.serviceId,
-    });
+    }]);
     setShowForm(true);
   };
 
@@ -167,168 +186,216 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
   console.log("Can delete:", canDelete);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-4 text-black">Product List</h2>
-      {canCreate && (
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
-        >
-          Add New Product
-        </button>
-      )}
+    <div className="container mx-auto px-6 py-8 max-w-7xl">
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-800">Product Management</h2>
+        {canCreate && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition duration-200 flex items-center gap-2 shadow-lg"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add New Product
+          </button>
+        )}
+      </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-4 text-black">Add New Products</h3>
-          
-          {productInputs.map((product, index) => (
-            <div key={index} className="mb-6 p-4 border rounded">
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="text-lg font-medium text-black">Product #{index + 1}</h4>
-                {productInputs.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeProductInput(index)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-
-              <div className="mb-4">
-                <label className="block mb-2 text-black">Product Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={product.name}
-                  onChange={(e) => handleInputChange(index, e)}
-                  required
-                  className="w-full p-2 border rounded text-black"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block mb-2 text-black">Description</label>
-                <textarea
-                  name="description"
-                  value={product.description}
-                  onChange={(e) => handleInputChange(index, e)}
-                  required
-                  className="w-full p-2 border rounded text-black"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block mb-2 text-black">Service</label>
-                <select
-                  name="serviceId"
-                  value={product.serviceId}
-                  onChange={(e) => handleInputChange(index, e)}
-                  required
-                  className="w-full p-2 border rounded text-black"
-                >
-                  <option value="">Select a service</option>
-                  {services.map(service => (
-                    <option key={service.id} value={service.id}>{service.name}</option>
-                  ))}
-                </select>
-              </div>
+        <div className="mb-8 bg-white rounded-xl shadow-lg p-8">
+          <form onSubmit={handleSubmit}>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-semibold text-gray-800">
+                {editingProduct ? 'Edit Product' : 'Add New Products'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-          ))}
+            
+            {productInputs.map((product, index) => (
+              <div key={index} className="mb-6 p-6 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-lg font-semibold text-gray-800">Product #{index + 1}</h4>
+                  {productInputs.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeProductInput(index)}
+                      className="text-red-500 hover:text-red-700 flex items-center gap-1"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Remove
+                    </button>
+                  )}
+                </div>
 
-          <div className="flex gap-4">
-            <button
-              type="button"
-              onClick={addProductInput}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Add Another Product
-            </button>
-            <button
-              type="submit"
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-            >
-              Create Products
-            </button>
-          </div>
-        </form>
+                <div className="grid gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={product.name}
+                      onChange={(e) => handleInputChange(index, e)}
+                      required
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea
+                      name="description"
+                      value={product.description}
+                      onChange={(e) => handleInputChange(index, e)}
+                      required
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Service</label>
+                    <select
+                      name="serviceId"
+                      value={product.serviceId}
+                      onChange={(e) => handleInputChange(index, e)}
+                      required
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black"
+                    >
+                      <option value="">Select a service</option>
+                      {services.map(service => (
+                        <option key={service.id} value={service.id}>{service.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <div className="flex justify-end gap-4 mt-6">
+              <button
+                type="button"
+                onClick={addProductInput}
+                className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200 shadow-md"
+                style={{ display: editingProduct ? 'none' : 'block' }}
+              >
+                Add Another Product
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 shadow-md"
+              >
+                {editingProduct ? 'Update Product' : 'Create Products'}
+              </button>
+            </div>
+          </form>
+        </div>
       )}
 
-      <div className="overflow-x-auto">
-        <table className="w-full bg-white shadow-md rounded mb-4">
-          <thead>
-            <tr className="bg-gray-200 text-black uppercase text-sm leading-normal">
-              <th className="py-3 px-6 text-left">Name</th>
-              <th className="py-3 px-6 text-left">Description</th>
-              <th className="py-3 px-6 text-left">Service</th>
-              <th className="py-3 px-6 text-left">Created By</th>
-              <th className="py-3 px-6 text-left">Created At</th>
-              <th className="py-3 px-6 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="text-black text-sm font-light">
-            {products.map(product => (
-              <tr key={product.id} className="border-b border-gray-200 hover:bg-gray-100">
-                <td className="py-3 px-6 text-left whitespace-nowrap">{product.name}</td>
-                <td className="py-3 px-6 text-left">{product.description}</td>
-                <td className="py-3 px-6 text-left">{product.serviceName}</td>
-                <td className="py-3 px-6 text-left">{product.createdBy}</td>
-                <td className="py-3 px-6 text-left">{new Date(product.createdAt).toLocaleString()}</td>
-                <td className="py-3 px-6 text-left">
-                  <button 
-                    onClick={() => handleViewDetails(product)} 
-                    className="text-green-500 hover:text-green-700 mr-2"
-                  >
-                    View Details
-                  </button>
-                  {canEdit && (
-                    <button onClick={() => handleEdit(product)} className="text-blue-500 hover:text-blue-700 mr-2">
-                      Edit
-                    </button>
-                  )}
-                  {canDelete && (
-                    <button onClick={() => handleDelete(product.id)} className="text-red-500 hover:text-red-700">
-                      Delete
-                    </button>
-                  )}
-                </td>
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Name</th>
+                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Description</th>
+                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Service</th>
+                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Created By</th>
+                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Created At</th>
+                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {products.map(product => (
+                <tr key={product.id} className="hover:bg-gray-50 transition duration-150">
+                  <td className="py-4 px-6 text-sm text-gray-800">{product.name}</td>
+                  <td className="py-4 px-6 text-sm text-gray-600">{product.description}</td>
+                  <td className="py-4 px-6 text-sm text-gray-600">{product.serviceName}</td>
+                  <td className="py-4 px-6 text-sm text-gray-600">{product.createdBy}</td>
+                  <td className="py-4 px-6 text-sm text-gray-600">{new Date(product.createdAt).toLocaleString()}</td>
+                  <td className="py-4 px-6">
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => handleViewDetails(product)}
+                        className="text-indigo-600 hover:text-indigo-800 font-medium text-sm"
+                      >
+                        View
+                      </button>
+                      {canEdit && (
+                        <button 
+                          onClick={() => handleEdit(product)}
+                          className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                        >
+                          Edit
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button 
+                          onClick={() => handleDelete(product.id)}
+                          className="text-red-600 hover:text-red-800 font-medium text-sm"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {selectedProduct && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="my-modal">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3 text-center">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">{selectedProduct.name} Details</h3>
-              <div className="mt-2 px-7 py-3">
-                <p className="text-sm text-gray-500">
-                  <strong>Description:</strong> {selectedProduct.description}
-                </p>
-                <p className="text-sm text-gray-500">
-                  <strong>Service:</strong> {selectedProduct.serviceName}
-                </p>
-                <p className="text-sm text-gray-500">
-                  <strong>Created By:</strong> {selectedProduct.createdBy}
-                </p>
-                <p className="text-sm text-gray-500">
-                  <strong>Created At:</strong> {new Date(selectedProduct.createdAt).toLocaleString()}
-                </p>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-gray-800">{selectedProduct.name}</h3>
+              <button
+                onClick={() => setSelectedProduct(null)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-sm font-medium text-gray-500">Description</h4>
+                <p className="text-gray-800 mt-1">{selectedProduct.description}</p>
               </div>
-              <div className="items-center px-4 py-3">
-                <button
-                  id="ok-btn"
-                  className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                  onClick={() => setSelectedProduct(null)}
-                >
-                  Close
-                </button>
+              <div>
+                <h4 className="text-sm font-medium text-gray-500">Service</h4>
+                <p className="text-gray-800 mt-1">{selectedProduct.serviceName}</p>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-gray-500">Created By</h4>
+                <p className="text-gray-800 mt-1">{selectedProduct.createdBy}</p>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-gray-500">Created At</h4>
+                <p className="text-gray-800 mt-1">{new Date(selectedProduct.createdAt).toLocaleString()}</p>
               </div>
             </div>
+
+            <button
+              onClick={() => setSelectedProduct(null)}
+              className="w-full mt-6 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
