@@ -6,6 +6,7 @@ interface User {
   employeeId: string;
   username: string;
   email: string;
+  phoneNumber: string;
   role: string;
   isActive: boolean;
 }
@@ -39,21 +40,21 @@ const UserList: React.FC = () => {
           <thead>
             <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
               <th className="py-3 px-6 text-left">Employee ID</th>
-              <th className="py-3 px-6 text-left">Username</th>
+              <th className="py-3 px-6 text-left">Name</th>
               <th className="py-3 px-6 text-left">Email</th>
-              <th className="py-3 px-6 text-left">Role</th>
-              <th className="py-3 px-6 text-left">Active</th>
+              <th className="py-3 px-6 text-left">Phone Number</th>
             </tr>
           </thead>
           <tbody className="text-gray-600 text-sm">
-            {users.map(user => (
-              <tr key={user.id} className="border-b border-gray-200 hover:bg-gray-100 transition duration-300">
-                <td className="py-3 px-6 text-left">{user.employeeId}</td>
-                <td className="py-3 px-6 text-left">{user.username}</td>
-                <td className="py-3 px-6 text-left">{user.email}</td>
-                <td className="py-3 px-6 text-left">{user.role}</td>
-                <td className="py-3 px-6 text-left">{user.isActive ? 'Yes' : 'No'}</td>
-              </tr>
+            {users
+              .filter(user => user.isActive)
+              .map(user => (
+                <tr key={user.id} className="border-b border-gray-200 hover:bg-gray-100 transition duration-300">
+                  <td className="py-3 px-6 text-left">{user.employeeId}</td>
+                  <td className="py-3 px-6 text-left">{user.username}</td>
+                  <td className="py-3 px-6 text-left">{user.email}</td>
+                  <td className="py-3 px-6 text-left">{user.phoneNumber}</td>
+                </tr>
             ))}
           </tbody>
         </table>
