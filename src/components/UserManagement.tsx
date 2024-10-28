@@ -188,276 +188,392 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 text-black">
-      <h2 className="text-2xl font-bold mb-4">User Management</h2>
-      <button
-        onClick={() => {
-          setEditingUser(null);
-          setNewUser({
-            employeeId: '',
-            username: '',
-            email: '',
-            phoneNumber: '',
-            nidNumber: '',
-            jobStartDate: '',
-            jobEndDate: '',
-            isActive: true,
-            role: 'NORMAL_ADMIN',
-            permissions: {
-              service: ['view'],
-              product: ['view'],
-              stockIn: ['view'],
-              stockOut: ['view'],
-            },
-          });
-          setShowForm(true);
-        }}
-        className="bg-blue-500 text-white px-4 py-2 rounded mb-4 hover:bg-blue-600 transition duration-300"
-      >
-        Add New User
-      </button>
+    <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-800">User Management</h2>
+        <button
+          onClick={() => {
+            setEditingUser(null);
+            setNewUser({
+              employeeId: '',
+              username: '',
+              email: '',
+              phoneNumber: '',
+              nidNumber: '',
+              jobStartDate: '',
+              jobEndDate: '',
+              isActive: true,
+              role: 'NORMAL_ADMIN',
+              permissions: {
+                service: ['view'],
+                product: ['view'],
+                stockIn: ['view'],
+                stockOut: ['view'],
+              },
+            });
+            setShowForm(true);
+          }}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition duration-200 flex items-center gap-2 shadow-lg"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Add New User
+        </button>
+      </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-4">{editingUser ? 'Edit User' : 'Add New User'}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-2">Employee ID</label>
-              <input
-                type="text"
-                name="employeeId"
-                value={newUser.employeeId}
-                onChange={handleInputChange}
-                required
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block mb-2">Username</label>
-              <input
-                type="text"
-                name="username"
-                value={newUser.username}
-                onChange={handleInputChange}
-                required
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block mb-2">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={newUser.email}
-                onChange={handleInputChange}
-                required
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block mb-2">Phone Number</label>
-              <input
-                type="tel"
-                name="phoneNumber"
-                value={newUser.phoneNumber}
-                onChange={handleInputChange}
-                required
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block mb-2">NID Number</label>
-              <input
-                type="text"
-                name="nidNumber"
-                value={newUser.nidNumber}
-                onChange={handleInputChange}
-                required
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block mb-2">Job Start Date</label>
-              <input
-                type="date"
-                name="jobStartDate"
-                value={newUser.jobStartDate}
-                onChange={handleInputChange}
-                required
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block mb-2">Job End Date (Optional)</label>
-              <input
-                type="date"
-                name="jobEndDate"
-                value={newUser.jobEndDate || ''}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block mb-2">Active Status</label>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="isActive"
-                  checked={newUser.isActive}
-                  onChange={handleInputChange}
-                  className="mr-2 focus:ring-2 focus:ring-blue-500"
-                />
-                <span>Active</span>
-              </div>
-            </div>
-            <div>
-              <label className="block mb-2">Role</label>
-              <select
-                name="role"
-                value={newUser.role}
-                onChange={handleInputChange}
-                required
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-black">
+                {editingUser ? 'Edit User Profile' : 'Create New User'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="text-gray-500 hover:text-gray-700"
               >
-                <option value="NORMAL_ADMIN">Normal Admin</option>
-                <option value="SUPER_ADMIN">Super Admin</option>
-              </select>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-            {!editingUser && (
+
+            <div className="grid gap-6">
               <div>
-                <label className="block mb-2">Password</label>
+                <label className="block text-sm font-medium text-black mb-2">Employee ID</label>
                 <input
-                  type="password"
-                  name="password"
-                  value={newUser.password || ''}
+                  type="text"
+                  name="employeeId"
+                  value={newUser.employeeId}
                   onChange={handleInputChange}
-                  required={!editingUser}
-                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                  placeholder="Enter employee ID"
                 />
               </div>
-            )}
-          </div>
-          <div className="mt-4">
-            <h4 className="font-semibold mb-2">Permissions</h4>
-            {(['service', 'product', 'stockIn', 'stockOut'] as const).map(feature => (
-              <div key={feature} className="mb-2">
-                <h5 className="font-medium">{feature.charAt(0).toUpperCase() + feature.slice(1)}</h5>
-                <div className="flex flex-wrap">
-                  {['view', 'create', 'edit', 'delete'].map(action => (
-                    <label key={`${feature}-${action}`} className="inline-flex items-center mr-4 mb-2">
-                      <input
-                        type="checkbox"
-                        name={`${feature}-${action}`}
-                        checked={newUser.permissions[feature].includes(action) || (!editingUser && action === 'view')}
-                        onChange={handlePermissionChange}
-                        className="mr-1 focus:ring-2 focus:ring-blue-500"
-                      />
-                      <span>{action.charAt(0).toUpperCase() + action.slice(1)}</span>
-                    </label>
+
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">Username</label>
+                <input
+                  type="text"
+                  name="username"
+                  value={newUser.username}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                  placeholder="Enter username"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={newUser.email}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                  placeholder="Enter email address"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">Phone Number</label>
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  value={newUser.phoneNumber}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                  placeholder="Enter phone number"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">NID Number</label>
+                <input
+                  type="text"
+                  name="nidNumber"
+                  value={newUser.nidNumber}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                  placeholder="Enter NID number"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">Job Start Date</label>
+                <input
+                  type="date"
+                  name="jobStartDate"
+                  value={newUser.jobStartDate}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">Job End Date (Optional)</label>
+                <input
+                  type="date"
+                  name="jobEndDate"
+                  value={newUser.jobEndDate || ''}
+                  onChange={handleInputChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">Status & Role</label>
+                <div className="flex items-center space-x-6">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="checkbox"
+                      name="isActive"
+                      checked={newUser.isActive}
+                      onChange={handleInputChange}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-600">Active</span>
+                  </label>
+                  
+                  <select
+                    name="role"
+                    value={newUser.role}
+                    onChange={handleInputChange}
+                    required
+                    className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                  >
+                    <option value="NORMAL_ADMIN">Normal Admin</option>
+                    <option value="SUPER_ADMIN">Super Admin</option>
+                  </select>
+                </div>
+              </div>
+
+              {!editingUser && (
+                <div>
+                  <label className="block text-sm font-medium text-black mb-2">Password</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={newUser.password || ''}
+                    onChange={handleInputChange}
+                    required={!editingUser}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                    placeholder="Enter password"
+                  />
+                </div>
+              )}
+
+              <div>
+                <h4 className="text-lg font-semibold text-black mb-4">User Permissions</h4>
+                <div className="grid grid-cols-2 gap-6">
+                  {(['service', 'product', 'stockIn', 'stockOut'] as const).map(feature => (
+                    <div key={feature} className="bg-gray-50 p-4 rounded-lg">
+                      <h5 className="font-medium text-black mb-3 capitalize">{feature}</h5>
+                      <div className="grid grid-cols-2 gap-3">
+                        {['view', 'create', 'edit', 'delete'].map(action => (
+                          <label key={`${feature}-${action}`} className="inline-flex items-center">
+                            <input
+                              type="checkbox"
+                              name={`${feature}-${action}`}
+                              checked={newUser.permissions[feature].includes(action) || (!editingUser && action === 'view')}
+                              onChange={handlePermissionChange}
+                              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            />
+                            <span className="ml-2 text-sm text-gray-600 capitalize">{action}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
-            ))}
-          </div>
-          <button type="submit" className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-300">
-            {editingUser ? 'Update User' : 'Create User'}
-          </button>
-        </form>
-      )}
+            </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full bg-white shadow-md rounded mb-4">
-          <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
-              <th className="py-3 px-6 text-left">Employee ID</th>
-              <th className="py-3 px-6 text-left">Username</th>
-              <th className="py-3 px-6 text-left">Email</th>
-              <th className="py-3 px-6 text-left">Role</th>
-              <th className="py-3 px-6 text-left">Active</th>
-              <th className="py-3 px-6 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="text-gray-600 text-sm">
-            {users.map(user => (
-              <tr key={user.id} className="border-b border-gray-200 hover:bg-gray-100 transition duration-300">
-                <td className="py-3 px-6 text-left">{user.employeeId}</td>
-                <td className="py-3 px-6 text-left">{user.username}</td>
-                <td className="py-3 px-6 text-left">{user.email}</td>
-                <td className="py-3 px-6 text-left">{user.role}</td>
-                <td className="py-3 px-6 text-left">{user.isActive ? 'Yes' : 'No'}</td>
-                <td className="py-3 px-6 text-left">
-                  <button onClick={() => handleViewDetails(user)} className="text-green-500 hover:text-green-700 mr-2 transition duration-300">View Details</button>
-                  <button onClick={() => handleEdit(user)} className="text-blue-500 hover:text-blue-700 mr-2 transition duration-300">Edit</button>
-                  <button onClick={() => handleDelete(user.id)} className="text-red-500 hover:text-red-700 transition duration-300">Delete</button>
-                </td>
+            <div className="flex justify-end gap-4 mt-6">
+              <button
+                type="submit"
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
+              >
+                {editingUser ? 'Update User' : 'Create User'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Employee ID</th>
+                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Username</th>
+                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Email</th>
+                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Role</th>
+                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Active</th>
+                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {users.map(user => (
+                <tr key={user.id} className="hover:bg-gray-50 transition duration-150">
+                  <td className="py-4 px-6 text-sm text-gray-800">{user.employeeId}</td>
+                  <td className="py-4 px-6 text-sm text-gray-600">{user.username}</td>
+                  <td className="py-4 px-6 text-sm text-gray-600">{user.email}</td>
+                  <td className="py-4 px-6 text-sm text-gray-600">{user.role}</td>
+                  <td className="py-4 px-6 text-sm text-gray-600">{user.isActive ? 'Yes' : 'No'}</td>
+                  <td className="py-4 px-6">
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => handleViewDetails(user)}
+                        className="text-indigo-600 hover:text-indigo-800 font-medium text-sm"
+                      >
+                        View Details
+                      </button>
+                      <button 
+                        onClick={() => handleEdit(user)}
+                        className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(user.id)}
+                        className="text-red-600 hover:text-red-800 font-medium text-sm"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {selectedUser && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" onClick={() => setSelectedUser(null)}>
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white" onClick={e => e.stopPropagation()}>
-            <div className="mt-3">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">User Details</h3>
-              <div className="mt-2 px-7 py-3">
-                <p className="text-sm text-gray-500 mb-2">
-                  <strong className="font-medium text-gray-700">Employee ID:</strong> {selectedUser.employeeId}
-                </p>
-                <p className="text-sm text-gray-500 mb-2">
-                  <strong className="font-medium text-gray-700">Username:</strong> {selectedUser.username}
-                </p>
-                <p className="text-sm text-gray-500 mb-2">
-                  <strong className="font-medium text-gray-700">Email:</strong> {selectedUser.email}
-                </p>
-                <p className="text-sm text-gray-500 mb-2">
-                  <strong className="font-medium text-gray-700">Phone Number:</strong> {selectedUser.phoneNumber}
-                </p>
-                <p className="text-sm text-gray-500 mb-2">
-                  <strong className="font-medium text-gray-700">NID Number:</strong> {selectedUser.nidNumber}
-                </p>
-                <p className="text-sm text-gray-500 mb-2">
-                  <strong className="font-medium text-gray-700">Job Start Date:</strong> {new Date(selectedUser.jobStartDate).toLocaleDateString()}
-                </p>
-                <p className="text-sm text-gray-500 mb-2">
-                  <strong className="font-medium text-gray-700">Job End Date:</strong> {selectedUser.jobEndDate ? new Date(selectedUser.jobEndDate).toLocaleDateString() : 'N/A'}
-                </p>
-                <p className="text-sm text-gray-500 mb-2">
-                  <strong className="font-medium text-gray-700">Active:</strong> {selectedUser.isActive ? 'Yes' : 'No'}
-                </p>
-                <p className="text-sm text-gray-500 mb-2">
-                  <strong className="font-medium text-gray-700">Role:</strong> {selectedUser.role}
-                </p>
-                <div className="mt-4">
-                  <strong className="font-medium text-gray-700">Permissions:</strong>
-                  <div className="mt-2 grid grid-cols-2 gap-2">
-                    {Object.entries(typeof selectedUser.permissions === 'string' 
-                      ? JSON.parse(selectedUser.permissions) 
-                      : selectedUser.permissions).map(([key, value]) => (
-                      <div key={key} className="bg-gray-100 p-2 rounded">
-                        <h6 className="font-medium text-gray-700 mb-1">{key.charAt(0).toUpperCase() + key.slice(1)}</h6>
-                        <div className="flex flex-wrap">
-                          {['view', 'create', 'edit', 'delete'].map(action => (
-                            <span key={action} className={`mr-2 ${(value as string[]).includes(action) ? 'text-green-500' : 'text-red-500'}`}>
-                              {action.charAt(0).toUpperCase() + action.slice(1)} {(value as string[]).includes(action) ? '✓' : '✗'}
-                            </span>
-                          ))}
-                        </div>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full transform transition-all" onClick={e => e.stopPropagation()}>
+            <div className="p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  User Profile Details
+                </h3>
+                <button
+                  onClick={() => setSelectedUser(null)}
+                  className="rounded-full p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Employee Information</h4>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs text-gray-500">Employee ID</label>
+                        <p className="text-gray-900 font-medium">{selectedUser.employeeId}</p>
                       </div>
-                    ))}
+                      <div>
+                        <label className="text-xs text-gray-500">Username</label>
+                        <p className="text-gray-900 font-medium">{selectedUser.username}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Email</label>
+                        <p className="text-gray-900 font-medium">{selectedUser.email}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Personal Details</h4>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs text-gray-500">Phone Number</label>
+                        <p className="text-gray-900 font-medium">{selectedUser.phoneNumber}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">NID Number</label>
+                        <p className="text-gray-900 font-medium">{selectedUser.nidNumber}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Employment Status</h4>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs text-gray-500">Job Start Date</label>
+                        <p className="text-gray-900 font-medium">{new Date(selectedUser.jobStartDate).toLocaleDateString()}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Job End Date</label>
+                        <p className="text-gray-900 font-medium">{selectedUser.jobEndDate ? new Date(selectedUser.jobEndDate).toLocaleDateString() : 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Status</label>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${selectedUser.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                          {selectedUser.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Role</label>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {selectedUser.role}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Permissions</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {Object.entries(typeof selectedUser.permissions === 'string' 
+                        ? JSON.parse(selectedUser.permissions) 
+                        : selectedUser.permissions).map(([key, value]) => (
+                        <div key={key} className="bg-white rounded-lg p-3 shadow-sm">
+                          <h6 className="text-sm font-medium text-gray-700 mb-2">{key.charAt(0).toUpperCase() + key.slice(1)}</h6>
+                          <div className="flex flex-wrap gap-1">
+                            {['view', 'create', 'edit', 'delete'].map(action => (
+                              <span key={action} 
+                                className={`px-2 py-1 rounded-md text-xs font-medium ${
+                                  (value as string[]).includes(action) 
+                                    ? 'bg-green-100 text-green-700' 
+                                    : 'bg-gray-100 text-gray-500'
+                                }`}
+                              >
+                                {action.charAt(0).toUpperCase() + action.slice(1)}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="items-center px-4 py-3">
-              <button
-                id="ok-btn"
-                className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                onClick={() => setSelectedUser(null)}
-              >
-                Close
-              </button>
+
+              <div className="mt-8 flex justify-end">
+                <button
+                  onClick={() => setSelectedUser(null)}
+                  className="px-6 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
+                >
+                  Close Details
+                </button>
+              </div>
             </div>
           </div>
         </div>
