@@ -21,6 +21,7 @@ interface StockIn {
   productId: string;
   productName: string;
   serviceName: string;
+  brandId: string;  // Add this line
   brandName: string;
   quantity: number;
   pricePerUnit: number;
@@ -48,6 +49,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   const [stockInInputs, setStockInInputs] = useState([{
     serviceId: '',
     productId: '',
+    brandId: '', // Add this
     brandName: '',
     quantity: 0,
     pricePerUnit: 0,
@@ -64,6 +66,20 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   useEffect(() => {
     fetchStockIns();
     fetchServices();
+  }, []);
+
+  // Add this useEffect near the top of the component
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!(event.target as HTMLElement).closest('.brand-input-container')) {
+        setShowBrandSuggestions({});
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   const fetchStockIns = async () => {
@@ -136,31 +152,32 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   const handleInputChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     const newInputs = [...stockInInputs];
-    newInputs[index] = {
-      ...newInputs[index],
-      [name]: name === 'quantity' || name === 'pricePerUnit' 
-        ? Number(value)
-        : value
-    };
+    
+    if (name === 'brandName') {
+      newInputs[index] = {
+        ...newInputs[index],
+        brandId: '', // Clear brandId when manually typing
+        brandName: value
+      };
+    } else {
+      newInputs[index] = {
+        ...newInputs[index],
+        [name]: name === 'quantity' || name === 'pricePerUnit' 
+          ? Number(value)
+          : value
+      };
+    }
+    
     setStockInInputs(newInputs);
     
     if (name === 'serviceId') {
       fetchProducts(value, index);
     } else if (name === 'productId') {
       fetchBrands(value, index);
-    } else if (name === 'brandName') {
-      // Filter brands based on input
-      const filtered = inputBrands[index]?.filter(brand => 
-        brand.name.toLowerCase().includes(value.toLowerCase())
-      ) || [];
-      setFilteredBrands(prev => ({
-        ...prev,
-        [index]: filtered
-      }));
-      setShowBrandSuggestions(prev => ({
-        ...prev,
-        [index]: true
-      }));
+      // Clear brand selection when product changes
+      newInputs[index].brandId = '';
+      newInputs[index].brandName = '';
+      setStockInInputs(newInputs);
     }
   };
 
@@ -191,6 +208,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     setStockInInputs([...stockInInputs, {
       serviceId: '',
       productId: '',
+      brandId: '', // Add this
       brandName: '',
       quantity: 0,
       pricePerUnit: 0,
@@ -256,6 +274,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
       setStockInInputs([{
         serviceId: '',
         productId: '',
+        brandId: '', // Add this
         brandName: '',
         quantity: 0,
         pricePerUnit: 0,
@@ -272,6 +291,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     setStockInInputs([{
       serviceId: services.find(s => s.name === stockIn.serviceName)?.id || '',
       productId: stockIn.productId,
+      brandId: stockIn.brandId || '',
       brandName: stockIn.brandName,
       quantity: stockIn.quantity,
       pricePerUnit: stockIn.pricePerUnit,
@@ -281,6 +301,9 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     const serviceId = services.find(s => s.name === stockIn.serviceName)?.id;
     if (serviceId) {
       fetchProducts(serviceId, 0);
+      if (stockIn.productId) {
+        fetchBrands(stockIn.productId, 0);
+      }
     }
     
     setShowForm(true);
@@ -383,27 +406,71 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                       ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block mb-2 text-black">Brand Name</label>
-                  <div className="relative">
+                <div className="relative">
+                  <label className="block mb-2 text-black">Brand</label>
+                  <div className="brand-input-container relative">
                     <input
                       type="text"
                       name="brandName"
                       value={stockIn.brandName}
-                      onChange={(e) => handleInputChange(index, e)}
-                      onFocus={() => setShowBrandSuggestions(prev => ({ ...prev, [index]: true }))}
-                      required
+                      onChange={(e) => {
+                        handleInputChange(index, e);
+                        // Only show suggestions if a product is selected
+                        if (stockIn.productId) {
+                          const searchTerm = e.target.value.toLowerCase();
+                          const filtered = (inputBrands[index] || [])
+                            .filter(brand => 
+                              brand.productId === stockIn.productId && 
+                              brand.name.toLowerCase().includes(searchTerm)
+                            );
+                          setFilteredBrands(prev => ({
+                            ...prev,
+                            [index]: filtered
+                          }));
+                          setShowBrandSuggestions(prev => ({
+                            ...prev,
+                            [index]: true
+                          }));
+                        }
+                      }}
+                      onFocus={() => {
+                        // Only show suggestions if a product is selected
+                        if (stockIn.productId) {
+                          const filtered = (inputBrands[index] || [])
+                            .filter(brand => brand.productId === stockIn.productId);
+                          setFilteredBrands(prev => ({
+                            ...prev,
+                            [index]: filtered
+                          }));
+                          setShowBrandSuggestions(prev => ({
+                            ...prev,
+                            [index]: true
+                          }));
+                        }
+                      }}
                       className="w-full p-2 border rounded text-black"
-                      placeholder="Type to search or add new brand"
-                      autoComplete="off"
+                      placeholder={stockIn.productId ? "Select or type new brand name" : "Select a product first"}
+                      disabled={!stockIn.productId}
                     />
                     {showBrandSuggestions[index] && filteredBrands[index]?.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 overflow-y-auto">
+                      <div className="absolute z-10 w-full bg-white border rounded-b mt-1 max-h-60 overflow-y-auto">
                         {filteredBrands[index].map(brand => (
                           <div
                             key={brand.id}
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-black"
-                            onClick={() => handleBrandSelect(index, brand.name)}
+                            className="p-2 hover:bg-gray-100 cursor-pointer text-black"
+                            onClick={() => {
+                              const newInputs = [...stockInInputs];
+                              newInputs[index] = {
+                                ...newInputs[index],
+                                brandId: brand.id,
+                                brandName: brand.name
+                              };
+                              setStockInInputs(newInputs);
+                              setShowBrandSuggestions(prev => ({
+                                ...prev,
+                                [index]: false
+                              }));
+                            }}
                           >
                             {brand.name}
                           </div>
