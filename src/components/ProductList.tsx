@@ -186,7 +186,7 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
   console.log("Can delete:", canDelete);
 
   return (
-    <div className="container mx-auto px-6 py-8 max-w-7xl">
+    <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold text-gray-800">Product Management</h2>
         {canCreate && (
@@ -203,10 +203,10 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
       </div>
 
       {showForm && (
-        <div className="mb-8 bg-white rounded-xl shadow-lg p-8">
-          <form onSubmit={handleSubmit}>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-semibold text-gray-800">
+              <h3 className="text-2xl font-bold text-black">
                 {editingProduct ? 'Edit Product' : 'Add New Products'}
               </h3>
               <button
@@ -223,7 +223,7 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
             {productInputs.map((product, index) => (
               <div key={index} className="mb-6 p-6 bg-gray-50 rounded-lg">
                 <div className="flex justify-between items-center mb-4">
-                  <h4 className="text-lg font-semibold text-gray-800">Product #{index + 1}</h4>
+                  <h4 className="text-lg font-semibold text-black">Product #{index + 1}</h4>
                   {productInputs.length > 1 && (
                     <button
                       type="button"
@@ -240,37 +240,37 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
 
                 <div className="grid gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
+                    <label className="block text-sm font-medium text-black mb-2">Product Name</label>
                     <input
                       type="text"
                       name="name"
                       value={product.name}
                       onChange={(e) => handleInputChange(index, e)}
                       required
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <label className="block text-sm font-medium text-black mb-2">Description</label>
                     <textarea
                       name="description"
                       value={product.description}
                       onChange={(e) => handleInputChange(index, e)}
                       required
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                       rows={3}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Service</label>
+                    <label className="block text-sm font-medium text-black mb-2">Service</label>
                     <select
                       name="serviceId"
                       value={product.serviceId}
                       onChange={(e) => handleInputChange(index, e)}
                       required
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                     >
                       <option value="">Select a service</option>
                       {services.map(service => (
@@ -283,17 +283,18 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
             ))}
 
             <div className="flex justify-end gap-4 mt-6">
-              <button
-                type="button"
-                onClick={addProductInput}
-                className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200 shadow-md"
-                style={{ display: editingProduct ? 'none' : 'block' }}
-              >
-                Add Another Product
-              </button>
+              {!editingProduct && (
+                <button
+                  type="button"
+                  onClick={addProductInput}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
+                >
+                  Add Another Product
+                </button>
+              )}
               <button
                 type="submit"
-                className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 shadow-md"
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
               >
                 {editingProduct ? 'Update Product' : 'Create Products'}
               </button>
@@ -329,7 +330,7 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
                         onClick={() => handleViewDetails(product)}
                         className="text-indigo-600 hover:text-indigo-800 font-medium text-sm"
                       >
-                        View
+                        View Details
                       </button>
                       {canEdit && (
                         <button 
@@ -357,45 +358,47 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
       </div>
 
       {selectedProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-gray-800">{selectedProduct.name}</h3>
-              <button
-                onClick={() => setSelectedProduct(null)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full transform transition-all">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  {selectedProduct.name} Details
+                </h3>
+                <button
+                  onClick={() => setSelectedProduct(null)}
+                  className="rounded-full p-1.5 text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="space-y-6">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="text-sm font-semibold text-gray-500 mb-2">Description</h4>
+                  <p className="text-gray-900">{selectedProduct.description}</p>
+                </div>
+                
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="text-sm font-semibold text-gray-500 mb-2">Service</h4>
+                  <p className="text-gray-900">{selectedProduct.serviceName}</p>
+                </div>
+                
+                <div className="flex gap-4">
+                  <div className="flex-1 bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Created By</h4>
+                    <p className="text-gray-900">{selectedProduct.createdBy}</p>
+                  </div>
+                  
+                  <div className="flex-1 bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Created At</h4>
+                    <p className="text-gray-900">{new Date(selectedProduct.createdAt).toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">Description</h4>
-                <p className="text-gray-800 mt-1">{selectedProduct.description}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">Service</h4>
-                <p className="text-gray-800 mt-1">{selectedProduct.serviceName}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">Created By</h4>
-                <p className="text-gray-800 mt-1">{selectedProduct.createdBy}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">Created At</h4>
-                <p className="text-gray-800 mt-1">{new Date(selectedProduct.createdAt).toLocaleString()}</p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setSelectedProduct(null)}
-              className="w-full mt-6 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200"
-            >
-              Close
-            </button>
           </div>
         </div>
       )}
