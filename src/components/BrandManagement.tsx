@@ -28,6 +28,7 @@ const BrandManagement: React.FC = () => {
   const [selectedService, setSelectedService] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('');
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     fetchBrands();
@@ -110,7 +111,7 @@ const BrandManagement: React.FC = () => {
       
       await fetchBrands();
       toast.success(`Brand ${editingBrand ? 'updated' : 'created'} successfully`);
-      resetForm();
+      handleCloseForm();
     } catch (error) {
       console.error('Error saving brand:', error);
       toast.error('Failed to save brand');
@@ -142,6 +143,7 @@ const BrandManagement: React.FC = () => {
   const handleEdit = async (brand: Brand) => {
     try {
       console.log('Starting edit process for brand:', brand);
+      setShowForm(true);
 
       if (!brand.productId) {
         throw new Error('Product ID is missing from brand data');
@@ -151,12 +153,12 @@ const BrandManagement: React.FC = () => {
       const productResponse = await fetch(`/api/products/${brand.productId}`);
       console.log('Product response status:', productResponse.status);
       
+      if (!productResponse.ok) {
+        throw new Error('Failed to fetch product details');
+      }
+
       const productData = await productResponse.json();
       console.log('Product data received:', productData);
-
-      if (!productResponse.ok) {
-        throw new Error(productData.error || 'Failed to fetch product details');
-      }
 
       // Set the service first
       setSelectedService(productData.serviceId);
@@ -173,118 +175,145 @@ const BrandManagement: React.FC = () => {
     } catch (error) {
       console.error('Error in handleEdit:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to load edit form');
+      setShowForm(false);
     }
   };
 
+  const handleCloseForm = () => {
+    setShowForm(false);
+    resetForm();
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-4 text-black">Brand Management</h2>
-      
-      <form onSubmit={handleSubmit} className="mb-8 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block mb-2 text-black">Service</label>
-            <select
-              value={selectedService}
-              onChange={handleServiceChange}
-              required
-              className="w-full p-2 border rounded text-black"
-            >
-              <option value="">Select a service</option>
-              {services.map(service => (
-                <option key={service.id} value={service.id}>
-                  {service.name}
-                </option>
-              ))}
-            </select>
-          </div>
+    <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-2xl font-bold text-black">Brand Management</h2>
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition duration-200 flex items-center gap-2 shadow-lg"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Add New Brand
+        </button>
+      </div>
 
-          <div>
-            <label className="block mb-2 text-black">Product</label>
-            <select
-              value={selectedProduct}
-              onChange={(e) => setSelectedProduct(e.target.value)}
-              required
-              className="w-full p-2 border rounded text-black"
-            >
-              <option value="">Select a product</option>
-              {products.map(product => (
-                <option key={product.id} value={product.id}>
-                  {product.name}
-                </option>
-              ))}
-            </select>
-          </div>
+      {showForm && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-black">
+                {editingBrand ? 'Edit Brand' : 'Add New Brand'}
+              </h3>
+              <button
+                type="button"
+                onClick={handleCloseForm}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
 
-          <div>
-            <label className="block mb-2 text-black">Brand Name</label>
-            <input
-              type="text"
-              value={newBrand}
-              onChange={(e) => setNewBrand(e.target.value)}
-              placeholder="Enter brand name"
-              className="w-full p-2 border rounded text-black"
-              required
-            />
-          </div>
+            <div className="grid gap-6">
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">Service</label>
+                <select
+                  value={selectedService}
+                  onChange={handleServiceChange}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                >
+                  <option value="">Select a service</option>
+                  {services.map(service => (
+                    <option key={service.id} value={service.id}>{service.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">Product</label>
+                <select
+                  value={selectedProduct}
+                  onChange={(e) => setSelectedProduct(e.target.value)}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                >
+                  <option value="">Select a product</option>
+                  {products.map(product => (
+                    <option key={product.id} value={product.id}>{product.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">Brand Name</label>
+                <input
+                  type="text"
+                  value={newBrand}
+                  onChange={(e) => setNewBrand(e.target.value)}
+                  placeholder="Enter brand name"
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-4 mt-6">
+              <button
+                type="submit"
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
+              >
+                {editingBrand ? 'Update Brand' : 'Create Brand'}
+              </button>
+            </div>
+          </form>
         </div>
+      )}
 
-        <div className="flex gap-4">
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            {editingBrand ? 'Update Brand' : 'Add Brand'}
-          </button>
-          {editingBrand && (
-            <button
-              type="button"
-              onClick={resetForm}
-              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      </form>
-
-      <div className="overflow-x-auto">
-        <table className="w-full bg-white shadow-md rounded mb-4">
-          <thead>
-            <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
-              <th className="py-3 px-6 text-left">Brand Name</th>
-              <th className="py-3 px-6 text-left">Product</th>
-              <th className="py-3 px-6 text-left">Service</th>
-              <th className="py-3 px-6 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="text-gray-600 text-sm">
-            {brands.map(brand => (
-              <tr key={brand.id} className="border-b border-gray-200 hover:bg-gray-100">
-                <td className="py-3 px-6 text-left">{brand.name}</td>
-                <td className="py-3 px-6 text-left">{brand.productName}</td>
-                <td className="py-3 px-6 text-left">{brand.serviceName}</td>
-                <td className="py-3 px-6 text-left">
-                  <button
-                    onClick={() => {
-                      console.log('Editing brand:', brand);
-                      handleEdit(brand);
-                    }}
-                    className="text-blue-500 hover:text-blue-700 mr-4"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(brand.id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Delete
-                  </button>
-                </td>
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Brand Name</th>
+                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Product</th>
+                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Service</th>
+                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {brands.map(brand => (
+                <tr key={brand.id} className="hover:bg-gray-50 transition duration-150">
+                  <td className="py-4 px-6 text-sm text-gray-800">{brand.name}</td>
+                  <td className="py-4 px-6 text-sm text-gray-600">{brand.productName}</td>
+                  <td className="py-4 px-6 text-sm text-gray-600">{brand.serviceName}</td>
+                  <td className="py-4 px-6">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          console.log('Editing brand:', brand);
+                          handleEdit(brand);
+                        }}
+                        className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(brand.id)}
+                        className="text-red-600 hover:text-red-800 font-medium text-sm"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
