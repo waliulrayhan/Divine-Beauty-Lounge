@@ -3,7 +3,8 @@ import { toast } from 'react-toastify';
 
 interface StockItem {
   id: string;
-  name: string;
+  brandName: string;
+  productName: string;
   serviceName: string;
   totalStockIn: number;
   totalStockOut: number;
@@ -45,7 +46,8 @@ const CurrentStock: React.FC = () => {
         <table className="w-full bg-white shadow-md rounded mb-4">
           <thead>
             <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
-              <th className="py-3 px-6 text-left">Product Name</th>
+              <th className="py-3 px-6 text-left">Brand Name</th>
+              <th className="py-3 px-6 text-left">Product</th>
               <th className="py-3 px-6 text-left">Service</th>
               <th className="py-3 px-6 text-center">Total Stock In</th>
               <th className="py-3 px-6 text-center">Total Stock Out</th>
@@ -55,7 +57,8 @@ const CurrentStock: React.FC = () => {
           <tbody className="text-gray-600 text-sm">
             {stockItems.map(item => (
               <tr key={item.id} className="border-b border-gray-200 hover:bg-gray-100">
-                <td className="py-3 px-6 text-left">{item.name}</td>
+                <td className="py-3 px-6 text-left font-medium">{item.brandName}</td>
+                <td className="py-3 px-6 text-left">{item.productName}</td>
                 <td className="py-3 px-6 text-left">{item.serviceName}</td>
                 <td className="py-3 px-6 text-center">{item.totalStockIn}</td>
                 <td className="py-3 px-6 text-center">{item.totalStockOut}</td>

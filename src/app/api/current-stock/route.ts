@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
-import { StockIn, StockOut } from '@prisma/client';
 
 interface StockRecord {
   quantity: number;
@@ -16,12 +15,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Get all products with their stock-in and stock-out records
-    const products = await prisma.product.findMany({
+    // Get all brands with their related product, service, and stock information
+    const brands = await prisma.brand.findMany({
       include: {
-        service: true,
-        stockIns: {
-          select: { quantity: true },
+        product: {
+          include: {
+            service: true,
+          },
         },
         stockOuts: {
           select: { quantity: true },
@@ -29,20 +29,46 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Calculate current stock for each product
-    const currentStock = products.map(product => ({
-      id: product.id,
-      name: product.name,
-      serviceName: product.service.name,
-      totalStockIn: product.stockIns.reduce((sum: number, record: StockRecord) => 
-        sum + record.quantity, 0),
-      totalStockOut: product.stockOuts.reduce((sum: number, record: StockRecord) => 
-        sum + record.quantity, 0),
-      currentStock: product.stockIns.reduce((sum: number, record: StockRecord) => 
-        sum + record.quantity, 0) -
-        product.stockOuts.reduce((sum: number, record: StockRecord) => 
-        sum + record.quantity, 0),
-    }));
+    // Get stock-in records for each brand
+    const stockInData = await Promise.all(
+      brands.map(async (brand) => {
+        const stockIns = await prisma.stockIn.findMany({
+          where: {
+            productId: brand.productId,
+            brandName: brand.name,
+          },
+          select: { quantity: true },
+        });
+        return { brandId: brand.id, stockIns };
+      })
+    );
+
+    // Create a map of brand IDs to their stock-in data
+    const stockInMap = new Map(
+      stockInData.map(({ brandId, stockIns }) => [brandId, stockIns])
+    );
+
+    // Calculate current stock for each brand-product combination
+    const currentStock = brands.map(brand => {
+      const stockIns = stockInMap.get(brand.id) || [];
+      const totalStockIn = stockIns.reduce((sum: number, record: StockRecord) => 
+        sum + record.quantity, 0);
+      const totalStockOut = brand.stockOuts.reduce((sum: number, record: StockRecord) => 
+        sum + record.quantity, 0);
+
+      return {
+        id: brand.id,
+        brandName: brand.name,
+        productName: brand.product.name,
+        serviceName: brand.product.service.name,
+        totalStockIn,
+        totalStockOut,
+        currentStock: totalStockIn - totalStockOut,
+      };
+    });
+
+    // Sort by brand name
+    currentStock.sort((a, b) => a.brandName.localeCompare(b.brandName));
 
     return NextResponse.json(currentStock);
   } catch (error) {
