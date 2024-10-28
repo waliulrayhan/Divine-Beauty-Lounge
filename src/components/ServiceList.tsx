@@ -37,15 +37,15 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
     description: '',
     serviceCharge: 0,
   }]);
+  const [isEditing, setIsEditing] = useState(false);
 
-  // Check permissions
   const canCreate = permissions.includes('create');
   const canEdit = permissions.includes('edit');
   const canDelete = permissions.includes('delete');
   const canView = permissions.includes('view');
 
-  console.log("Current permissions:", permissions); // For debugging
-  console.log("Can view:", canView); // For debugging
+  console.log("Current permissions:", permissions);
+  console.log("Can view:", canView);
 
   useEffect(() => {
     console.log("Permissions received:", permissions);
@@ -92,40 +92,58 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Handle multiple services creation
-      const responses = await Promise.all(
-        serviceInputs.map(service =>
-          fetch('/api/services', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(service),
-          })
-        )
-      );
+      if (isEditing && editingService) {
+        // Handle edit
+        const response = await fetch(`/api/services/${editingService.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(serviceInputs[0]),
+        });
 
-      // Check if all requests were successful
-      const hasError = responses.some(response => !response.ok);
-      if (hasError) {
-        throw new Error('One or more services failed to create');
+        if (!response.ok) {
+          throw new Error('Failed to update service');
+        }
+
+        toast.success('Service updated successfully');
+      } else {
+        // Handle create (existing code)
+        const responses = await Promise.all(
+          serviceInputs.map(service =>
+            fetch('/api/services', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(service),
+            })
+          )
+        );
+
+        const hasError = responses.some(response => !response.ok);
+        if (hasError) {
+          throw new Error('One or more services failed to create');
+        }
+
+        toast.success(`${serviceInputs.length} service(s) created successfully`);
       }
 
       await fetchServices();
-      toast.success(`${serviceInputs.length} service(s) created successfully`);
       setShowForm(false);
       setServiceInputs([{ name: '', description: '', serviceCharge: 0 }]);
+      setIsEditing(false);
+      setEditingService(null);
     } catch (error) {
-      console.error('Error creating services:', error);
-      toast.error('Failed to create services');
+      console.error('Error saving service:', error);
+      toast.error(isEditing ? 'Failed to update service' : 'Failed to create services');
     }
   };
 
   const handleEdit = (service: Service) => {
     setEditingService(service);
-    setNewService({
+    setServiceInputs([{
       name: service.name,
       description: service.description,
       serviceCharge: service.serviceCharge,
-    });
+    }]);
+    setIsEditing(true);
     setShowForm(true);
   };
 
@@ -150,182 +168,223 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-4 text-black">Service List</h2>
+    <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-800">Service Management</h2>
+        {canCreate && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow-md transition duration-300 ease-in-out flex items-center gap-2"
+          >
+            <span>Add New Service</span>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+          </button>
+        )}
+      </div>
 
-      {/* Only show Add New Service button if user has create permission */}
-      {canCreate && (
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
-        >
-          Add New Service
-        </button>
-      )}
-
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="py-3 px-4 text-left">Name</th>
-              <th className="py-3 px-4 text-left">Description</th>
-              <th className="py-3 px-4 text-left">Service Charge</th>
-              <th className="py-3 px-4 text-left">Created By</th>
-              <th className="py-3 px-4 text-left">Created At</th>
-              <th className="py-3 px-4 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="text-gray-700">
-            {services.map((service) => (
-              <tr key={service.id} className="border-b hover:bg-gray-50">
-                <td className="py-3 px-4">{service.name}</td>
-                <td className="py-3 px-4">{service.description}</td>
-                <td className="py-3 px-4">${service.serviceCharge}</td>
-                <td className="py-3 px-4">{service.createdBy?.username}</td>
-                <td className="py-3 px-4">
-                  {new Date(service.createdAt).toLocaleDateString()}
-                </td>
-                <td className="py-3 px-4">
-                  {/* Only show View button if user has view permission */}
-                  {canView && (
-                    <button
-                      onClick={() => handleViewDetails(service)}
-                      className="text-blue-500 hover:text-blue-700 mr-2"
-                    >
-                      View
-                    </button>
-                  )}
-                  
-                  {/* Only show Edit button if user has edit permission */}
-                  {canEdit && (
-                    <button
-                      onClick={() => handleEdit(service)}
-                      className="text-green-500 hover:text-green-700 mr-2"
-                    >
-                      Edit
-                    </button>
-                  )}
-                  
-                  {/* Only show Delete button if user has delete permission */}
-                  {canDelete && (
-                    <button
-                      onClick={() => handleDelete(service.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      Delete
-                    </button>
-                  )}
-                </td>
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Name</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Description</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Service Charge</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Created By</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Created At</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {services.map((service) => (
+                <tr key={service.id} className="hover:bg-gray-50 transition duration-150">
+                  <td className="px-6 py-4 text-sm text-black">{service.name}</td>
+                  <td className="px-6 py-4 text-sm text-black">{service.description}</td>
+                  <td className="px-6 py-4 text-sm text-black">${service.serviceCharge}</td>
+                  <td className="px-6 py-4 text-sm text-black">{service.createdBy?.username}</td>
+                  <td className="px-6 py-4 text-sm text-black">
+                    {new Date(service.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 text-sm space-x-2">
+                    {canView && (
+                      <button
+                        onClick={() => handleViewDetails(service)}
+                        className="text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        View
+                      </button>
+                    )}
+                    {canEdit && (
+                      <button
+                        onClick={() => handleEdit(service)}
+                        className="text-green-600 hover:text-green-800 font-medium"
+                      >
+                        Edit
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        onClick={() => handleDelete(service.id)}
+                        className="text-red-600 hover:text-red-800 font-medium"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-4 text-black">Add New Services</h3>
-          
-          {serviceInputs.map((service, index) => (
-            <div key={index} className="mb-6 p-4 border rounded">
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="text-lg font-medium text-black">Service #{index + 1}</h4>
-                {serviceInputs.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeServiceInput(index)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-
-              <div className="mb-4">
-                <label className="block mb-2 text-black">Service Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={service.name}
-                  onChange={(e) => handleInputChange(index, e)}
-                  required
-                  className="w-full p-2 border rounded text-black"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block mb-2 text-black">Description</label>
-                <textarea
-                  name="description"
-                  value={service.description}
-                  onChange={(e) => handleInputChange(index, e)}
-                  required
-                  className="w-full p-2 border rounded text-black"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block mb-2 text-black">Service Charge</label>
-                <input
-                  type="number"
-                  name="serviceCharge"
-                  value={service.serviceCharge}
-                  onChange={(e) => handleInputChange(index, e)}
-                  required
-                  min="0"
-                  step="0.01"
-                  className="w-full p-2 border rounded text-black"
-                />
-              </div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-black">
+                {isEditing ? 'Edit Service' : 'Add New Services'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-          ))}
+            
+            {serviceInputs.map((service, index) => (
+              <div key={index} className="mb-6 p-6 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-lg font-semibold text-black">Service #{index + 1}</h4>
+                  {serviceInputs.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeServiceInput(index)}
+                      className="text-red-500 hover:text-red-700 flex items-center gap-1"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Remove
+                    </button>
+                  )}
+                </div>
 
-          <div className="flex gap-4">
-            <button
-              type="button"
-              onClick={addServiceInput}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Add Another Service
-            </button>
-            <button
-              type="submit"
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-            >
-              Create Services
-            </button>
-          </div>
-        </form>
+                <div className="grid gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Service Name</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={service.name}
+                      onChange={(e) => handleInputChange(index, e)}
+                      required
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Description</label>
+                    <textarea
+                      name="description"
+                      value={service.description}
+                      onChange={(e) => handleInputChange(index, e)}
+                      required
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Service Charge</label>
+                    <input
+                      type="number"
+                      name="serviceCharge"
+                      value={service.serviceCharge}
+                      onChange={(e) => handleInputChange(index, e)}
+                      required
+                      min="0"
+                      step="0.01"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <div className="flex justify-end gap-4 mt-6">
+              {/* <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-300"
+              >
+                Cancel
+              </button> */}
+              {!isEditing && (
+                <button
+                  type="button"
+                  onClick={addServiceInput}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
+                >
+                  Add Another Service
+                </button>
+              )}
+              <button
+                type="submit"
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
+              >
+                {isEditing ? 'Update Service' : 'Create Services'}
+              </button>
+            </div>
+          </form>
+        </div>
       )}
 
       {selectedService && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="my-modal">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3 text-center">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">{selectedService.name} Details</h3>
-              <div className="mt-2 px-7 py-3">
-                <p className="text-sm text-gray-500">
-                  <strong>Description:</strong> {selectedService.description}
-                </p>
-                <p className="text-sm text-gray-500">
-                  <strong>Service Charge:</strong> ${selectedService.serviceCharge.toFixed(2)}
-                </p>
-                <p className="text-sm text-gray-500">
-                  <strong>Created By:</strong> {selectedService.createdBy.username}
-                </p>
-                <p className="text-sm text-gray-500">
-                  <strong>Created At:</strong> {new Date(selectedService.createdAt).toLocaleString()}
-                </p>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-black">{selectedService.name} Details</h3>
+              <button
+                onClick={() => setSelectedService(null)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-sm font-medium text-black">Description</h4>
+                <p className="text-black">{selectedService.description}</p>
               </div>
-              <div className="items-center px-4 py-3">
-                <button
-                  id="ok-btn"
-                  className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                  onClick={() => setSelectedService(null)}
-                >
-                  Close
-                </button>
+              <div>
+                <h4 className="text-sm font-medium text-black">Service Charge</h4>
+                <p className="text-black">${selectedService.serviceCharge.toFixed(2)}</p>
               </div>
+              <div>
+                <h4 className="text-sm font-medium text-black">Created By</h4>
+                <p className="text-black">{selectedService.createdBy.username}</p>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-black">Created At</h4>
+                <p className="text-black">{new Date(selectedService.createdAt).toLocaleString()}</p>
+              </div>
+            </div>
+            <div className="mt-6">
+              <button
+                onClick={() => setSelectedService(null)}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
