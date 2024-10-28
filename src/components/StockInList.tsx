@@ -336,297 +336,355 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   const canView = permissions.includes('view');
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">
+      <div className="flex justify-between items-center mb-8">
         <h2 className="text-2xl font-bold text-black">Stock In List</h2>
-        <div className="space-x-4">
+        <div className="flex items-center gap-4">
           {canCreate && (
             <button
               onClick={() => setShowForm(true)}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 flex items-center gap-2"
             >
-              Add New Stock In
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Stock In
             </button>
           )}
           
           {session?.user?.role === 'SUPER_ADMIN' && (
             <Link
               href="/brand-management"
-              className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 inline-block"
+              className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 inline-flex items-center gap-2"
             >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+              </svg>
               Manage Brand Name
             </Link>
           )}
         </div>
       </div>
       {showForm && (
-        <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow-lg">
-          <h3 className="text-xl font-semibold mb-4 text-gray-800">
-            {editingStockIn ? 'Edit Stock In' : 'Add New Stock In'}
-          </h3>
-
-          {stockInInputs.map((stockIn, index) => (
-            <div key={index} className="mb-6 p-4 border border-gray-200 rounded-md">
-              <div className="flex justify-between items-center mb-4">
-                <h4 className="text-lg font-medium text-gray-700">Stock In #{index + 1}</h4>
-                {!editingStockIn && stockInInputs.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeStockIn(index)}
-                    className="text-red-500 hover:text-red-700 transition-colors duration-200"
-                  >
-                    Remove Entry
-                  </button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">Service</label>
-                  <select
-                    name="serviceId"
-                    value={stockIn.serviceId}
-                    onChange={(e) => handleInputChange(index, e)}
-                    required
-                    className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select a service</option>
-                    {services.map(service => (
-                      <option key={service.id} value={service.id}>
-                        {service.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">Product</label>
-                  <select
-                    name="productId"
-                    value={stockIn.productId}
-                    onChange={(e) => handleInputChange(index, e)}
-                    required
-                    className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select a product</option>
-                    {(inputProducts[index] || [])
-                      .filter(product => !stockIn.serviceId || product.serviceId === stockIn.serviceId)
-                      .map(product => (
-                        <option key={product.id} value={product.id}>
-                          {product.name}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-                <div className="relative">
-                  <label className="block mb-2 text-sm font-medium text-gray-700">Brand</label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="brandName"
-                      value={stockIn.brandName}
-                      onChange={(e) => {
-                        handleInputChange(index, e);
-                        if (stockIn.productId) {
-                          const searchTerm = e.target.value.toLowerCase();
-                          const filtered = (inputBrands[index] || [])
-                            .filter(brand => 
-                              brand.productId === stockIn.productId && 
-                              brand.name.toLowerCase().includes(searchTerm)
-                            );
-                          setFilteredBrands(prev => ({
-                            ...prev,
-                            [index]: filtered
-                          }));
-                          setShowBrandSuggestions(prev => ({
-                            ...prev,
-                            [index]: true
-                          }));
-                        }
-                      }}
-                      onFocus={() => {
-                        if (stockIn.productId) {
-                          const filtered = (inputBrands[index] || [])
-                            .filter(brand => brand.productId === stockIn.productId);
-                          setFilteredBrands(prev => ({
-                            ...prev,
-                            [index]: filtered
-                          }));
-                          setShowBrandSuggestions(prev => ({
-                            ...prev,
-                            [index]: true
-                          }));
-                        }
-                      }}
-                      className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
-                      placeholder={stockIn.productId ? "Select or type new brand name" : "Select a product first"}
-                      disabled={!stockIn.productId}
-                    />
-                    {showBrandSuggestions[index] && filteredBrands[index]?.length > 0 && (
-                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                        {filteredBrands[index].map(brand => (
-                          <div
-                            key={brand.id}
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-700 transition-colors duration-200"
-                            onClick={() => {
-                              const newInputs = [...stockInInputs];
-                              newInputs[index] = {
-                                ...newInputs[index],
-                                brandId: brand.id,
-                                brandName: brand.name
-                              };
-                              setStockInInputs(newInputs);
-                              setShowBrandSuggestions(prev => ({
-                                ...prev,
-                                [index]: false
-                              }));
-                            }}
-                          >
-                            {brand.name}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">Quantity</label>
-                  <input
-                    type="number"
-                    name="quantity"
-                    value={stockIn.quantity === 0 ? '' : stockIn.quantity}
-                    onChange={(e) => handleInputChange(index, e)}
-                    required
-                    min="1"
-                    className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">Price Per Unit</label>
-                  <input
-                    type="number"
-                    name="pricePerUnit"
-                    value={stockIn.pricePerUnit === 0 ? '' : stockIn.pricePerUnit}
-                    onChange={(e) => handleInputChange(index, e)}
-                    required
-                    min="0"
-                    step="0.01"
-                    className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block mb-2 text-sm font-medium text-gray-700">Comments</label>
-                  <textarea
-                    name="comments"
-                    value={stockIn.comments}
-                    onChange={(e) => handleInputChange(index, e)}
-                    className="w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 min-h-[100px]"
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-
-          <div className="flex gap-4 mt-6">
-            {!editingStockIn && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-black">
+                {editingStockIn ? 'Edit Stock In' : 'Add New Stock In'}
+              </h3>
               <button
                 type="button"
-                onClick={addAnotherStockIn}
-                className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition duration-200"
+                onClick={() => setShowForm(false)}
+                className="text-gray-500 hover:text-gray-700"
               >
-                Add Another Entry
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
-            )}
+            </div>
 
-            <button
-              type="submit"
-              className="px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition duration-200"
-            >
-              {editingStockIn ? 'Update Stock In' : 'Create Stock In(s)'}
-            </button>
-          </div>
-        </form>
+            {stockInInputs.map((stockIn, index) => (
+              <div key={index} className="mb-6 p-6 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-lg font-semibold text-black">Stock In #{index + 1}</h4>
+                  {!editingStockIn && stockInInputs.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeStockIn(index)}
+                      className="text-red-500 hover:text-red-700 flex items-center gap-1"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Remove
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Service</label>
+                    <select
+                      name="serviceId"
+                      value={stockIn.serviceId}
+                      onChange={(e) => handleInputChange(index, e)}
+                      required
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                    >
+                      <option value="">Select a service</option>
+                      {services.map(service => (
+                        <option key={service.id} value={service.id}>
+                          {service.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Product</label>
+                    <select
+                      name="productId"
+                      value={stockIn.productId}
+                      onChange={(e) => handleInputChange(index, e)}
+                      required
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                    >
+                      <option value="">Select a product</option>
+                      {(inputProducts[index] || [])
+                        .filter(product => !stockIn.serviceId || product.serviceId === stockIn.serviceId)
+                        .map(product => (
+                          <option key={product.id} value={product.id}>
+                            {product.name}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Brand</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="brandName"
+                        value={stockIn.brandName}
+                        onChange={(e) => {
+                          handleInputChange(index, e);
+                          if (stockIn.productId) {
+                            const searchTerm = e.target.value.toLowerCase();
+                            const filtered = (inputBrands[index] || [])
+                              .filter(brand => 
+                                brand.productId === stockIn.productId && 
+                                brand.name.toLowerCase().includes(searchTerm)
+                              );
+                            setFilteredBrands(prev => ({
+                              ...prev,
+                              [index]: filtered
+                            }));
+                            setShowBrandSuggestions(prev => ({
+                              ...prev,
+                              [index]: true
+                            }));
+                          }
+                        }}
+                        onFocus={() => {
+                          if (stockIn.productId) {
+                            const filtered = (inputBrands[index] || [])
+                              .filter(brand => brand.productId === stockIn.productId);
+                            setFilteredBrands(prev => ({
+                              ...prev,
+                              [index]: filtered
+                            }));
+                            setShowBrandSuggestions(prev => ({
+                              ...prev,
+                              [index]: true
+                            }));
+                          }
+                        }}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                        placeholder={stockIn.productId ? "Select or type new brand name" : "Select a product first"}
+                        disabled={!stockIn.productId}
+                      />
+                      {showBrandSuggestions[index] && filteredBrands[index]?.length > 0 && (
+                        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                          {filteredBrands[index].map(brand => (
+                            <div
+                              key={brand.id}
+                              className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-700"
+                              onClick={() => {
+                                const newInputs = [...stockInInputs];
+                                newInputs[index] = {
+                                  ...newInputs[index],
+                                  brandId: brand.id,
+                                  brandName: brand.name
+                                };
+                                setStockInInputs(newInputs);
+                                setShowBrandSuggestions(prev => ({
+                                  ...prev,
+                                  [index]: false
+                                }));
+                              }}
+                            >
+                              {brand.name}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Quantity</label>
+                    <input
+                      type="number"
+                      name="quantity"
+                      value={stockIn.quantity === 0 ? '' : stockIn.quantity}
+                      onChange={(e) => handleInputChange(index, e)}
+                      required
+                      min="1"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Price Per Unit</label>
+                    <input
+                      type="number"
+                      name="pricePerUnit"
+                      value={stockIn.pricePerUnit === 0 ? '' : stockIn.pricePerUnit}
+                      onChange={(e) => handleInputChange(index, e)}
+                      required
+                      min="0"
+                      step="0.01"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Comments</label>
+                    <textarea
+                      name="comments"
+                      value={stockIn.comments}
+                      onChange={(e) => handleInputChange(index, e)}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <div className="flex justify-end gap-4 mt-6">
+              {!editingStockIn && (
+                <button
+                  type="button"
+                  onClick={addAnotherStockIn}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
+                >
+                  Add More
+                </button>
+              )}
+              <button
+                type="submit"
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
+              >
+                {editingStockIn ? 'Update Stock In' : 'Create Stock In(s)'}
+              </button>
+            </div>
+          </form>
+        </div>
       )}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white">
-          <thead>
-            <tr className="bg-gray-200 text-black uppercase text-sm leading-normal">
-              <th className="py-3 px-6 text-left">Date</th>
-              <th className="py-3 px-6 text-left">User Name</th>
-              <th className="py-3 px-6 text-left">Brand Name</th>
-              <th className="py-3 px-6 text-left">Product Name</th>
-              <th className="py-3 px-6 text-left">Service Name</th>
-              <th className="py-3 px-6 text-left">Quantity</th>
-              <th className="py-3 px-6 text-left">Unit Price</th>
-              <th className="py-3 px-6 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="text-gray-700">
-            {stockIns.map((stockIn) => (
-              <tr key={stockIn.id} className="border-b hover:bg-gray-50">
-                <td className="py-3 px-4">{new Date(stockIn.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Dhaka' })}</td>
-                <td className="py-3 px-4">{stockIn.createdBy}</td>
-                <td className="py-3 px-4">{stockIn.brandName}</td>
-                <td className="py-3 px-4">{stockIn.productName}</td>
-                <td className="py-3 px-4">{stockIn.serviceName}</td>
-                <td className="py-3 px-4">{stockIn.quantity}</td>
-                <td className="py-3 px-4">${stockIn.pricePerUnit.toFixed(2)}</td>
-                <td className="py-3 px-4">
-                  <button
-                    onClick={() => handleViewDetails(stockIn)}
-                    className="text-blue-500 hover:text-blue-700 mr-2"
-                  >
-                    View
-                  </button>
-                  
-                  {canEdit && (
-                    <button
-                      onClick={() => handleEdit(stockIn)}
-                      className="text-green-500 hover:text-green-700 mr-2"
-                    >
-                      Edit
-                    </button>
-                  )}
-                  
-                  {canDelete && (
-                    <button
-                      onClick={() => handleDelete(stockIn.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      Delete
-                    </button>
-                  )}
-                </td>
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Date</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">User Name</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Brand Name</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Product Name</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Service Name</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Quantity</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Unit Price</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {stockIns.map((stockIn) => (
+                <tr key={stockIn.id} className="hover:bg-gray-50 transition duration-150">
+                  <td className="px-6 py-4 text-sm text-black">{new Date(stockIn.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Dhaka' })}</td>
+                  <td className="px-6 py-4 text-sm text-black">{stockIn.createdBy}</td>
+                  <td className="px-6 py-4 text-sm text-black">{stockIn.brandName}</td>
+                  <td className="px-6 py-4 text-sm text-black">{stockIn.productName}</td>
+                  <td className="px-6 py-4 text-sm text-black">{stockIn.serviceName}</td>
+                  <td className="px-6 py-4 text-sm text-black">{stockIn.quantity}</td>
+                  <td className="px-6 py-4 text-sm text-black">${stockIn.pricePerUnit.toFixed(2)}</td>
+                  <td className="px-6 py-4 text-sm space-x-2">
+                    {canView && (
+                      <button
+                        onClick={() => handleViewDetails(stockIn)}
+                        className="text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        View Details
+                      </button>
+                    )}
+                    {canEdit && (
+                      <button
+                        onClick={() => handleEdit(stockIn)}
+                        className="text-green-600 hover:text-green-800 font-medium"
+                      >
+                        Edit
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        onClick={() => handleDelete(stockIn.id)}
+                        className="text-red-600 hover:text-red-800 font-medium"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {selectedStockIn && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="my-modal">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3 text-center">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">Stock In Details</h3>
-              <div className="mt-2 px-7 py-3 text-left">
-                <p className="text-sm text-gray-500"><strong>Product:</strong> {selectedStockIn.productName}</p>
-                <p className="text-sm text-gray-500"><strong>Service:</strong> {selectedStockIn.serviceName}</p>
-                <p className="text-sm text-gray-500"><strong>Brand:</strong> {selectedStockIn.brandName}</p>
-                <p className="text-sm text-gray-500"><strong>Quantity:</strong> {selectedStockIn.quantity}</p>
-                <p className="text-sm text-gray-500"><strong>Price Per Unit:</strong> ${selectedStockIn.pricePerUnit.toFixed(2)}</p>
-                <p className="text-sm text-gray-500"><strong>Total Value:</strong> ${(selectedStockIn.quantity * selectedStockIn.pricePerUnit).toFixed(2)}</p>
-                <p className="text-sm text-gray-500"><strong>Comments:</strong> {selectedStockIn.comments}</p>
-                <p className="text-sm text-gray-500"><strong>Created By:</strong> {selectedStockIn.createdBy}</p>
-                <p className="text-sm text-gray-500"><strong>Created At:</strong> {new Date(selectedStockIn.createdAt).toLocaleString()}</p>
-              </div>
-              <div className="items-center px-4 py-3">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full transform transition-all">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Stock In Details
+                </h3>
                 <button
-                  id="ok-btn"
-                  className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
                   onClick={() => setSelectedStockIn(null)}
+                  className="rounded-full p-1.5 text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors"
                 >
-                  Close
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
+              </div>
+              
+              <div className="space-y-6">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="text-sm font-semibold text-gray-500 mb-2">Product Details</h4>
+                  <div className="space-y-2">
+                    <p className="text-gray-900">Product: {selectedStockIn.productName}</p>
+                    <p className="text-gray-900">Service: {selectedStockIn.serviceName}</p>
+                    <p className="text-gray-900">Brand: {selectedStockIn.brandName}</p>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="text-sm font-semibold text-gray-500 mb-2">Stock Information</h4>
+                  <div className="space-y-2">
+                    <p className="text-gray-900">Quantity: {selectedStockIn.quantity}</p>
+                    <p className="text-gray-900">Price Per Unit: ${selectedStockIn.pricePerUnit.toFixed(2)}</p>
+                    <p className="text-gray-900">Total Value: ${(selectedStockIn.quantity * selectedStockIn.pricePerUnit).toFixed(2)}</p>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="text-sm font-semibold text-gray-500 mb-2">Additional Information</h4>
+                  <p className="text-gray-900">{selectedStockIn.comments}</p>
+                </div>
+                
+                <div className="flex gap-4">
+                  <div className="flex-1 bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Created By</h4>
+                    <p className="text-gray-900">{selectedStockIn.createdBy}</p>
+                  </div>
+                  
+                  <div className="flex-1 bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Created At</h4>
+                    <p className="text-gray-900">{new Date(selectedStockIn.createdAt).toLocaleString()}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
