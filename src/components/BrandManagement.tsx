@@ -4,17 +4,33 @@ import { toast } from 'react-toastify';
 interface Brand {
   id: string;
   name: string;
-  createdAt: string;
-  createdBy: string;
+  productName: string;
+  serviceName: string;
+}
+
+interface Service {
+  id: string;
+  name: string;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  serviceId: string;
 }
 
 const BrandManagement: React.FC = () => {
   const [brands, setBrands] = useState<Brand[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [newBrand, setNewBrand] = useState('');
+  const [selectedService, setSelectedService] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState('');
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
 
   useEffect(() => {
     fetchBrands();
+    fetchServices();
   }, []);
 
   const fetchBrands = async () => {
@@ -29,8 +45,48 @@ const BrandManagement: React.FC = () => {
     }
   };
 
+  const fetchServices = async () => {
+    try {
+      const response = await fetch('/api/services');
+      if (!response.ok) throw new Error('Failed to fetch services');
+      const data = await response.json();
+      setServices(data);
+    } catch (error) {
+      console.error('Error fetching services:', error);
+      toast.error('Failed to load services');
+    }
+  };
+
+  const fetchProducts = async (serviceId: string) => {
+    try {
+      const response = await fetch(`/api/products?serviceId=${serviceId}`);
+      if (!response.ok) throw new Error('Failed to fetch products');
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      toast.error('Failed to load products');
+    }
+  };
+
+  const handleServiceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const serviceId = e.target.value;
+    setSelectedService(serviceId);
+    setSelectedProduct('');
+    if (serviceId) {
+      fetchProducts(serviceId);
+    } else {
+      setProducts([]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedProduct) {
+      toast.error('Please select a product');
+      return;
+    }
+
     try {
       const url = editingBrand ? `/api/brands/${editingBrand.id}` : '/api/brands';
       const method = editingBrand ? 'PUT' : 'POST';
@@ -38,19 +94,28 @@ const BrandManagement: React.FC = () => {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newBrand }),
+        body: JSON.stringify({ 
+          name: newBrand,
+          productId: selectedProduct
+        }),
       });
 
       if (!response.ok) throw new Error('Failed to save brand');
       
       await fetchBrands();
       toast.success(`Brand ${editingBrand ? 'updated' : 'created'} successfully`);
-      setNewBrand('');
-      setEditingBrand(null);
+      resetForm();
     } catch (error) {
       console.error('Error saving brand:', error);
       toast.error('Failed to save brand');
     }
+  };
+
+  const resetForm = () => {
+    setNewBrand('');
+    setSelectedService('');
+    setSelectedProduct('');
+    setEditingBrand(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -72,16 +137,56 @@ const BrandManagement: React.FC = () => {
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-2xl font-bold mb-4 text-black">Brand Management</h2>
       
-      <form onSubmit={handleSubmit} className="mb-8">
+      <form onSubmit={handleSubmit} className="mb-8 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block mb-2 text-black">Service</label>
+            <select
+              value={selectedService}
+              onChange={handleServiceChange}
+              required
+              className="w-full p-2 border rounded text-black"
+            >
+              <option value="">Select a service</option>
+              {services.map(service => (
+                <option key={service.id} value={service.id}>
+                  {service.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-2 text-black">Product</label>
+            <select
+              value={selectedProduct}
+              onChange={(e) => setSelectedProduct(e.target.value)}
+              required
+              className="w-full p-2 border rounded text-black"
+            >
+              <option value="">Select a product</option>
+              {products.map(product => (
+                <option key={product.id} value={product.id}>
+                  {product.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-2 text-black">Brand Name</label>
+            <input
+              type="text"
+              value={newBrand}
+              onChange={(e) => setNewBrand(e.target.value)}
+              placeholder="Enter brand name"
+              className="w-full p-2 border rounded text-black"
+              required
+            />
+          </div>
+        </div>
+
         <div className="flex gap-4">
-          <input
-            type="text"
-            value={newBrand}
-            onChange={(e) => setNewBrand(e.target.value)}
-            placeholder="Enter brand name"
-            className="flex-1 p-2 border rounded text-black"
-            required
-          />
           <button
             type="submit"
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
@@ -91,10 +196,7 @@ const BrandManagement: React.FC = () => {
           {editingBrand && (
             <button
               type="button"
-              onClick={() => {
-                setEditingBrand(null);
-                setNewBrand('');
-              }}
+              onClick={resetForm}
               className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
             >
               Cancel
@@ -108,8 +210,8 @@ const BrandManagement: React.FC = () => {
           <thead>
             <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
               <th className="py-3 px-6 text-left">Brand Name</th>
-              <th className="py-3 px-6 text-left">Created By</th>
-              <th className="py-3 px-6 text-left">Created At</th>
+              <th className="py-3 px-6 text-left">Product</th>
+              <th className="py-3 px-6 text-left">Service</th>
               <th className="py-3 px-6 text-left">Actions</th>
             </tr>
           </thead>
@@ -117,10 +219,8 @@ const BrandManagement: React.FC = () => {
             {brands.map(brand => (
               <tr key={brand.id} className="border-b border-gray-200 hover:bg-gray-100">
                 <td className="py-3 px-6 text-left">{brand.name}</td>
-                <td className="py-3 px-6 text-left">{brand.createdBy}</td>
-                <td className="py-3 px-6 text-left">
-                  {new Date(brand.createdAt).toLocaleString()}
-                </td>
+                <td className="py-3 px-6 text-left">{brand.productName}</td>
+                <td className="py-3 px-6 text-left">{brand.serviceName}</td>
                 <td className="py-3 px-6 text-left">
                   <button
                     onClick={() => {
