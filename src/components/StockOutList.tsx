@@ -262,220 +262,281 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
   const canView = isSuperAdmin || permissions.includes('view');
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-4 text-black">Stock Out List</h2>
-
-      {canCreate && (
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
-        >
-          Add New Stock Out
-        </button>
-      )}
+    <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-800">Stock Out Management</h2>
+        {canCreate && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow-md transition duration-300 ease-in-out flex items-center gap-2"
+          >
+            <span>Add New Stock Out</span>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+          </button>
+        )}
+      </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="mb-8 bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-4 text-black">
-            {editingStockOut ? 'Edit Stock Out' : 'Add New Stock Out'}
-          </h3>
-
-          {stockOutInputs.map((stockOut, index) => (
-            <div key={index} className="mb-6 p-4 border rounded">
-              <div className="flex justify-between items-center mb-4">
-                <h4 className="text-lg font-medium text-black">Stock Out #{index + 1}</h4>
-                {!editingStockOut && stockOutInputs.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeStockOut(index)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Remove Entry
-                  </button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block mb-2 text-black">Service</label>
-                  <select
-                    name="serviceId"
-                    value={stockOut.serviceId}
-                    onChange={(e) => handleInputChange(index, e)}
-                    required
-                    className="w-full p-2 border rounded text-black"
-                  >
-                    <option value="">Select a service</option>
-                    {services.map(service => (
-                      <option key={service.id} value={service.id}>{service.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block mb-2 text-black">Product</label>
-                  <select
-                    name="productId"
-                    value={stockOut.productId}
-                    onChange={(e) => handleInputChange(index, e)}
-                    required
-                    className="w-full p-2 border rounded text-black"
-                  >
-                    <option value="">Select a product</option>
-                    {(inputProducts[index] || [])
-                      .filter(product => !stockOut.serviceId || product.serviceId === stockOut.serviceId)
-                      .map(product => (
-                        <option key={product.id} value={product.id}>{product.name}</option>
-                      ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block mb-2 text-black">Brand</label>
-                  <select
-                    name="brandId"
-                    value={stockOut.brandId}
-                    onChange={(e) => handleInputChange(index, e)}
-                    required
-                    className="w-full p-2 border rounded text-black"
-                  >
-                    <option value="">Select a brand</option>
-                    {(inputBrands[index] || [])
-                      .filter(brand => !stockOut.productId || brand.productId === stockOut.productId)
-                      .map(brand => (
-                        <option key={brand.id} value={brand.id}>{brand.name}</option>
-                      ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block mb-2 text-black">Quantity</label>
-                  <input
-                    type="number"
-                    name="quantity"
-                    value={stockOut.quantity === 0 ? '' : stockOut.quantity}
-                    onChange={(e) => handleInputChange(index, e)}
-                    required
-                    min="1"
-                    className="w-full p-2 border rounded text-black"
-                  />
-                </div>
-
-                <div className="col-span-2">
-                  <label className="block mb-2 text-black">Comments</label>
-                  <textarea
-                    name="comments"
-                    value={stockOut.comments}
-                    onChange={(e) => handleInputChange(index, e)}
-                    className="w-full p-2 border rounded text-black"
-                  />
-                </div>
-              </div>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-black">
+                {editingStockOut ? 'Edit Stock Out' : 'Add New Stock Out'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-          ))}
 
-          {!editingStockOut && (
-            <button
-              type="button"
-              onClick={addAnotherStockOut}
-              className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
-            >
-              Add Another Entry
-            </button>
-          )}
+            {stockOutInputs.map((stockOut, index) => (
+              <div key={index} className="mb-6 p-6 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-lg font-semibold text-black">Stock Out #{index + 1}</h4>
+                  {!editingStockOut && stockOutInputs.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeStockOut(index)}
+                      className="text-red-500 hover:text-red-700 flex items-center gap-1"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Remove
+                    </button>
+                  )}
+                </div>
 
-          <button
-            type="submit"
-            className="bg-green-500 text-white px-4 py-2 rounded"
-          >
-            {editingStockOut ? 'Update Stock Out' : 'Create Stock Out(s)'}
-          </button>
-        </form>
+                <div className="grid gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Service</label>
+                    <select
+                      name="serviceId"
+                      value={stockOut.serviceId}
+                      onChange={(e) => handleInputChange(index, e)}
+                      required
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                    >
+                      <option value="">Select a service</option>
+                      {services.map(service => (
+                        <option key={service.id} value={service.id}>{service.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Product</label>
+                    <select
+                      name="productId"
+                      value={stockOut.productId}
+                      onChange={(e) => handleInputChange(index, e)}
+                      required
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                    >
+                      <option value="">Select a product</option>
+                      {(inputProducts[index] || [])
+                        .filter(product => !stockOut.serviceId || product.serviceId === stockOut.serviceId)
+                        .map(product => (
+                          <option key={product.id} value={product.id}>{product.name}</option>
+                        ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Brand</label>
+                    <select
+                      name="brandId"
+                      value={stockOut.brandId}
+                      onChange={(e) => handleInputChange(index, e)}
+                      required
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                    >
+                      <option value="">Select a brand</option>
+                      {(inputBrands[index] || [])
+                        .filter(brand => !stockOut.productId || brand.productId === stockOut.productId)
+                        .map(brand => (
+                          <option key={brand.id} value={brand.id}>{brand.name}</option>
+                        ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Quantity</label>
+                    <input
+                      type="number"
+                      name="quantity"
+                      value={stockOut.quantity === 0 ? '' : stockOut.quantity}
+                      onChange={(e) => handleInputChange(index, e)}
+                      required
+                      min="1"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Comments</label>
+                    <textarea
+                      name="comments"
+                      value={stockOut.comments}
+                      onChange={(e) => handleInputChange(index, e)}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <div className="flex justify-end gap-4 mt-6">
+              {!editingStockOut && (
+                <button
+                  type="button"
+                  onClick={addAnotherStockOut}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
+                >
+                  Add Another Entry
+                </button>
+              )}
+              <button
+                type="submit"
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
+              >
+                {editingStockOut ? 'Update Stock Out' : 'Create Stock Out(s)'}
+              </button>
+            </div>
+          </form>
+        </div>
       )}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white">
-          <thead>
-            <tr className="bg-gray-200 text-black uppercase text-sm leading-normal">
-              <th className="py-3 px-6 text-left">Date</th>
-              <th className="py-3 px-6 text-left">User Name</th>
-              <th className="py-3 px-6 text-left">Brand Name</th>
-              <th className="py-3 px-6 text-left">Product Name</th>
-              <th className="py-3 px-6 text-left">Service Name</th>
-              <th className="py-3 px-6 text-left">Quantity</th>
-              <th className="py-3 px-6 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="text-gray-700">
-            {stockOuts.map((stockOut) => (
-              <tr key={stockOut.id} className="border-b hover:bg-gray-50">
-                <td className="py-3 px-4">{new Date(stockOut.createdAt).toLocaleString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: true
-                })}</td>
-                <td className="py-3 px-4">{stockOut.createdBy}</td>
-                <td className="py-3 px-4">{stockOut.brandName}</td>
-                <td className="py-3 px-4">{stockOut.productName}</td>
-                <td className="py-3 px-4">{stockOut.serviceName}</td>
-                <td className="py-3 px-4">{stockOut.quantity}</td>
-                <td className="py-3 px-4">
-                  <button
-                    onClick={() => handleViewDetails(stockOut)}
-                    className="text-blue-500 hover:text-blue-700 mr-2"
-                  >
-                    View
-                  </button>
-                  
-                  {canEdit && (
-                    <button
-                      onClick={() => handleEdit(stockOut)}
-                      className="text-green-500 hover:text-green-700 mr-2"
-                    >
-                      Edit
-                    </button>
-                  )}
-                  
-                  {canDelete && (
-                    <button
-                      onClick={() => handleDelete(stockOut.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      Delete
-                    </button>
-                  )}
-                </td>
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Date</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">User Name</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Brand Name</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Product Name</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Service Name</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Quantity</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {stockOuts.map((stockOut) => (
+                <tr key={stockOut.id} className="hover:bg-gray-50 transition duration-150">
+                  <td className="px-6 py-4 text-sm text-black">{new Date(stockOut.createdAt).toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  })}</td>
+                  <td className="px-6 py-4 text-sm text-black">{stockOut.createdBy}</td>
+                  <td className="px-6 py-4 text-sm text-black">{stockOut.brandName}</td>
+                  <td className="px-6 py-4 text-sm text-black">{stockOut.productName}</td>
+                  <td className="px-6 py-4 text-sm text-black">{stockOut.serviceName}</td>
+                  <td className="px-6 py-4 text-sm text-black">{stockOut.quantity}</td>
+                  <td className="px-6 py-4 text-sm space-x-2">
+                    {canView && (
+                      <button
+                        onClick={() => handleViewDetails(stockOut)}
+                        className="text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        View Details
+                      </button>
+                    )}
+                    {canEdit && (
+                      <button
+                        onClick={() => handleEdit(stockOut)}
+                        className="text-green-600 hover:text-green-800 font-medium"
+                      >
+                        Edit
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        onClick={() => handleDelete(stockOut.id)}
+                        className="text-red-600 hover:text-red-800 font-medium"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {selectedStockOut && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="my-modal">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3 text-center">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">Stock Out Details</h3>
-              <div className="mt-2 px-7 py-3 text-left">
-                <p className="text-sm text-gray-500"><strong>Date:</strong> {new Date(selectedStockOut.createdAt).toLocaleString()}</p>
-                <p className="text-sm text-gray-500"><strong>User Name:</strong> {selectedStockOut.createdBy}</p>
-                <p className="text-sm text-gray-500"><strong>Brand Name:</strong> {selectedStockOut.brandName}</p>
-                <p className="text-sm text-gray-500"><strong>Product Name:</strong> {selectedStockOut.productName}</p>
-                <p className="text-sm text-gray-500"><strong>Service Name:</strong> {selectedStockOut.serviceName}</p>
-                <p className="text-sm text-gray-500"><strong>Quantity:</strong> {selectedStockOut.quantity}</p>
-                <p className="text-sm text-gray-500"><strong>Comments:</strong> {selectedStockOut.comments}</p>
-              </div>
-              <div className="items-center px-4 py-3">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full transform transition-all">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Stock Out Details
+                </h3>
                 <button
-                  id="ok-btn"
-                  className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
                   onClick={() => setSelectedStockOut(null)}
+                  className="rounded-full p-1.5 text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors"
                 >
-                  Close
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
+              </div>
+              
+              <div className="space-y-6">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="text-sm font-semibold text-gray-500 mb-2">Date</h4>
+                  <p className="text-gray-900">{new Date(selectedStockOut.createdAt).toLocaleString()}</p>
+                </div>
+                
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="text-sm font-semibold text-gray-500 mb-2">User Name</h4>
+                  <p className="text-gray-900">{selectedStockOut.createdBy}</p>
+                </div>
+                
+                <div className="flex gap-4">
+                  <div className="flex-1 bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Brand Name</h4>
+                    <p className="text-gray-900">{selectedStockOut.brandName}</p>
+                  </div>
+                  
+                  <div className="flex-1 bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Product Name</h4>
+                    <p className="text-gray-900">{selectedStockOut.productName}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="flex-1 bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Service Name</h4>
+                    <p className="text-gray-900">{selectedStockOut.serviceName}</p>
+                  </div>
+                  
+                  <div className="flex-1 bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Quantity</h4>
+                    <p className="text-gray-900">{selectedStockOut.quantity}</p>
+                  </div>
+                </div>
+
+                {selectedStockOut.comments && (
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Comments</h4>
+                    <p className="text-gray-900">{selectedStockOut.comments}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
