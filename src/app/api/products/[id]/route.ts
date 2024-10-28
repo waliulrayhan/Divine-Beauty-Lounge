@@ -44,3 +44,48 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 });
   }
 }
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    console.log('Fetching product with ID:', params.id); // Debug log
+
+    const product = await prisma.product.findUnique({
+      where: {
+        id: params.id,
+      },
+      include: {
+        service: true,
+      },
+    });
+
+    if (!product) {
+      console.log('Product not found for ID:', params.id); // Debug log
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    const response = {
+      id: product.id,
+      name: product.name,
+      serviceId: product.serviceId,
+      serviceName: product.service.name,
+    };
+
+    console.log('Returning product data:', response); // Debug log
+    return NextResponse.json(response);
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch product details' },
+      { status: 500 }
+    );
+  }
+}

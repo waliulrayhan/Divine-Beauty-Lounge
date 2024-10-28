@@ -14,7 +14,15 @@ export async function GET(request: NextRequest) {
     const brands = await prisma.brand.findMany({
       include: {
         product: {
-          select: { name: true },
+          select: {
+            id: true,
+            name: true,
+            service: {
+              select: {
+                name: true,
+              },
+            },
+          },
         },
       },
       orderBy: {
@@ -25,7 +33,9 @@ export async function GET(request: NextRequest) {
     const formattedBrands = brands.map(brand => ({
       id: brand.id,
       name: brand.name,
+      productId: brand.product.id,  // Make sure this is included
       productName: brand.product.name,
+      serviceName: brand.product.service.name,
     }));
 
     return NextResponse.json(formattedBrands);

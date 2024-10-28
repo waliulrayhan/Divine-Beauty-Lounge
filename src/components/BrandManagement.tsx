@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 interface Brand {
   id: string;
   name: string;
+  productId: string;  // Add this line
   productName: string;
   serviceName: string;
 }
@@ -33,11 +34,16 @@ const BrandManagement: React.FC = () => {
     fetchServices();
   }, []);
 
+  useEffect(() => {
+    console.log('Current brands:', brands);
+  }, [brands]);
+
   const fetchBrands = async () => {
     try {
       const response = await fetch('/api/brands');
       if (!response.ok) throw new Error('Failed to fetch brands');
       const data = await response.json();
+      console.log('Fetched brands data:', data); // Debug log
       setBrands(data);
     } catch (error) {
       console.error('Error fetching brands:', error);
@@ -133,6 +139,43 @@ const BrandManagement: React.FC = () => {
     }
   };
 
+  const handleEdit = async (brand: Brand) => {
+    try {
+      console.log('Starting edit process for brand:', brand);
+
+      if (!brand.productId) {
+        throw new Error('Product ID is missing from brand data');
+      }
+
+      // First, fetch the product details to get the serviceId
+      const productResponse = await fetch(`/api/products/${brand.productId}`);
+      console.log('Product response status:', productResponse.status);
+      
+      const productData = await productResponse.json();
+      console.log('Product data received:', productData);
+
+      if (!productResponse.ok) {
+        throw new Error(productData.error || 'Failed to fetch product details');
+      }
+
+      // Set the service first
+      setSelectedService(productData.serviceId);
+      
+      // Fetch products for this service
+      await fetchProducts(productData.serviceId);
+      
+      // Set the product and brand name
+      setSelectedProduct(brand.productId);
+      setNewBrand(brand.name);
+      setEditingBrand(brand);
+
+      console.log('Edit form setup completed successfully');
+    } catch (error) {
+      console.error('Error in handleEdit:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to load edit form');
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-2xl font-bold mb-4 text-black">Brand Management</h2>
@@ -224,8 +267,8 @@ const BrandManagement: React.FC = () => {
                 <td className="py-3 px-6 text-left">
                   <button
                     onClick={() => {
-                      setEditingBrand(brand);
-                      setNewBrand(brand.name);
+                      console.log('Editing brand:', brand);
+                      handleEdit(brand);
                     }}
                     className="text-blue-500 hover:text-blue-700 mr-4"
                   >
