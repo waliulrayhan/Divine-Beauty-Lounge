@@ -14,7 +14,7 @@ export default function Dashboard({ user, children }: DashboardProps) {
 
   // Load sidebar state on component mount
   useEffect(() => {
-    const savedState = localStorage.getItem('sidebarState');
+    const savedState = localStorage.getItem("sidebarState");
     if (savedState !== null) {
       setIsSidebarOpen(JSON.parse(savedState));
     }
@@ -23,7 +23,7 @@ export default function Dashboard({ user, children }: DashboardProps) {
   const toggleSidebar = () => {
     const newState = !isSidebarOpen;
     setIsSidebarOpen(newState);
-    localStorage.setItem('sidebarState', JSON.stringify(newState));
+    localStorage.setItem("sidebarState", JSON.stringify(newState));
   };
 
   return (
@@ -31,57 +31,81 @@ export default function Dashboard({ user, children }: DashboardProps) {
       {/* Sidebar */}
       <div
         className={`bg-gradient-to-b from-indigo-900 to-indigo-800 text-white ${
-          isSidebarOpen ? 'w-72' : 'w-20'
+          isSidebarOpen ? "w-72" : "w-20"
         } space-y-2 py-8 px-4 absolute inset-y-0 left-0 transform md:relative transition-all duration-200 ease-in-out z-20 shadow-xl`}
       >
-        <div className={`px-4 mb-8 ${!isSidebarOpen && 'text-center'}`}>
+        <div className={`px-4 mb-8 ${!isSidebarOpen && "text-center"}`}>
           {isSidebarOpen ? (
             <h2 className="text-2xl font-bold text-white mb-2">Admin Panel</h2>
           ) : (
             <div className="flex justify-center">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-8 h-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
           )}
-          <div className={`h-1 bg-indigo-500 rounded-full ${isSidebarOpen ? 'w-16' : 'w-8 mx-auto'}`}></div>
+          <div
+            className={`h-1 bg-indigo-500 rounded-full ${
+              isSidebarOpen ? "w-16" : "w-8 mx-auto"
+            }`}
+          ></div>
         </div>
-        
+
         <nav className="space-y-1">
-          <Link
+          {/* <Link
             href="/dashboard"
             className="flex items-center px-4 py-3 text-gray-100 rounded-lg transition-all duration-200 hover:bg-indigo-700 hover:shadow-md group"
           >
             <span className="inline-block mr-3">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
               </svg>
             </span>
-            <span className={`${!isSidebarOpen && 'hidden'}`}>Dashboard</span>
-          </Link>
-          
-          <Link
-            href="/service-list"
-            className="flex items-center px-4 py-3 text-gray-100 rounded-lg transition-all duration-200 hover:bg-indigo-700 hover:shadow-md group"
-          >
-            <span className="inline-block mr-3">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </span>
-            <span className={`${!isSidebarOpen && 'hidden'}`}>Service List</span>
-          </Link>
+            <span className={`${!isSidebarOpen && "hidden"}`}>Dashboard</span>
+          </Link> */}
 
           <Link
-            href="/product-list"
+            href="/current-stock"
             className="flex items-center px-4 py-3 text-gray-100 rounded-lg transition-all duration-200 hover:bg-indigo-700 hover:shadow-md group"
           >
             <span className="inline-block mr-3">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                />
               </svg>
             </span>
-            <span className={`${!isSidebarOpen && 'hidden'}`}>Product List</span>
+            <span className={`${!isSidebarOpen && "hidden"}`}>
+              Current Stock
+            </span>
           </Link>
 
           <Link
@@ -89,11 +113,21 @@ export default function Dashboard({ user, children }: DashboardProps) {
             className="flex items-center px-4 py-3 text-gray-100 rounded-lg transition-all duration-200 hover:bg-indigo-700 hover:shadow-md group"
           >
             <span className="inline-block mr-3">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 11l3-3m0 0l3 3m-3-3v8m0-13a9 9 0 110 18 9 9 0 010-18z" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 11l3-3m0 0l3 3m-3-3v8m0-13a9 9 0 110 18 9 9 0 010-18z"
+                />
               </svg>
             </span>
-            <span className={`${!isSidebarOpen && 'hidden'}`}>Stock In</span>
+            <span className={`${!isSidebarOpen && "hidden"}`}>Stock In</span>
           </Link>
 
           <Link
@@ -101,50 +135,118 @@ export default function Dashboard({ user, children }: DashboardProps) {
             className="flex items-center px-4 py-3 text-gray-100 rounded-lg transition-all duration-200 hover:bg-indigo-700 hover:shadow-md group"
           >
             <span className="inline-block mr-3">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z"
+                />
               </svg>
             </span>
-            <span className={`${!isSidebarOpen && 'hidden'}`}>Stock Out</span>
+            <span className={`${!isSidebarOpen && "hidden"}`}>Stock Out</span>
           </Link>
 
           <Link
-            href="/current-stock"
+            href="/service-list"
             className="flex items-center px-4 py-3 text-gray-100 rounded-lg transition-all duration-200 hover:bg-indigo-700 hover:shadow-md group"
           >
             <span className="inline-block mr-3">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
               </svg>
             </span>
-            <span className={`${!isSidebarOpen && 'hidden'}`}>Current Stock</span>
+            <span className={`${!isSidebarOpen && "hidden"}`}>
+              Service List
+            </span>
           </Link>
 
-          {user.role === 'SUPER_ADMIN' && (
+          <Link
+            href="/product-list"
+            className="flex items-center px-4 py-3 text-gray-100 rounded-lg transition-all duration-200 hover:bg-indigo-700 hover:shadow-md group"
+          >
+            <span className="inline-block mr-3">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                />
+              </svg>
+            </span>
+            <span className={`${!isSidebarOpen && "hidden"}`}>
+              Product List
+            </span>
+          </Link>
+
+          {user.role === "SUPER_ADMIN" && (
             <Link
               href="/user-management"
               className="flex items-center px-4 py-3 text-gray-100 rounded-lg transition-all duration-200 hover:bg-indigo-700 hover:shadow-md group"
             >
               <span className="inline-block mr-3">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                  />
                 </svg>
               </span>
-              <span className={`${!isSidebarOpen && 'hidden'}`}>User Management</span>
+              <span className={`${!isSidebarOpen && "hidden"}`}>
+                User Management
+              </span>
             </Link>
           )}
 
-          {user.role === 'NORMAL_ADMIN' && (
+          {user.role === "NORMAL_ADMIN" && (
             <Link
               href="/users"
               className="flex items-center px-4 py-3 text-gray-100 rounded-lg transition-all duration-200 hover:bg-indigo-700 hover:shadow-md group"
             >
               <span className="inline-block mr-3">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                  />
                 </svg>
               </span>
-              <span className={`${!isSidebarOpen && 'hidden'}`}>Users</span>
+              <span className={`${!isSidebarOpen && "hidden"}`}>Users</span>
             </Link>
           )}
         </nav>
@@ -174,17 +276,33 @@ export default function Dashboard({ user, children }: DashboardProps) {
                   </svg>
                 </button>
                 <div className="ml-6">
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-indigo-800 bg-clip-text text-transparent">
-                    Dashboard
-                  </h1>
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center px-4 py-2 text-gray-700 hover:text-indigo-600 font-medium transition-colors duration-200"
+                  >
+                    {/* <svg 
+                      className="w-5 h-5 mr-2"
+                      fill="none"
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                      />
+                    </svg> */}
+                    Divine Beauty Lounge
+                  </Link>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-4">
                 <span className="text-gray-700 font-medium">
-                  {user.email || user.username || 'User'}
+                  {user.email || user.username || "User"}
                 </span>
-                
+
                 <button className="p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 relative">
                   <span className="sr-only">View notifications</span>
                   <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
@@ -208,8 +326,18 @@ export default function Dashboard({ user, children }: DashboardProps) {
                   onClick={() => signOut({ callbackUrl: "/" })}
                   className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-700 hover:to-indigo-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm transition-all duration-200"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  <svg
+                    className="w-5 h-5 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    />
                   </svg>
                   Log Out
                 </button>
