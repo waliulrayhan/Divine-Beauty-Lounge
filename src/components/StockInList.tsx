@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { toast } from 'react-toastify';
-import Link from 'next/link';
+import React, { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { toast } from "react-toastify";
+import Link from "next/link";
 
 interface Service {
   id: string;
@@ -21,7 +21,7 @@ interface StockIn {
   productId: string;
   productName: string;
   serviceName: string;
-  brandId: string;  // Add this line
+  brandId: string; // Add this line
   brandName: string;
   quantity: number;
   pricePerUnit: number;
@@ -46,22 +46,32 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   const [stockIns, setStockIns] = useState<StockIn[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [stockInInputs, setStockInInputs] = useState([{
-    serviceId: '',
-    productId: '',
-    brandId: '', // Add this
-    brandName: '',
-    quantity: 0,
-    pricePerUnit: 0,
-    comments: '',
-  }]);
+  const [stockInInputs, setStockInInputs] = useState([
+    {
+      serviceId: "",
+      productId: "",
+      brandId: "", // Add this
+      brandName: "",
+      quantity: 0,
+      pricePerUnit: 0,
+      comments: "",
+    },
+  ]);
   const [editingStockIn, setEditingStockIn] = useState<StockIn | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [selectedStockIn, setSelectedStockIn] = useState<StockIn | null>(null);
-  const [inputProducts, setInputProducts] = useState<{ [key: number]: Product[] }>({});
-  const [inputBrands, setInputBrands] = useState<{ [key: number]: Brand[] }>({});
-  const [showBrandSuggestions, setShowBrandSuggestions] = useState<{ [key: number]: boolean }>({});
-  const [filteredBrands, setFilteredBrands] = useState<{ [key: number]: Brand[] }>({});
+  const [inputProducts, setInputProducts] = useState<{
+    [key: number]: Product[];
+  }>({});
+  const [inputBrands, setInputBrands] = useState<{ [key: number]: Brand[] }>(
+    {}
+  );
+  const [showBrandSuggestions, setShowBrandSuggestions] = useState<{
+    [key: number]: boolean;
+  }>({});
+  const [filteredBrands, setFilteredBrands] = useState<{
+    [key: number]: Brand[];
+  }>({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -72,29 +82,29 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   // Add this useEffect near the top of the component
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (!(event.target as HTMLElement).closest('.brand-input-container')) {
+      if (!(event.target as HTMLElement).closest(".brand-input-container")) {
         setShowBrandSuggestions({});
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   const fetchStockIns = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/stock-in');
+      const response = await fetch("/api/stock-in");
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
       setStockIns(data);
     } catch (error) {
-      console.error('Error fetching stock ins:', error);
-      toast.error('Failed to load stock ins');
+      console.error("Error fetching stock ins:", error);
+      toast.error("Failed to load stock ins");
     } finally {
       setIsLoading(false);
     }
@@ -102,15 +112,15 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
 
   const fetchServices = async () => {
     try {
-      const response = await fetch('/api/services');
+      const response = await fetch("/api/services");
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
       setServices(data);
     } catch (error) {
-      console.error('Error fetching services:', error);
-      toast.error('Failed to load services');
+      console.error("Error fetching services:", error);
+      toast.error("Failed to load services");
     }
   };
 
@@ -122,13 +132,13 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
       }
       const data = await response.json();
       setProducts(data);
-      setInputProducts(prev => ({
+      setInputProducts((prev) => ({
         ...prev,
-        [index]: data
+        [index]: data,
       }));
     } catch (error) {
-      console.error('Error fetching products:', error);
-      toast.error('Failed to load products');
+      console.error("Error fetching products:", error);
+      toast.error("Failed to load products");
     }
   };
 
@@ -139,13 +149,13 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setInputBrands(prev => ({
+      setInputBrands((prev) => ({
         ...prev,
-        [index]: data
+        [index]: data,
       }));
-      setFilteredBrands(prev => ({
+      setFilteredBrands((prev) => ({
         ...prev,
-        [index]: data
+        [index]: data,
       }));
     } catch (error) {
       console.error("Error fetching brands:", error);
@@ -153,34 +163,40 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     }
   };
 
-  const handleInputChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    index: number,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
     const newInputs = [...stockInInputs];
-    
-    if (name === 'brandName') {
+
+    if (name === "brandName") {
       newInputs[index] = {
         ...newInputs[index],
-        brandId: '', // Clear brandId when manually typing
-        brandName: value
+        brandId: "", // Clear brandId when manually typing
+        brandName: value,
       };
     } else {
       newInputs[index] = {
         ...newInputs[index],
-        [name]: name === 'quantity' || name === 'pricePerUnit' 
-          ? Number(value)
-          : value
+        [name]:
+          name === "quantity" || name === "pricePerUnit"
+            ? Number(value)
+            : value,
       };
     }
-    
+
     setStockInInputs(newInputs);
-    
-    if (name === 'serviceId') {
+
+    if (name === "serviceId") {
       fetchProducts(value, index);
-    } else if (name === 'productId') {
+    } else if (name === "productId") {
       fetchBrands(value, index);
       // Clear brand selection when product changes
-      newInputs[index].brandId = '';
-      newInputs[index].brandName = '';
+      newInputs[index].brandId = "";
+      newInputs[index].brandName = "";
       setStockInInputs(newInputs);
     }
   };
@@ -189,12 +205,12 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     const newInputs = [...stockInInputs];
     newInputs[index] = {
       ...newInputs[index],
-      brandName
+      brandName,
     };
     setStockInInputs(newInputs);
-    setShowBrandSuggestions(prev => ({
+    setShowBrandSuggestions((prev) => ({
       ...prev,
-      [index]: false
+      [index]: false,
     }));
   };
 
@@ -203,21 +219,24 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     if (currentIndex > 0) {
       const lastIndex = currentIndex - 1;
       if (inputProducts[lastIndex]) {
-        setInputProducts(prev => ({
+        setInputProducts((prev) => ({
           ...prev,
-          [currentIndex]: inputProducts[lastIndex]
+          [currentIndex]: inputProducts[lastIndex],
         }));
       }
     }
-    setStockInInputs([...stockInInputs, {
-      serviceId: '',
-      productId: '',
-      brandId: '', // Add this
-      brandName: '',
-      quantity: 0,
-      pricePerUnit: 0,
-      comments: '',
-    }]);
+    setStockInInputs([
+      ...stockInInputs,
+      {
+        serviceId: "",
+        productId: "",
+        brandId: "", // Add this
+        brandName: "",
+        quantity: 0,
+        pricePerUnit: 0,
+        comments: "",
+      },
+    ]);
   };
 
   const removeStockIn = (index: number) => {
@@ -229,19 +248,19 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
 
   const createBrand = async (productId: string, brandName: string) => {
     try {
-      const response = await fetch('/api/brands', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/brands", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, name: brandName }),
       });
-      
+
       if (!response.ok) {
-        throw new Error('Failed to create brand');
+        throw new Error("Failed to create brand");
       }
-      
+
       return await response.json();
     } catch (error) {
-      console.error('Error creating brand:', error);
+      console.error("Error creating brand:", error);
       throw error;
     }
   };
@@ -258,73 +277,80 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
       );
 
       const responses = await Promise.all(
-        stockInInputs.map(stockIn =>
-          fetch('/api/stock-in', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+        stockInInputs.map((stockIn) =>
+          fetch("/api/stock-in", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(stockIn),
           })
         )
       );
 
-      const hasError = responses.some(response => !response.ok);
+      const hasError = responses.some((response) => !response.ok);
       if (hasError) {
-        throw new Error('One or more stock ins failed to create');
+        throw new Error("One or more stock ins failed to create");
       }
 
       await fetchStockIns();
       toast.success(`${stockInInputs.length} stock in(s) created successfully`);
       setShowForm(false);
-      setStockInInputs([{
-        serviceId: '',
-        productId: '',
-        brandId: '', // Add this
-        brandName: '',
-        quantity: 0,
-        pricePerUnit: 0,
-        comments: '',
-      }]);
+      setStockInInputs([
+        {
+          serviceId: "",
+          productId: "",
+          brandId: "", // Add this
+          brandName: "",
+          quantity: 0,
+          pricePerUnit: 0,
+          comments: "",
+        },
+      ]);
     } catch (error) {
-      console.error('Error creating stock ins:', error);
-      toast.error('Failed to create stock ins');
+      console.error("Error creating stock ins:", error);
+      toast.error("Failed to create stock ins");
     }
   };
 
   const handleEdit = (stockIn: StockIn) => {
     setEditingStockIn(stockIn);
-    setStockInInputs([{
-      serviceId: services.find(s => s.name === stockIn.serviceName)?.id || '',
-      productId: stockIn.productId,
-      brandId: stockIn.brandId || '',
-      brandName: stockIn.brandName,
-      quantity: stockIn.quantity,
-      pricePerUnit: stockIn.pricePerUnit,
-      comments: stockIn.comments || '',
-    }]);
-    
-    const serviceId = services.find(s => s.name === stockIn.serviceName)?.id;
+    setStockInInputs([
+      {
+        serviceId:
+          services.find((s) => s.name === stockIn.serviceName)?.id || "",
+        productId: stockIn.productId,
+        brandId: stockIn.brandId || "",
+        brandName: stockIn.brandName,
+        quantity: stockIn.quantity,
+        pricePerUnit: stockIn.pricePerUnit,
+        comments: stockIn.comments || "",
+      },
+    ]);
+
+    const serviceId = services.find((s) => s.name === stockIn.serviceName)?.id;
     if (serviceId) {
       fetchProducts(serviceId, 0);
       if (stockIn.productId) {
         fetchBrands(stockIn.productId, 0);
       }
     }
-    
+
     setShowForm(true);
   };
 
   const handleDelete = async (stockInId: string) => {
-    if (window.confirm('Are you sure you want to delete this stock in record?')) {
+    if (
+      window.confirm("Are you sure you want to delete this stock in record?")
+    ) {
       try {
         const response = await fetch(`/api/stock-in/${stockInId}`, {
-          method: 'DELETE',
+          method: "DELETE",
         });
-        if (!response.ok) throw new Error('Failed to delete stock in');
+        if (!response.ok) throw new Error("Failed to delete stock in");
         await fetchStockIns();
-        toast.success('Stock in record deleted successfully');
+        toast.success("Stock in record deleted successfully");
       } catch (error) {
-        console.error('Error deleting stock in:', error);
-        toast.error('Failed to delete stock in record');
+        console.error("Error deleting stock in:", error);
+        toast.error("Failed to delete stock in record");
       }
     }
   };
@@ -334,10 +360,10 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   };
 
   // Check permissions
-  const canCreate = permissions.includes('create');
-  const canEdit = permissions.includes('edit');
-  const canDelete = permissions.includes('delete');
-  const canView = permissions.includes('view');
+  const canCreate = permissions.includes("create");
+  const canEdit = permissions.includes("edit");
+  const canDelete = permissions.includes("delete");
+  const canView = permissions.includes("view");
 
   if (isLoading) {
     return (
@@ -357,20 +383,40 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
               onClick={() => setShowForm(true)}
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 flex items-center gap-2"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
               Stock In
             </button>
           )}
-          
-          {session?.user?.role === 'SUPER_ADMIN' && (
+
+          {session?.user?.role === "SUPER_ADMIN" && (
             <Link
               href="/brand-management"
               className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 inline-flex items-center gap-2"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                />
               </svg>
               Manage Brand Name
             </Link>
@@ -379,18 +425,31 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
       </div>
       {showForm && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto"
+          >
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-black">
-                {editingStockIn ? 'Edit Stock In' : 'Add New Stock In'}
+                {editingStockIn ? "Edit Stock In" : "Add New Stock In"}
               </h3>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
                 className="text-gray-500 hover:text-gray-700"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -398,15 +457,27 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
             {stockInInputs.map((stockIn, index) => (
               <div key={index} className="mb-6 p-6 bg-gray-50 rounded-lg">
                 <div className="flex justify-between items-center mb-4">
-                  <h4 className="text-lg font-semibold text-black">Stock In #{index + 1}</h4>
+                  <h4 className="text-lg font-semibold text-black">
+                    Stock In #{index + 1}
+                  </h4>
                   {!editingStockIn && stockInInputs.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeStockIn(index)}
                       className="text-red-500 hover:text-red-700 flex items-center gap-1"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
                       </svg>
                       Remove
                     </button>
@@ -415,7 +486,9 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
 
                 <div className="grid gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">Service</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Service <span className="text-red-500">*</span>
+                    </label>
                     <select
                       name="serviceId"
                       value={stockIn.serviceId}
@@ -424,7 +497,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                     >
                       <option value="">Select a service</option>
-                      {services.map(service => (
+                      {services.map((service) => (
                         <option key={service.id} value={service.id}>
                           {service.name}
                         </option>
@@ -433,7 +506,9 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">Product</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Product <span className="text-red-500">*</span>
+                    </label>
                     <select
                       name="productId"
                       value={stockIn.productId}
@@ -443,8 +518,12 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                     >
                       <option value="">Select a product</option>
                       {(inputProducts[index] || [])
-                        .filter(product => !stockIn.serviceId || product.serviceId === stockIn.serviceId)
-                        .map(product => (
+                        .filter(
+                          (product) =>
+                            !stockIn.serviceId ||
+                            product.serviceId === stockIn.serviceId
+                        )
+                        .map((product) => (
                           <option key={product.id} value={product.id}>
                             {product.name}
                           </option>
@@ -453,7 +532,9 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">Brand</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Brand <span className="text-red-500">*</span>
+                    </label>
                     <div className="relative">
                       <input
                         type="text"
@@ -463,73 +544,81 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                           handleInputChange(index, e);
                           if (stockIn.productId) {
                             const searchTerm = e.target.value.toLowerCase();
-                            const filtered = (inputBrands[index] || [])
-                              .filter(brand => 
-                                brand.productId === stockIn.productId && 
+                            const filtered = (inputBrands[index] || []).filter(
+                              (brand) =>
+                                brand.productId === stockIn.productId &&
                                 brand.name.toLowerCase().includes(searchTerm)
-                              );
-                            setFilteredBrands(prev => ({
+                            );
+                            setFilteredBrands((prev) => ({
                               ...prev,
-                              [index]: filtered
+                              [index]: filtered,
                             }));
-                            setShowBrandSuggestions(prev => ({
+                            setShowBrandSuggestions((prev) => ({
                               ...prev,
-                              [index]: true
+                              [index]: true,
                             }));
                           }
                         }}
                         onFocus={() => {
                           if (stockIn.productId) {
-                            const filtered = (inputBrands[index] || [])
-                              .filter(brand => brand.productId === stockIn.productId);
-                            setFilteredBrands(prev => ({
+                            const filtered = (inputBrands[index] || []).filter(
+                              (brand) => brand.productId === stockIn.productId
+                            );
+                            setFilteredBrands((prev) => ({
                               ...prev,
-                              [index]: filtered
+                              [index]: filtered,
                             }));
-                            setShowBrandSuggestions(prev => ({
+                            setShowBrandSuggestions((prev) => ({
                               ...prev,
-                              [index]: true
+                              [index]: true,
                             }));
                           }
                         }}
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                        placeholder={stockIn.productId ? "Select or type new brand name" : "Select a product first"}
+                        placeholder={
+                          stockIn.productId
+                            ? "Select or type new brand name"
+                            : "Select a product first"
+                        }
                         disabled={!stockIn.productId}
                       />
-                      {showBrandSuggestions[index] && filteredBrands[index]?.length > 0 && (
-                        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                          {filteredBrands[index].map(brand => (
-                            <div
-                              key={brand.id}
-                              className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-700"
-                              onClick={() => {
-                                const newInputs = [...stockInInputs];
-                                newInputs[index] = {
-                                  ...newInputs[index],
-                                  brandId: brand.id,
-                                  brandName: brand.name
-                                };
-                                setStockInInputs(newInputs);
-                                setShowBrandSuggestions(prev => ({
-                                  ...prev,
-                                  [index]: false
-                                }));
-                              }}
-                            >
-                              {brand.name}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      {showBrandSuggestions[index] &&
+                        filteredBrands[index]?.length > 0 && (
+                          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            {filteredBrands[index].map((brand) => (
+                              <div
+                                key={brand.id}
+                                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-700"
+                                onClick={() => {
+                                  const newInputs = [...stockInInputs];
+                                  newInputs[index] = {
+                                    ...newInputs[index],
+                                    brandId: brand.id,
+                                    brandName: brand.name,
+                                  };
+                                  setStockInInputs(newInputs);
+                                  setShowBrandSuggestions((prev) => ({
+                                    ...prev,
+                                    [index]: false,
+                                  }));
+                                }}
+                              >
+                                {brand.name}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">Quantity</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Quantity <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="number"
                       name="quantity"
-                      value={stockIn.quantity === 0 ? '' : stockIn.quantity}
+                      value={stockIn.quantity === 0 ? "" : stockIn.quantity}
                       onChange={(e) => handleInputChange(index, e)}
                       required
                       min="1"
@@ -538,11 +627,15 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">Price Per Unit</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Price Per Unit <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="number"
                       name="pricePerUnit"
-                      value={stockIn.pricePerUnit === 0 ? '' : stockIn.pricePerUnit}
+                      value={
+                        stockIn.pricePerUnit === 0 ? "" : stockIn.pricePerUnit
+                      }
                       onChange={(e) => handleInputChange(index, e)}
                       required
                       min="0"
@@ -552,7 +645,9 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">Comments</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Comments
+                    </label>
                     <textarea
                       name="comments"
                       value={stockIn.comments}
@@ -579,7 +674,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                 type="submit"
                 className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
               >
-                {editingStockIn ? 'Update Stock In' : 'Create Stock In(s)'}
+                {editingStockIn ? "Update Stock In" : "Create Stock In(s)"}
               </button>
             </div>
           </form>
@@ -591,26 +686,67 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Date</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">User Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Brand Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Product Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Service Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Quantity</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Unit Price</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Actions</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                  Date
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                  User Name
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                  Brand Name
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                  Product Name
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                  Service Name
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                  Quantity
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                  Unit Price
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {stockIns.map((stockIn) => (
-                <tr key={stockIn.id} className="hover:bg-gray-50 transition duration-150">
-                  <td className="px-6 py-4 text-sm text-black">{new Date(stockIn.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Dhaka' })}</td>
-                  <td className="px-6 py-4 text-sm text-black">{stockIn.createdBy}</td>
-                  <td className="px-6 py-4 text-sm text-black">{stockIn.brandName}</td>
-                  <td className="px-6 py-4 text-sm text-black">{stockIn.productName}</td>
-                  <td className="px-6 py-4 text-sm text-black">{stockIn.serviceName}</td>
-                  <td className="px-6 py-4 text-sm text-black">{stockIn.quantity}</td>
-                  <td className="px-6 py-4 text-sm text-black">${stockIn.pricePerUnit.toFixed(2)}</td>
+                <tr
+                  key={stockIn.id}
+                  className="hover:bg-gray-50 transition duration-150"
+                >
+                  <td className="px-6 py-4 text-sm text-black">
+                    {new Date(stockIn.createdAt).toLocaleString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                      timeZone: "Asia/Dhaka",
+                    })}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-black">
+                    {stockIn.createdBy}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-black">
+                    {stockIn.brandName}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-black">
+                    {stockIn.productName}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-black">
+                    {stockIn.serviceName}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-black">
+                    {stockIn.quantity}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-black">
+                    ${stockIn.pricePerUnit.toFixed(2)}
+                  </td>
                   <td className="px-6 py-4 text-sm">
                     <div className="flex gap-2">
                       {canView && (
@@ -618,9 +754,24 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                           onClick={() => handleViewDetails(stockIn)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition duration-200"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                            />
                           </svg>
                           View
                         </button>
@@ -630,8 +781,18 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                           onClick={() => handleEdit(stockIn)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-md transition duration-200"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
                           </svg>
                           Edit
                         </button>
@@ -641,8 +802,18 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                           onClick={() => handleDelete(stockIn.id)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md transition duration-200"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
                           </svg>
                           Delete
                         </button>
@@ -668,45 +839,82 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                   onClick={() => setSelectedStockIn(null)}
                   className="rounded-full p-1.5 text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
-              
+
               <div className="space-y-6">
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="text-sm font-semibold text-gray-500 mb-2">Product Details</h4>
+                  <h4 className="text-sm font-semibold text-gray-500 mb-2">
+                    Product Details
+                  </h4>
                   <div className="space-y-2">
-                    <p className="text-gray-900">Product: {selectedStockIn.productName}</p>
-                    <p className="text-gray-900">Service: {selectedStockIn.serviceName}</p>
-                    <p className="text-gray-900">Brand: {selectedStockIn.brandName}</p>
-                  </div>
-                </div>
-                
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="text-sm font-semibold text-gray-500 mb-2">Stock Information</h4>
-                  <div className="space-y-2">
-                    <p className="text-gray-900">Quantity: {selectedStockIn.quantity}</p>
-                    <p className="text-gray-900">Price Per Unit: ${selectedStockIn.pricePerUnit.toFixed(2)}</p>
-                    <p className="text-gray-900">Total Value: ${(selectedStockIn.quantity * selectedStockIn.pricePerUnit).toFixed(2)}</p>
+                    <p className="text-gray-900">
+                      Product: {selectedStockIn.productName}
+                    </p>
+                    <p className="text-gray-900">
+                      Service: {selectedStockIn.serviceName}
+                    </p>
+                    <p className="text-gray-900">
+                      Brand: {selectedStockIn.brandName}
+                    </p>
                   </div>
                 </div>
 
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="text-sm font-semibold text-gray-500 mb-2">Additional Information</h4>
+                  <h4 className="text-sm font-semibold text-gray-500 mb-2">
+                    Stock Information
+                  </h4>
+                  <div className="space-y-2">
+                    <p className="text-gray-900">
+                      Quantity: {selectedStockIn.quantity}
+                    </p>
+                    <p className="text-gray-900">
+                      Price Per Unit: ${selectedStockIn.pricePerUnit.toFixed(2)}
+                    </p>
+                    <p className="text-gray-900">
+                      Total Value: $
+                      {(
+                        selectedStockIn.quantity * selectedStockIn.pricePerUnit
+                      ).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="text-sm font-semibold text-gray-500 mb-2">
+                    Additional Information
+                  </h4>
                   <p className="text-gray-900">{selectedStockIn.comments}</p>
                 </div>
-                
+
                 <div className="flex gap-4">
                   <div className="flex-1 bg-gray-50 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Created By</h4>
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">
+                      Created By
+                    </h4>
                     <p className="text-gray-900">{selectedStockIn.createdBy}</p>
                   </div>
-                  
+
                   <div className="flex-1 bg-gray-50 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Created At</h4>
-                    <p className="text-gray-900">{new Date(selectedStockIn.createdAt).toLocaleString()}</p>
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">
+                      Created At
+                    </h4>
+                    <p className="text-gray-900">
+                      {new Date(selectedStockIn.createdAt).toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </div>

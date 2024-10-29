@@ -230,7 +230,9 @@ const BrandManagement: React.FC = () => {
 
             <div className="grid gap-6">
               <div>
-                <label className="block text-sm font-medium text-black mb-2">Service</label>
+                <label className="block text-sm font-medium text-black mb-2">
+                  Service <span className="text-red-500">*</span>
+                </label>
                 <select
                   value={selectedService}
                   onChange={handleServiceChange}
@@ -245,7 +247,9 @@ const BrandManagement: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-black mb-2">Product</label>
+                <label className="block text-sm font-medium text-black mb-2">
+                  Product <span className="text-red-500">*</span>
+                </label>
                 <select
                   value={selectedProduct}
                   onChange={(e) => setSelectedProduct(e.target.value)}
@@ -260,7 +264,9 @@ const BrandManagement: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-black mb-2">Brand Name</label>
+                <label className="block text-sm font-medium text-black mb-2">
+                  Brand Name <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   value={newBrand}

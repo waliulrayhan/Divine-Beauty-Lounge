@@ -328,7 +328,9 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
 
                 <div className="grid gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">Service</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Service <span className="text-red-500">*</span>
+                    </label>
                     <select
                       name="serviceId"
                       value={stockOut.serviceId}
@@ -344,7 +346,7 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">Product</label>
+                    <label className="block text-sm font-medium text-black mb-2">Product <span className="text-red-500">*</span></label>
                     <select
                       name="productId"
                       value={stockOut.productId}
@@ -362,7 +364,7 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">Brand</label>
+                    <label className="block text-sm font-medium text-black mb-2">Brand <span className="text-red-500">*</span></label>
                     <select
                       name="brandId"
                       value={stockOut.brandId}
@@ -380,7 +382,7 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">Quantity</label>
+                    <label className="block text-sm font-medium text-black mb-2">Quantity <span className="text-red-500">*</span></label>
                     <input
                       type="number"
                       name="quantity"

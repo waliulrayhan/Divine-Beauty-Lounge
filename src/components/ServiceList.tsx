@@ -296,7 +296,9 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
 
                 <div className="grid gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">Service Name</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Service Name <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       name="name"
@@ -308,7 +310,9 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">Description</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Description <span className="text-red-500">*</span>
+                    </label>
                     <textarea
                       name="description"
                       value={service.description}
@@ -320,7 +324,9 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">Service Charge</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Service Charge <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="number"
                       name="serviceCharge"
@@ -337,13 +343,6 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
             ))}
 
             <div className="flex justify-end gap-4 mt-6">
-              {/* <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-300"
-              >
-                Cancel
-              </button> */}
               {!isEditing && (
                 <button
                   type="button"

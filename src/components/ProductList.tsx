@@ -252,7 +252,9 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
 
                 <div className="grid gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">Product Name</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Product Name <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       name="name"
@@ -264,7 +266,9 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">Description</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Description <span className="text-red-500">*</span>
+                    </label>
                     <textarea
                       name="description"
                       value={product.description}
@@ -276,7 +280,9 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-black mb-2">Service</label>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      Service <span className="text-red-500">*</span>
+                    </label>
                     <select
                       name="serviceId"
                       value={product.serviceId}

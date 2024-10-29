@@ -303,7 +303,7 @@ export default function UserManagement() {
             <div className="grid gap-6">
               <div>
                 <label className="block text-sm font-medium text-black mb-2">
-                  Employee ID
+                  Employee ID <span className="text-red-500">*</span> 
                 </label>
                 <input
                   type="text"
@@ -318,7 +318,7 @@ export default function UserManagement() {
 
               <div>
                 <label className="block text-sm font-medium text-black mb-2">
-                  Username
+                  Username <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -333,7 +333,7 @@ export default function UserManagement() {
 
               <div>
                 <label className="block text-sm font-medium text-black mb-2">
-                  Email
+                  Email <span className="text-red-500">*</span> 
                 </label>
                 <input
                   type="email"
@@ -348,7 +348,7 @@ export default function UserManagement() {
 
               <div>
                 <label className="block text-sm font-medium text-black mb-2">
-                  Phone Number
+                  Phone Number <span className="text-red-500">*</span>  
                 </label>
                 <input
                   type="tel"
@@ -363,7 +363,7 @@ export default function UserManagement() {
 
               <div>
                 <label className="block text-sm font-medium text-black mb-2">
-                  NID Number
+                  NID Number <span className="text-red-500">*</span>  
                 </label>
                 <input
                   type="text"
@@ -378,7 +378,7 @@ export default function UserManagement() {
 
               <div>
                 <label className="block text-sm font-medium text-black mb-2">
-                  Job Start Date
+                  Job Start Date <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -405,7 +405,7 @@ export default function UserManagement() {
 
               <div>
                 <label className="block text-sm font-medium text-black mb-2">
-                  Status & Role
+                  Status & Role <span className="text-red-500">*</span>
                 </label>
                 <div className="flex items-center space-x-6">
                   <label className="inline-flex items-center">
@@ -435,7 +435,7 @@ export default function UserManagement() {
               {!editingUser && (
                 <div>
                   <label className="block text-sm font-medium text-black mb-2">
-                    Password
+                    Password <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="password"
@@ -451,7 +451,7 @@ export default function UserManagement() {
 
               <div>
                 <h4 className="text-lg font-semibold text-black mb-4">
-                  User Permissions
+                  User Permissions <span className="text-red-500">*</span>
                 </h4>
                 <div className="grid grid-cols-2 gap-6">
                   {(["service", "product", "stockIn", "stockOut"] as const).map(
