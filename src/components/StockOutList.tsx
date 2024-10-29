@@ -56,6 +56,7 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
   const [selectedStockOut, setSelectedStockOut] = useState<StockOut | null>(null);
   const [inputProducts, setInputProducts] = useState<{ [key: number]: Product[] }>({});
   const [inputBrands, setInputBrands] = useState<{ [key: number]: Brand[] }>({});
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchStockOuts();
@@ -64,6 +65,7 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
 
   const fetchStockOuts = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch("/api/stock-out");
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -73,6 +75,8 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
     } catch (error) {
       console.error("Error fetching stock outs:", error);
       toast.error("Failed to load stock outs");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -260,6 +264,14 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
   const canEdit = isSuperAdmin || permissions.includes('edit');
   const canDelete = isSuperAdmin || permissions.includes('delete');
   const canView = isSuperAdmin || permissions.includes('view');
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">

@@ -40,6 +40,7 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
     description: '',
     serviceId: '',
   }]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     console.log("Received permissions:", permissions);
@@ -49,6 +50,7 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
 
   const fetchProducts = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch('/api/products');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -58,6 +60,8 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
     } catch (error) {
       console.error('Error fetching products:', error);
       toast.error('Failed to load products');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -184,6 +188,14 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
   console.log("Can create:", canCreate);
   console.log("Can edit:", canEdit);
   console.log("Can delete:", canDelete);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">

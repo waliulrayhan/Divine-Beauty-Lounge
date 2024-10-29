@@ -62,6 +62,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   const [inputBrands, setInputBrands] = useState<{ [key: number]: Brand[] }>({});
   const [showBrandSuggestions, setShowBrandSuggestions] = useState<{ [key: number]: boolean }>({});
   const [filteredBrands, setFilteredBrands] = useState<{ [key: number]: Brand[] }>({});
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchStockIns();
@@ -84,6 +85,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
 
   const fetchStockIns = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch('/api/stock-in');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -93,6 +95,8 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     } catch (error) {
       console.error('Error fetching stock ins:', error);
       toast.error('Failed to load stock ins');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -334,6 +338,14 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   const canEdit = permissions.includes('edit');
   const canDelete = permissions.includes('delete');
   const canView = permissions.includes('view');
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">

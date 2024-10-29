@@ -13,6 +13,7 @@ interface User {
 
 const UserList: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchUsers();
@@ -20,6 +21,7 @@ const UserList: React.FC = () => {
 
   const fetchUsers = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch('/api/users');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -29,8 +31,18 @@ const UserList: React.FC = () => {
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('Failed to load users');
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">

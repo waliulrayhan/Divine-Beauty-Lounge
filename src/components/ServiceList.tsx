@@ -38,6 +38,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
     serviceCharge: 0,
   }]);
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const canCreate = permissions.includes('create');
   const canEdit = permissions.includes('edit');
@@ -54,6 +55,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
 
   const fetchServices = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch('/api/services');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -63,6 +65,8 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
     } catch (error) {
       console.error('Error fetching services:', error);
       toast.error('Failed to load services');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -166,6 +170,14 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
   const handleViewDetails = (service: Service) => {
     setSelectedService(service);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">
