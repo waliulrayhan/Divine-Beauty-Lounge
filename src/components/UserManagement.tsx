@@ -470,7 +470,10 @@ export default function UserManagement() {
                   value={newUser.employeeId}
                   onChange={handleInputChange}
                   required
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                  disabled={!!editingUser}
+                  className={`w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black ${
+                    editingUser ? 'bg-gray-100 cursor-not-allowed' : ''
+                  }`}
                   placeholder="Enter employee ID"
                 />
               </div>
@@ -485,7 +488,10 @@ export default function UserManagement() {
                   value={newUser.username}
                   onChange={handleInputChange}
                   required
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                  disabled={!!editingUser}
+                  className={`w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black ${
+                    editingUser ? 'bg-gray-100 cursor-not-allowed' : ''
+                  }`}
                   placeholder="Enter username"
                 />
               </div>
@@ -500,7 +506,10 @@ export default function UserManagement() {
                   value={newUser.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                  disabled={!!editingUser}
+                  className={`w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black ${
+                    editingUser ? 'bg-gray-100 cursor-not-allowed' : ''
+                  }`}
                   placeholder="Enter email address"
                 />
               </div>
@@ -530,7 +539,10 @@ export default function UserManagement() {
                   value={newUser.nidNumber}
                   onChange={handleInputChange}
                   required
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                  disabled={!!editingUser}
+                  className={`w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black ${
+                    editingUser ? 'bg-gray-100 cursor-not-allowed' : ''
+                  }`}
                   placeholder="Enter NID number"
                 />
               </div>
