@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
+import Box from '@mui/material/Box';
+import { DataGrid, GridToolbar, GridColDef } from '@mui/x-data-grid';
 
 interface User {
   id: string;
@@ -212,6 +214,114 @@ export default function UserManagement() {
     setSelectedUser(user);
   };
 
+  const columns: GridColDef[] = [
+    { 
+      field: 'employeeId', 
+      headerName: 'Employee ID', 
+      flex: 1,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      type: 'string',
+      align: 'center',
+      headerAlign: 'center'
+    },
+    { 
+      field: 'username', 
+      headerName: 'Username', 
+      flex: 1,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      type: 'string',
+      align: 'center',
+      headerAlign: 'center'
+    },
+    { 
+      field: 'email', 
+      headerName: 'Email', 
+      flex: 1.5,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      type: 'string',
+      align: 'center',
+      headerAlign: 'center'
+    },
+    { 
+      field: 'role', 
+      headerName: 'Role', 
+      flex: 1,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      type: 'string',
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: (params) => (
+        <span className="capitalize">
+          {params.value === 'SUPER_ADMIN' ? 'Admin' : 'User'}
+        </span>
+      )
+    },
+    { 
+      field: 'isActive', 
+      headerName: 'Status', 
+      flex: 1,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      type: 'boolean',
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: (params) => (
+        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+          params.value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        }`}>
+          {params.value ? 'Active' : 'Inactive'}
+        </span>
+      )
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      flex: 1.5,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      sortable: false,
+      filterable: false,
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: (params) => (
+        <div className="flex gap-2 justify-center items-center h-full mt-0">
+          <button
+            onClick={() => handleViewDetails(params.row)}
+            className="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition duration-200 text-sm"
+          >
+            <svg className="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            View
+          </button>
+          <button
+            onClick={() => handleEdit(params.row)}
+            className="px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-md transition duration-200 text-sm"
+          >
+            <svg className="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Edit
+          </button>
+          <button
+            onClick={() => handleDelete(params.row.id)}
+            className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md transition duration-200 text-sm"
+          >
+            <svg className="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -252,21 +362,70 @@ export default function UserManagement() {
           }}
           className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition duration-200 flex items-center gap-2 shadow-lg"
         >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-            />
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
           Add New User
         </button>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <Box sx={{ 
+          height: 600, 
+          width: '100%',
+          '& .table-header': {
+            backgroundColor: '#f8fafc',
+            color: '#1e293b',
+            fontSize: '0.875rem',
+            fontWeight: 600,
+          },
+          '& .table-cell': {
+            fontSize: '0.875rem',
+            color: '#334155',
+          },
+          '& .MuiDataGrid-root': {
+            border: 'none',
+          },
+          '& .MuiDataGrid-cell': {
+            borderBottom: '1px solid #f1f5f9',
+          },
+          '& .MuiDataGrid-columnHeaders': {
+            borderBottom: '2px solid #e2e8f0',
+          },
+          '& .MuiDataGrid-toolbarContainer': {
+            padding: '1rem',
+            backgroundColor: '#ffffff',
+            borderBottom: '1px solid #f1f5f9',
+          },
+          '& .MuiButton-root': {
+            color: '#475569',
+          },
+          '& .MuiInputBase-root': {
+            backgroundColor: '#f8fafc',
+            borderRadius: '0.5rem',
+            padding: '0.25rem 0.5rem',
+          },
+        }}>
+          <DataGrid
+            rows={users}
+            columns={columns}
+            disableColumnFilter
+            disableColumnSelector
+            disableDensitySelector
+            slots={{ toolbar: GridToolbar }}
+            slotProps={{
+              toolbar: {
+                showQuickFilter: true,
+                quickFilterProps: { debounceMs: 500 },
+              },
+            }}
+            sx={{
+              '& .MuiDataGrid-row:hover': {
+                backgroundColor: '#f8fafc',
+              },
+            }}
+          />
+        </Box>
       </div>
 
       {showForm && (
@@ -504,90 +663,6 @@ export default function UserManagement() {
           </form>
         </div>
       )}
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">
-                  Employee ID
-                </th>
-                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">
-                  Username
-                </th>
-                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">
-                  Email
-                </th>
-                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">
-                  Role
-                </th>
-                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">
-                  Active
-                </th>
-                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {users.map((user) => (
-                <tr
-                  key={user.id}
-                  className="hover:bg-gray-50 transition duration-150"
-                >
-                  <td className="py-4 px-6 text-sm text-gray-800">
-                    {user.employeeId}
-                  </td>
-                  <td className="py-4 px-6 text-sm text-gray-600">
-                    {user.username}
-                  </td>
-                  <td className="py-4 px-6 text-sm text-gray-600">
-                    {user.email}
-                  </td>
-                  <td className="py-4 px-6 text-sm text-gray-600">
-                    {user.role === 'SUPER_ADMIN' ? 'Admin' : 'User'}
-                  </td>
-                  <td className="py-4 px-6 text-sm text-gray-600">
-                    {user.isActive ? "Yes" : "No"}
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleViewDetails(user)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        View
-                      </button>
-                      <button
-                        onClick={() => handleEdit(user)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-md transition duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(user.id)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md transition duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
 
       {selectedUser && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900/75 backdrop-blur-sm flex items-center justify-center p-4">
