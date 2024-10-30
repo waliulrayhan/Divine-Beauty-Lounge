@@ -58,7 +58,7 @@ model Product {
 model StockIn {
   id           String   @id @default(uuid())
   productId    String
-  brandName    String
+  brandId      String
   quantity     Int
   pricePerUnit Float
   comments     String?
@@ -66,6 +66,7 @@ model StockIn {
   createdAt    DateTime @default(now())
   createdBy    User     @relation(fields: [createdById], references: [id])
   product      Product  @relation(fields: [productId], references: [id])
+  brand        Brand    @relation(fields: [brandId], references: [id])
 }
 
 model Brand {
@@ -73,6 +74,7 @@ model Brand {
   name      String
   productId String
   product   Product    @relation(fields: [productId], references: [id])
+  stockIns  StockIn[]
   stockOuts StockOut[]
 }
 

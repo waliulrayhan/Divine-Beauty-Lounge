@@ -20,18 +20,23 @@ export async function GET(request: NextRequest) {
             },
           },
         },
+        brand: {
+          select: { name: true },
+        },
         createdBy: {
           select: { username: true },
         },
       },
       orderBy: { createdAt: 'desc' },
     });
+
     const formattedStockIns = stockIns.map(stockIn => ({
       id: stockIn.id,
       productId: stockIn.productId,
       productName: stockIn.product.name,
       serviceName: stockIn.product.service.name,
-      brandName: stockIn.brandName,
+      brandId: stockIn.brandId,
+      brandName: stockIn.brand.name,
       quantity: stockIn.quantity,
       pricePerUnit: stockIn.pricePerUnit,
       comments: stockIn.comments,
@@ -53,11 +58,11 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { productId, brandName, quantity, pricePerUnit, comments } = await request.json();
+    const { productId, brandId, quantity, pricePerUnit, comments } = await request.json();
     const stockIn = await prisma.stockIn.create({
       data: {
         product: { connect: { id: productId } },
-        brandName,
+        brand: { connect: { id: brandId } },
         quantity: parseInt(quantity),
         pricePerUnit: parseFloat(pricePerUnit),
         comments,
