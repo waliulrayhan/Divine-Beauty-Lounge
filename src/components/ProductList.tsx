@@ -113,13 +113,14 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
           body: JSON.stringify(productInputs[0]),
         });
 
+        const data = await response.json();
         if (!response.ok) {
-          throw new Error('Failed to update product');
+          throw new Error(data.error || 'Failed to update product');
         }
 
         toast.success('Product updated successfully');
       } else {
-        // Handle create (existing code)
+        // Handle create
         const responses = await Promise.all(
           productInputs.map(product =>
             fetch('/api/products', {
@@ -130,9 +131,20 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
           )
         );
 
-        const hasError = responses.some(response => !response.ok);
-        if (hasError) {
-          throw new Error('One or more products failed to create');
+        // Check each response and collect errors
+        const results = await Promise.all(
+          responses.map(async (response) => {
+            const data = await response.json();
+            return { ok: response.ok, data };
+          })
+        );
+
+        const errors = results
+          .filter(result => !result.ok)
+          .map(result => result.data.error);
+
+        if (errors.length > 0) {
+          throw new Error(errors.join(', '));
         }
 
         toast.success(`${productInputs.length} product(s) created successfully`);
@@ -140,11 +152,11 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
 
       await fetchProducts();
       setShowForm(false);
-      setEditingProduct(null);
       setProductInputs([{ name: '', description: '', serviceId: '' }]);
+      setEditingProduct(null);
     } catch (error) {
-      console.error('Error saving products:', error);
-      toast.error(editingProduct ? 'Failed to update product' : 'Failed to create products');
+      console.error('Error saving product:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to save product');
     }
   };
 

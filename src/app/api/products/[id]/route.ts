@@ -12,6 +12,27 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
   try {
     const { name, description, serviceId } = await request.json();
+
+    // Check if product name already exists (excluding current product)
+    const existingProduct = await prisma.product.findFirst({
+      where: {
+        name: {
+          equals: name,
+          mode: 'insensitive'
+        },
+        NOT: {
+          id: params.id
+        }
+      }
+    });
+
+    if (existingProduct) {
+      return NextResponse.json(
+        { error: 'A product with this name already exists' },
+        { status: 400 }
+      );
+    }
+
     const product = await prisma.product.update({
       where: { id: params.id },
       data: { 
