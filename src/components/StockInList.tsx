@@ -719,15 +719,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                   className="hover:bg-gray-50 transition duration-150"
                 >
                   <td className="px-6 py-4 text-sm text-black">
-                    {new Date(stockIn.createdAt).toLocaleString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                      timeZone: "Asia/Dhaka",
-                    })}
+                    {new Date(stockIn.createdAt).toLocaleString()}
                   </td>
                   <td className="px-6 py-4 text-sm text-black">
                     {stockIn.createdBy}
