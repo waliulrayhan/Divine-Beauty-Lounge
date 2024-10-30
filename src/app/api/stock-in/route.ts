@@ -37,12 +37,15 @@ export async function GET(request: NextRequest) {
       serviceName: stockIn.product.service.name,
       brandId: stockIn.brandId,
       brandName: stockIn.brand.name,
-      quantity: stockIn.quantity,
-      pricePerUnit: stockIn.pricePerUnit,
+      quantity: Number(stockIn.quantity),
+      pricePerUnit: Number(stockIn.pricePerUnit),
       comments: stockIn.comments,
       createdBy: stockIn.createdBy.username,
       createdAt: stockIn.createdAt,
     }));
+
+    console.log('Formatted Stock Ins:', formattedStockIns);
+
     return NextResponse.json(formattedStockIns);
   } catch (error) {
     console.error('Error fetching stock ins:', error);
