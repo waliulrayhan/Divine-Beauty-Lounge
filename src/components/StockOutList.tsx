@@ -434,7 +434,7 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Date</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Date & Time</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">User Name</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Brand Name</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Product Name</th>
@@ -516,53 +516,77 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
                   onClick={() => setSelectedStockOut(null)}
                   className="rounded-full p-1.5 text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
-              
+
               <div className="space-y-6">
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="text-sm font-semibold text-gray-500 mb-2">Date</h4>
-                  <p className="text-gray-900">{new Date(selectedStockOut.createdAt).toLocaleString()}</p>
-                </div>
-                
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="text-sm font-semibold text-gray-500 mb-2">User Name</h4>
-                  <p className="text-gray-900">{selectedStockOut.createdBy}</p>
-                </div>
-                
-                <div className="flex gap-4">
-                  <div className="flex-1 bg-gray-50 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Brand Name</h4>
-                    <p className="text-gray-900">{selectedStockOut.brandName}</p>
-                  </div>
-                  
-                  <div className="flex-1 bg-gray-50 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Product Name</h4>
-                    <p className="text-gray-900">{selectedStockOut.productName}</p>
+                  <h4 className="text-sm font-semibold text-gray-500 mb-2">
+                    Product Details
+                  </h4>
+                  <div className="space-y-2">
+                    <p className="text-gray-900">
+                      Product: {selectedStockOut.productName}
+                    </p>
+                    <p className="text-gray-900">
+                      Service: {selectedStockOut.serviceName}
+                    </p>
+                    <p className="text-gray-900">
+                      Brand: {selectedStockOut.brandName}
+                    </p>
                   </div>
                 </div>
 
-                <div className="flex gap-4">
-                  <div className="flex-1 bg-gray-50 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Service Name</h4>
-                    <p className="text-gray-900">{selectedStockOut.serviceName}</p>
-                  </div>
-                  
-                  <div className="flex-1 bg-gray-50 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Quantity</h4>
-                    <p className="text-gray-900">{selectedStockOut.quantity}</p>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="text-sm font-semibold text-gray-500 mb-2">
+                    Stock Information
+                  </h4>
+                  <div className="space-y-2">
+                    <p className="text-gray-900">
+                      Quantity: {selectedStockOut.quantity}
+                    </p>
                   </div>
                 </div>
 
                 {selectedStockOut.comments && (
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-gray-500 mb-2">Comments</h4>
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">
+                      Additional Information
+                    </h4>
                     <p className="text-gray-900">{selectedStockOut.comments}</p>
                   </div>
                 )}
+
+                <div className="flex gap-4">
+                  <div className="flex-1 bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">
+                      Created By
+                    </h4>
+                    <p className="text-gray-900">{selectedStockOut.createdBy}</p>
+                  </div>
+
+                  <div className="flex-1 bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-2">
+                      Created At
+                    </h4>
+                    <p className="text-gray-900">
+                      {new Date(selectedStockOut.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

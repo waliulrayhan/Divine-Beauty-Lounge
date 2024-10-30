@@ -687,7 +687,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  Date
+                  Date & Time
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
                   User Name
@@ -745,7 +745,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                     {stockIn.quantity}
                   </td>
                   <td className="px-6 py-4 text-sm text-black">
-                    ${stockIn.pricePerUnit.toFixed(2)}
+                    {stockIn.pricePerUnit.toFixed(2)} Tk
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <div className="flex gap-2">
@@ -882,13 +882,12 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                       Quantity: {selectedStockIn.quantity}
                     </p>
                     <p className="text-gray-900">
-                      Price Per Unit: ${selectedStockIn.pricePerUnit.toFixed(2)}
+                      Price Per Unit: {selectedStockIn.pricePerUnit.toFixed(2)} Tk
                     </p>
                     <p className="text-gray-900">
-                      Total Value: $
-                      {(
+                      Total Value: {(
                         selectedStockIn.quantity * selectedStockIn.pricePerUnit
-                      ).toFixed(2)}
+                      ).toFixed(2)} Tk
                     </p>
                   </div>
                 </div>

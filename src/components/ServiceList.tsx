@@ -334,7 +334,6 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
                       onChange={(e) => handleInputChange(index, e)}
                       required
                       min="0"
-                      step="0.01"
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                     />
                   </div>

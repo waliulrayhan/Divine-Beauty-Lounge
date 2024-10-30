@@ -545,7 +545,7 @@ export default function UserManagement() {
                     {user.email}
                   </td>
                   <td className="py-4 px-6 text-sm text-gray-600">
-                    {user.role}
+                    {user.role === 'SUPER_ADMIN' ? 'Admin' : 'User'}
                   </td>
                   <td className="py-4 px-6 text-sm text-gray-600">
                     {user.isActive ? "Yes" : "No"}
@@ -762,7 +762,7 @@ export default function UserManagement() {
                       <div className="flex items-center gap-4">
                         <div>
                           <label className="text-xs font-medium text-gray-500">
-                            Status
+                            Status: 
                           </label>
                           <span
                             className={`mt-1 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
@@ -787,13 +787,13 @@ export default function UserManagement() {
                       <div className="flex items-center gap-4">
                         <div>
                           <label className="text-xs font-medium text-gray-500">
-                            Role
+                            Role: 
                           </label>
                           <span className="mt-1 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
-                            {selectedUser.role}
+                            {selectedUser.role === 'SUPER_ADMIN' ? 'Admin' : 'User'}
                           </span>
                         </div>
                       </div>

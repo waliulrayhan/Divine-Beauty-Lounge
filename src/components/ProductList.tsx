@@ -329,8 +329,6 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
                 <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Name</th>
                 <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Description</th>
                 <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Service</th>
-                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Created By</th>
-                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Created At</th>
                 <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Actions</th>
               </tr>
             </thead>
@@ -340,8 +338,6 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
                   <td className="py-4 px-6 text-sm text-gray-800">{product.name}</td>
                   <td className="py-4 px-6 text-sm text-gray-600">{product.description}</td>
                   <td className="py-4 px-6 text-sm text-gray-600">{product.serviceName}</td>
-                  <td className="py-4 px-6 text-sm text-gray-600">{product.createdBy}</td>
-                  <td className="py-4 px-6 text-sm text-gray-600">{new Date(product.createdAt).toLocaleString()}</td>
                   <td className="px-6 py-4 text-sm">
                     <div className="flex gap-2">
                       <button
