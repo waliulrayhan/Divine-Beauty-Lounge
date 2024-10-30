@@ -54,6 +54,24 @@ export async function POST(request: NextRequest) {
 
   try {
     const { name, productId } = await request.json();
+    
+    // Check if brand name already exists
+    const existingBrand = await prisma.brand.findFirst({
+      where: {
+        name: {
+          equals: name,
+          mode: 'insensitive' // Case-insensitive comparison
+        }
+      }
+    });
+
+    if (existingBrand) {
+      return NextResponse.json(
+        { error: 'A brand with this name already exists' }, 
+        { status: 400 }
+      );
+    }
+
     const brand = await prisma.brand.create({
       data: {
         name,

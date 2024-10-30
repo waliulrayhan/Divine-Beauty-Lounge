@@ -12,6 +12,27 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
   try {
     const { name } = await request.json();
+    
+    // Check if brand name already exists (excluding current brand)
+    const existingBrand = await prisma.brand.findFirst({
+      where: {
+        name: {
+          equals: name,
+          mode: 'insensitive'
+        },
+        NOT: {
+          id: params.id
+        }
+      }
+    });
+
+    if (existingBrand) {
+      return NextResponse.json(
+        { error: 'A brand with this name already exists' }, 
+        { status: 400 }
+      );
+    }
+
     const brand = await prisma.brand.update({
       where: { id: params.id },
       data: { name },

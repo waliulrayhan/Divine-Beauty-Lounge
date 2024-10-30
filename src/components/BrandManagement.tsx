@@ -110,14 +110,18 @@ const BrandManagement: React.FC = () => {
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to save brand');
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save brand');
+      }
       
       await fetchBrands();
       toast.success(`Brand ${editingBrand ? 'updated' : 'created'} successfully`);
       handleCloseForm();
     } catch (error) {
       console.error('Error saving brand:', error);
-      toast.error('Failed to save brand');
+      toast.error(error instanceof Error ? error.message : 'Failed to save brand');
     }
   };
 
