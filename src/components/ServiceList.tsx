@@ -192,8 +192,8 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
       flex: 1,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
-      // align: 'center',
-      // headerAlign: 'center'
+      align: 'center',
+      headerAlign: 'center'
     },
     { 
       field: 'description', 
@@ -201,7 +201,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
       flex: 2,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
-      // align: 'center',
+      align: 'center',
       headerAlign: 'center'
     },
     { 
