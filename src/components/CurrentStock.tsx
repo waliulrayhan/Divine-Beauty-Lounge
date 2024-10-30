@@ -44,7 +44,9 @@ const CurrentStock: React.FC = () => {
       flex: 1,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
-      type: 'string'
+      type: 'string',
+      align: 'center',
+      headerAlign: 'center'
     },
     { 
       field: 'productName', 
@@ -52,7 +54,9 @@ const CurrentStock: React.FC = () => {
       flex: 1,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
-      type: 'string'
+      type: 'string',
+      align: 'center',
+      headerAlign: 'center'
     },
     { 
       field: 'serviceName', 
@@ -60,7 +64,9 @@ const CurrentStock: React.FC = () => {
       flex: 1,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
-      type: 'string'
+      type: 'string',
+      align: 'center',
+      headerAlign: 'center'
     },
     { 
       field: 'totalStockIn', 

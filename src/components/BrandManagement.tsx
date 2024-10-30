@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import Box from '@mui/material/Box';
+import { DataGrid, GridToolbar, GridColDef } from '@mui/x-data-grid';
 
 interface Brand {
   id: string;
@@ -191,6 +193,75 @@ const BrandManagement: React.FC = () => {
     resetForm();
   };
 
+  const columns: GridColDef[] = [
+    { 
+      field: 'name', 
+      headerName: 'Brand Name', 
+      flex: 1,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      type: 'string',
+      align: 'center',
+      headerAlign: 'center'
+    },
+    { 
+      field: 'productName', 
+      headerName: 'Product', 
+      flex: 1,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      type: 'string',
+      align: 'center',
+      headerAlign: 'center'
+    },
+    { 
+      field: 'serviceName', 
+      headerName: 'Service', 
+      flex: 1,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      type: 'string',
+      align: 'center',
+      headerAlign: 'center'
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      flex: 1,
+      headerClassName: 'table-header',
+      cellClassName: 'table-cell',
+      sortable: false,
+      filterable: false,
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: (params) => (
+        <div className="flex gap-2 justify-center items-center h-full mt-0">
+          <button
+            onClick={() => {
+              console.log('Editing brand:', params.row);
+              handleEdit(params.row);
+            }}
+            className="px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-md transition duration-200 text-sm"
+          >
+            <svg className="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Edit
+          </button>
+          <button
+            onClick={() => handleDelete(params.row.id)}
+            className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md transition duration-200 text-sm"
+          >
+            <svg className="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -212,6 +283,65 @@ const BrandManagement: React.FC = () => {
           </svg>
           Add New Brand
         </button>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <Box sx={{ 
+          height: 600, 
+          width: '100%',
+          '& .table-header': {
+            backgroundColor: '#f8fafc',
+            color: '#1e293b',
+            fontSize: '0.875rem',
+            fontWeight: 600,
+          },
+          '& .table-cell': {
+            fontSize: '0.875rem',
+            color: '#334155',
+          },
+          '& .MuiDataGrid-root': {
+            border: 'none',
+          },
+          '& .MuiDataGrid-cell': {
+            borderBottom: '1px solid #f1f5f9',
+          },
+          '& .MuiDataGrid-columnHeaders': {
+            borderBottom: '2px solid #e2e8f0',
+          },
+          '& .MuiDataGrid-toolbarContainer': {
+            padding: '1rem',
+            backgroundColor: '#ffffff',
+            borderBottom: '1px solid #f1f5f9',
+          },
+          '& .MuiButton-root': {
+            color: '#475569',
+          },
+          '& .MuiInputBase-root': {
+            backgroundColor: '#f8fafc',
+            borderRadius: '0.5rem',
+            padding: '0.25rem 0.5rem',
+          },
+        }}>
+          <DataGrid
+            rows={brands}
+            columns={columns}
+            disableColumnFilter
+            disableColumnSelector
+            disableDensitySelector
+            slots={{ toolbar: GridToolbar }}
+            slotProps={{
+              toolbar: {
+                showQuickFilter: true,
+                quickFilterProps: { debounceMs: 500 },
+              },
+            }}
+            sx={{
+              '& .MuiDataGrid-row:hover': {
+                backgroundColor: '#f8fafc',
+              },
+            }}
+          />
+        </Box>
       </div>
 
       {showForm && (
@@ -293,55 +423,6 @@ const BrandManagement: React.FC = () => {
           </form>
         </div>
       )}
-
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Brand Name</th>
-                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Product</th>
-                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Service</th>
-                <th className="py-4 px-6 text-left text-sm font-semibold text-gray-600">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {brands.map(brand => (
-                <tr key={brand.id} className="hover:bg-gray-50 transition duration-150">
-                  <td className="py-4 px-6 text-sm text-gray-800">{brand.name}</td>
-                  <td className="py-4 px-6 text-sm text-gray-600">{brand.productName}</td>
-                  <td className="py-4 px-6 text-sm text-gray-600">{brand.serviceName}</td>
-                  <td className="px-6 py-4 text-sm">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          console.log('Editing brand:', brand);
-                          handleEdit(brand);
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-md transition duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(brand.id)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md transition duration-200"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
     </div>
   );
 };
