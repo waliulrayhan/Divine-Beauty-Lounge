@@ -104,13 +104,14 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
           body: JSON.stringify(serviceInputs[0]),
         });
 
+        const data = await response.json();
         if (!response.ok) {
-          throw new Error('Failed to update service');
+          throw new Error(data.error || 'Failed to update service');
         }
 
         toast.success('Service updated successfully');
       } else {
-        // Handle create (existing code)
+        // Handle create
         const responses = await Promise.all(
           serviceInputs.map(service =>
             fetch('/api/services', {
@@ -121,9 +122,20 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
           )
         );
 
-        const hasError = responses.some(response => !response.ok);
-        if (hasError) {
-          throw new Error('One or more services failed to create');
+        // Check each response and collect errors
+        const results = await Promise.all(
+          responses.map(async (response) => {
+            const data = await response.json();
+            return { ok: response.ok, data };
+          })
+        );
+
+        const errors = results
+          .filter(result => !result.ok)
+          .map(result => result.data.error);
+
+        if (errors.length > 0) {
+          throw new Error(errors.join(', '));
         }
 
         toast.success(`${serviceInputs.length} service(s) created successfully`);
@@ -136,7 +148,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
       setEditingService(null);
     } catch (error) {
       console.error('Error saving service:', error);
-      toast.error(isEditing ? 'Failed to update service' : 'Failed to create services');
+      toast.error(error instanceof Error ? error.message : 'Failed to save service');
     }
   };
 

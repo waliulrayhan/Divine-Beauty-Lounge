@@ -12,6 +12,27 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
   try {
     const { name, description, serviceCharge } = await request.json();
+
+    // Check if service name already exists (excluding current service)
+    const existingService = await prisma.service.findFirst({
+      where: {
+        name: {
+          equals: name,
+          mode: 'insensitive'
+        },
+        NOT: {
+          id: params.id
+        }
+      }
+    });
+
+    if (existingService) {
+      return NextResponse.json(
+        { error: 'A service with this name already exists' },
+        { status: 400 }
+      );
+    }
+
     const service = await prisma.service.update({
       where: { id: params.id },
       data: { name, description, serviceCharge },
