@@ -14,7 +14,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(""); // Reset the error state before submitting
+    setError("");
 
     try {
       const result = await signIn("credentials", {
@@ -24,9 +24,9 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError(result.error); // Display error returned from NextAuth
+        setError(result.error);
       } else {
-        router.push("/dashboard"); // Redirect to dashboard on success
+        router.push("/dashboard");
       }
     } catch (error) {
       console.error("An error occurred during login:", error);
@@ -35,16 +35,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600">
-      <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#D9CFF5] to-[#FAF8F5]">
+      <div className="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md border border-[#D9CFF5]">
+        <h2 className="text-3xl font-bold text-center text-[#4C306D] mb-8">
           Welcome Back!
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label
               htmlFor="email"
-              className="text-sm font-bold text-gray-700 block mb-2"
+              className="text-sm font-semibold text-[#333333] block mb-2"
             >
               Email
             </label>
@@ -52,7 +52,7 @@ export default function LoginPage() {
               id="email"
               type="email"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+              className="w-full px-4 py-3 border border-[#D9CFF5] rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6B4FA0] focus:border-transparent text-[#333333]"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -61,7 +61,7 @@ export default function LoginPage() {
           <div>
             <label
               htmlFor="password"
-              className="text-sm font-bold text-gray-700 block mb-2"
+              className="text-sm font-semibold text-[#333333] block mb-2"
             >
               Password
             </label>
@@ -70,14 +70,14 @@ export default function LoginPage() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                className="w-full px-4 py-3 border border-[#D9CFF5] rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6B4FA0] focus:border-transparent text-[#333333]"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-black"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-[#6B4FA0]"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
@@ -97,17 +97,17 @@ export default function LoginPage() {
           <div>
             <button
               type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+              className="w-full flex justify-center py-3 px-4 rounded-lg text-white bg-gradient-to-r from-[#6B4FA0] to-[#4C306D] hover:from-[#4C306D] hover:to-[#6B4FA0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6B4FA0] transition-all duration-300 shadow-lg hover:shadow-xl font-medium"
             >
               Sign In
             </button>
           </div>
         </form>
-        <div className="mt-4 text-center">
-          <span className="text-sm text-gray-600">
+        <div className="mt-6 text-center">
+          <span className="text-[#333333] text-sm">
             Don't have email and password?{" "}
           </span>
-          <Link href="#" className="text-sm text-blue-600 hover:text-blue-800">
+          <Link href="#" className="text-[#6B4FA0] hover:text-[#4C306D] text-sm font-medium transition-colors duration-200">
             Contact Admin
           </Link>
         </div>

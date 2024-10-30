@@ -34,20 +34,20 @@ export default function Dashboard({ user, children }: DashboardProps) {
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
+    <div className="min-h-screen flex bg-[#FAF8F5]">
       {/* Sidebar */}
       <div
-        className={`bg-gradient-to-br from-blue-900 to-indigo-900 text-white ${
+        className={`bg-gradient-to-br from-[#6B4FA0] to-[#4C306D] text-white ${
           isSidebarOpen ? "w-72" : "w-20"
         } space-y-2 py-8 px-4 absolute inset-y-0 left-0 transform md:relative transition-all duration-200 ease-in-out z-20 shadow-lg`}
       >
         <div className={`px-4 mb-8 ${!isSidebarOpen && "text-center"}`}>
           {isSidebarOpen ? (
-            <h2 className="text-2xl font-bold text-white mb-2">Admin Panel</h2>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-[#FAF8F5] to-[#F8E5B3] bg-clip-text text-transparent mb-2">Divine Beauty</h2>
           ) : (
             <div className="flex justify-center">
               <svg
-                className="w-8 h-8"
+                className="w-8 h-8 text-[#D9CFF5]"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -62,7 +62,7 @@ export default function Dashboard({ user, children }: DashboardProps) {
             </div>
           )}
           <div
-            className={`h-1 bg-blue-400 rounded-full ${
+            className={`h-1 bg-[#D9CFF5] rounded-full ${
               isSidebarOpen ? "w-16" : "w-8 mx-auto"
             }`}
           ></div>
@@ -71,7 +71,7 @@ export default function Dashboard({ user, children }: DashboardProps) {
         <nav className="space-y-1">
           <Link
             href="/current-stock"
-            className="flex items-center px-4 py-3 text-gray-100 rounded-lg transition-all duration-200 hover:bg-blue-800 hover:shadow-md group"
+            className="flex items-center px-4 py-3 text-[#FAF8F5] rounded-lg transition-all duration-200 hover:bg-[#4C306D] hover:shadow-md group"
           >
             <span className="inline-block mr-3">
               <svg
@@ -95,7 +95,7 @@ export default function Dashboard({ user, children }: DashboardProps) {
 
           <Link
             href="/stock-in"
-            className="flex items-center px-4 py-3 text-gray-100 rounded-lg transition-all duration-200 hover:bg-blue-800 hover:shadow-md group"
+            className="flex items-center px-4 py-3 text-[#FAF8F5] rounded-lg transition-all duration-200 hover:bg-[#4C306D] hover:shadow-md group"
           >
             <span className="inline-block mr-3">
               <svg
@@ -117,7 +117,7 @@ export default function Dashboard({ user, children }: DashboardProps) {
 
           <Link
             href="/stock-out"
-            className="flex items-center px-4 py-3 text-gray-100 rounded-lg transition-all duration-200 hover:bg-blue-800 hover:shadow-md group"
+            className="flex items-center px-4 py-3 text-[#FAF8F5] rounded-lg transition-all duration-200 hover:bg-[#4C306D] hover:shadow-md group"
           >
             <span className="inline-block mr-3">
               <svg
@@ -139,7 +139,7 @@ export default function Dashboard({ user, children }: DashboardProps) {
 
           <Link
             href="/service-list"
-            className="flex items-center px-4 py-3 text-gray-100 rounded-lg transition-all duration-200 hover:bg-blue-800 hover:shadow-md group"
+            className="flex items-center px-4 py-3 text-[#FAF8F5] rounded-lg transition-all duration-200 hover:bg-[#4C306D] hover:shadow-md group"
           >
             <span className="inline-block mr-3">
               <svg
@@ -163,7 +163,7 @@ export default function Dashboard({ user, children }: DashboardProps) {
 
           <Link
             href="/product-list"
-            className="flex items-center px-4 py-3 text-gray-100 rounded-lg transition-all duration-200 hover:bg-blue-800 hover:shadow-md group"
+            className="flex items-center px-4 py-3 text-[#FAF8F5] rounded-lg transition-all duration-200 hover:bg-[#4C306D] hover:shadow-md group"
           >
             <span className="inline-block mr-3">
               <svg
@@ -185,11 +185,10 @@ export default function Dashboard({ user, children }: DashboardProps) {
             </span>
           </Link>
 
-          {/* Update the SUPER_ADMIN check */}
           {user?.role === "SUPER_ADMIN" && (
             <Link
               href="/user-management"
-              className="flex items-center px-4 py-3 text-gray-100 rounded-lg transition-all duration-200 hover:bg-blue-800 hover:shadow-md group"
+              className="flex items-center px-4 py-3 text-[#FAF8F5] rounded-lg transition-all duration-200 hover:bg-[#4C306D] hover:shadow-md group"
             >
               <span className="inline-block mr-3">
                 <svg
@@ -212,11 +211,10 @@ export default function Dashboard({ user, children }: DashboardProps) {
             </Link>
           )}
 
-          {/* Update the NORMAL_ADMIN check */}
           {user?.role === "NORMAL_ADMIN" && (
             <Link
               href="/users"
-              className="flex items-center px-4 py-3 text-gray-100 rounded-lg transition-all duration-200 hover:bg-blue-800 hover:shadow-md group"
+              className="flex items-center px-4 py-3 text-[#FAF8F5] rounded-lg transition-all duration-200 hover:bg-[#4C306D] hover:shadow-md group"
             >
               <span className="inline-block mr-3">
                 <svg
@@ -239,7 +237,7 @@ export default function Dashboard({ user, children }: DashboardProps) {
 
           <Link
             href="/profile"
-            className="flex items-center px-4 py-3 text-gray-100 rounded-lg transition-all duration-200 hover:bg-blue-800 hover:shadow-md group"
+            className="flex items-center px-4 py-3 text-[#FAF8F5] rounded-lg transition-all duration-200 hover:bg-[#4C306D] hover:shadow-md group"
           >
             <span className="inline-block mr-3">
               <svg
@@ -263,13 +261,13 @@ export default function Dashboard({ user, children }: DashboardProps) {
 
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Navbar */}
-        <nav className="bg-white border-b border-gray-200">
+        <nav className="bg-white border-b border-[#D9CFF5]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16">
               <div className="flex items-center">
                 <button
                   onClick={toggleSidebar}
-                  className="p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="p-2 rounded-md text-[#6B4FA0] hover:text-[#4C306D] hover:bg-[#D9CFF5] focus:outline-none focus:ring-2 focus:ring-[#6B4FA0]"
                 >
                   <svg
                     className="h-6 w-6"
@@ -288,7 +286,7 @@ export default function Dashboard({ user, children }: DashboardProps) {
                 <div className="ml-6">
                   <Link
                     href="/dashboard"
-                    className="flex items-center px-4 py-2 text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors duration-200"
+                    className="flex items-center px-4 py-2 text-lg font-semibold text-[#333333] hover:text-[#6B4FA0] transition-colors duration-200"
                   >
                     Divine Beauty Lounge
                   </Link>
@@ -297,15 +295,12 @@ export default function Dashboard({ user, children }: DashboardProps) {
 
               <div className="flex items-center space-x-6">
                 <div className="flex items-center">
-                  <span className="text-gray-700 font-medium mr-4">
+                  <span className="text-[#333333] font-medium mr-4">
                     {user?.email ? user.email.split('@')[0] : "User"}
                   </span>
-                  {/* <span className="text-gray-700 font-medium mr-4">
-                    {user?.username || "User"}
-                  </span> */}
                   
                   <div className="relative">
-                    <button className="p-2 rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button className="p-2 rounded-full text-[#6B4FA0] hover:text-[#4C306D] hover:bg-[#D9CFF5] focus:outline-none focus:ring-2 focus:ring-[#6B4FA0]">
                       <span className="sr-only">View notifications</span>
                       <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
                       <svg
@@ -327,7 +322,7 @@ export default function Dashboard({ user, children }: DashboardProps) {
 
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all duration-200"
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-[#6B4FA0] to-[#4C306D] hover:from-[#4C306D] hover:to-[#6B4FA0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6B4FA0] shadow-sm transition-all duration-200"
                 >
                   <svg
                     className="w-5 h-5 mr-2"
@@ -349,7 +344,7 @@ export default function Dashboard({ user, children }: DashboardProps) {
           </div>
         </nav>
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#FAF8F5]">
           {children}
         </main>
       </div>
