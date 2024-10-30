@@ -48,13 +48,29 @@ export async function PUT(request: NextRequest) {
 
   try {
     const userData = await request.json();
+    const isSuperAdmin = session.user.role === 'SUPER_ADMIN';
+    
+    // Define updateData based on user role
+    const updateData: any = isSuperAdmin 
+      ? {
+          username: userData.username,
+          phoneNumber: userData.phoneNumber,
+          password: userData.password,
+          nidNumber: userData.nidNumber,
+          jobStartDate: new Date(userData.jobStartDate),
+          jobEndDate: userData.jobEndDate ? new Date(userData.jobEndDate) : null,
+          isActive: userData.isActive,
+          role: userData.role,
+        }
+      : {
+          phoneNumber: userData.phoneNumber,
+          password: userData.password,
+          nidNumber: userData.nidNumber,
+        };
+
     const updatedUser = await prisma.user.update({
       where: { email: session.user.email },
-      data: {
-        username: userData.username,
-        phoneNumber: userData.phoneNumber,
-        // Add other fields that a user should be able to update
-      },
+      data: updateData,
     });
 
     return NextResponse.json(updatedUser);

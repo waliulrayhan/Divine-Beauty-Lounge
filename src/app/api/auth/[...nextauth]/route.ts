@@ -24,13 +24,16 @@ export const authOptions: AuthOptions = {
             throw new Error("User not found");
           }
 
-          // Compare the plain text password directly
           if (credentials.password !== user.password) {
             throw new Error("Invalid password");
           }
 
-          // If password matches, return the user object
-          return { id: user.id, email: user.email, role: user.role };
+          return { 
+            id: user.id, 
+            email: user.email, 
+            username: user.username,
+            role: user.role 
+          };
         } catch (error) {
           console.error("Authorization error:", (error as Error).message);
           throw new Error((error as Error).message || "Authentication failed");
@@ -41,15 +44,17 @@ export const authOptions: AuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role
+        token.role = user.role;
+        token.username = user.username;
       }
-      return token
+      return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.role = token.role as string
+        session.user.role = token.role as string;
+        session.user.username = token.username as string;
       }
-      return session
+      return session;
     },
   },
   pages: {
