@@ -226,7 +226,7 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
     },
     { 
       field: 'serviceName', 
-      headerName: 'Service Name', 
+      headerName: 'Product Category Name', 
       flex: 1,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
@@ -436,7 +436,7 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
 
                   <div>
                     <label className="block text-sm font-medium text-black mb-2">
-                      Service <span className="text-red-500">*</span>
+                      Product Category <span className="text-red-500">*</span>
                     </label>
                     <select
                       name="serviceId"
@@ -501,7 +501,7 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
                 </div>
                 
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="text-sm font-semibold text-gray-500 mb-2">Service</h4>
+                  <h4 className="text-sm font-semibold text-gray-500 mb-2">Product Category</h4>
                   <p className="text-gray-900">{selectedProduct.serviceName}</p>
                 </div>
                 

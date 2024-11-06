@@ -206,7 +206,7 @@ const BrandManagement: React.FC = () => {
     },
     { 
       field: 'productName', 
-      headerName: 'Product', 
+      headerName: 'Product Name', 
       flex: 1,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
@@ -216,7 +216,7 @@ const BrandManagement: React.FC = () => {
     },
     { 
       field: 'serviceName', 
-      headerName: 'Service', 
+      headerName: 'Product Category', 
       flex: 1,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
@@ -365,7 +365,7 @@ const BrandManagement: React.FC = () => {
             <div className="grid gap-6">
               <div>
                 <label className="block text-sm font-medium text-black mb-2">
-                  Service <span className="text-red-500">*</span>
+                  Product Category <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={selectedService}
@@ -373,7 +373,7 @@ const BrandManagement: React.FC = () => {
                   required
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                 >
-                  <option value="">Select a service</option>
+                  <option value="">Select a Product Category</option>
                   {services.map(service => (
                     <option key={service.id} value={service.id}>{service.name}</option>
                   ))}
