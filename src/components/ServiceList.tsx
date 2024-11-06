@@ -188,7 +188,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
   const columns: GridColDef[] = [
     { 
       field: 'name', 
-      headerName: 'Service Name', 
+      headerName: 'Product category Name', 
       flex: 1,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
@@ -276,7 +276,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
   return (
     <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-800">Service Management</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Product category</h2>
         {canCreate && (
           <button
             onClick={() => setShowForm(true)}
@@ -285,7 +285,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            Add New Service
+            Add New Product category
           </button>
         )}
       </div>
@@ -354,7 +354,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
           <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-black">
-                {isEditing ? 'Edit Service' : 'Add New Services'}
+                {isEditing ? 'Edit Product category' : 'Add New Product category'}
               </h3>
               <button
                 type="button"
@@ -370,7 +370,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
             {serviceInputs.map((service, index) => (
               <div key={index} className="mb-6 p-6 bg-gray-50 rounded-lg">
                 <div className="flex justify-between items-center mb-4">
-                  <h4 className="text-lg font-semibold text-black">Service #{index + 1}</h4>
+                  <h4 className="text-lg font-semibold text-black">Product category #{index + 1}</h4>
                   {serviceInputs.length > 1 && (
                     <button
                       type="button"
@@ -388,7 +388,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
                 <div className="grid gap-6">
                   <div>
                     <label className="block text-sm font-medium text-black mb-2">
-                      Service Name <span className="text-red-500">*</span>
+                      Product category Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -439,14 +439,14 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
                   onClick={addServiceInput}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
                 >
-                  Add Another Service
+                  Add Another Product Category
                 </button>
               )}
               <button
                 type="submit"
                 className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
               >
-                {isEditing ? 'Update Service' : 'Create Services'}
+                {isEditing ? 'Update Product Category' : 'Create Product Category'}
               </button>
             </div>
           </form>

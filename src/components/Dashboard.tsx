@@ -157,7 +157,7 @@ export default function Dashboard({ user, children }: DashboardProps) {
               </svg>
             </span>
             <span className={`${!isSidebarOpen && "hidden"}`}>
-              Service List
+              Product category
             </span>
           </Link>
 
