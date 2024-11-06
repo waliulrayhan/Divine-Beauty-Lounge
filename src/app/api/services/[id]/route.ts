@@ -11,7 +11,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 
   try {
-    const { name, description, serviceCharge } = await request.json();
+    const { name, description } = await request.json();
 
     // Check if service name already exists (excluding current service)
     const existingService = await prisma.service.findFirst({
@@ -35,7 +35,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     const service = await prisma.service.update({
       where: { id: params.id },
-      data: { name, description, serviceCharge },
+      data: { name, description },
     });
     return NextResponse.json(service);
   } catch (error) {
@@ -52,6 +52,15 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
   }
 
   try {
+    // Ensure the service exists before attempting to delete
+    const serviceExists = await prisma.service.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!serviceExists) {
+      return NextResponse.json({ error: 'Service not found' }, { status: 404 });
+    }
+
     await prisma.service.delete({
       where: { id: params.id },
     });

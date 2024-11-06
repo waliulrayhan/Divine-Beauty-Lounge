@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { name, description, serviceCharge } = await request.json();
+    const { name, description } = await request.json();
 
     // Check if service name already exists
     const existingService = await prisma.service.findFirst({
@@ -56,7 +56,6 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         description,
-        serviceCharge,
         createdBy: { connect: { email: session.user.email } },
       },
     });

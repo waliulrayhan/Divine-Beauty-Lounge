@@ -11,7 +11,7 @@ interface Service {
   id: string;
   name: string;
   description: string;
-  serviceCharge: number;
+  serviceCharge?: number;
   createdBy: {
     username: string;
   };
@@ -28,7 +28,6 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
   const [newService, setNewService] = useState({
     name: '',
     description: '',
-    serviceCharge: 0,
   });
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -37,7 +36,6 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
   const [serviceInputs, setServiceInputs] = useState([{
     name: '',
     description: '',
-    serviceCharge: 0,
   }]);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -86,7 +84,6 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
     setServiceInputs([...serviceInputs, {
       name: '',
       description: '',
-      serviceCharge: 0,
     }]);
   };
 
@@ -103,7 +100,10 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
         const response = await fetch(`/api/services/${editingService.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(serviceInputs[0]),
+          body: JSON.stringify({
+            name: serviceInputs[0].name,
+            description: serviceInputs[0].description,
+          }),
         });
 
         const data = await response.json();
@@ -119,7 +119,10 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
             fetch('/api/services', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(service),
+              body: JSON.stringify({
+                name: service.name,
+                description: service.description,
+              }),
             })
           )
         );
@@ -145,7 +148,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
 
       await fetchServices();
       setShowForm(false);
-      setServiceInputs([{ name: '', description: '', serviceCharge: 0 }]);
+      setServiceInputs([{ name: '', description: '' }]);
       setIsEditing(false);
       setEditingService(null);
     } catch (error) {
@@ -159,7 +162,6 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
     setServiceInputs([{
       name: service.name,
       description: service.description,
-      serviceCharge: service.serviceCharge,
     }]);
     setIsEditing(true);
     setShowForm(true);
@@ -204,16 +206,16 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
       align: 'center',
       headerAlign: 'center'
     },
-    { 
-      field: 'serviceCharge', 
-      headerName: 'Service Charge', 
-      flex: 1,
-      headerClassName: 'table-header',
-      cellClassName: 'table-cell',
-      align: 'center',
-      headerAlign: 'center',
-      renderCell: (params) => `${params.value} Tk`,
-    },
+    // { 
+    //   field: 'serviceCharge', 
+    //   headerName: 'Service Charge', 
+    //   flex: 1,
+    //   headerClassName: 'table-header',
+    //   cellClassName: 'table-cell',
+    //   align: 'center',
+    //   headerAlign: 'center',
+    //   renderCell: (params) => `${params.value} Tk`,
+    // },
     {
       field: 'actions',
       headerName: 'Actions',
@@ -276,7 +278,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
   return (
     <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-800">Product category</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Product Category Management</h2>
         {canCreate && (
           <button
             onClick={() => setShowForm(true)}
@@ -354,7 +356,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
           <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-black">
-                {isEditing ? 'Edit Product category' : 'Add New Product category'}
+                {isEditing ? 'Edit Product Category' : 'Add New Product Category'}
               </h3>
               <button
                 type="button"
@@ -370,7 +372,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
             {serviceInputs.map((service, index) => (
               <div key={index} className="mb-6 p-6 bg-gray-50 rounded-lg">
                 <div className="flex justify-between items-center mb-4">
-                  <h4 className="text-lg font-semibold text-black">Product category #{index + 1}</h4>
+                  <h4 className="text-lg font-semibold text-black">Product Category #{index + 1}</h4>
                   {serviceInputs.length > 1 && (
                     <button
                       type="button"
@@ -414,7 +416,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
                     />
                   </div>
 
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium text-black mb-2">
                       Service Charge <span className="text-red-500">*</span>
                     </label>
@@ -427,7 +429,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
                       min="0"
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                     />
-                  </div>
+                  </div> */}
                 </div>
               </div>
             ))}
@@ -476,12 +478,12 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
                   <p className="text-gray-900">{selectedService.description}</p>
                 </div>
                 
-                <div className="bg-gray-50 rounded-lg p-4">
+                {/* <div className="bg-gray-50 rounded-lg p-4">
                   <h4 className="text-sm font-semibold text-gray-500 mb-2">Service Charge</h4>
                   <p className="text-gray-900 text-lg font-medium">
                     ${selectedService.serviceCharge.toFixed(2)}
                   </p>
-                </div>
+                </div> */}
                 
                 <div className="flex gap-4">
                   <div className="flex-1 bg-gray-50 rounded-lg p-4">
