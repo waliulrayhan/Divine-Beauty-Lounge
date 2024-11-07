@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
 import Link from "next/link";
+import Box from "@mui/material/Box";
+import { DataGrid, GridToolbar, GridColDef } from "@mui/x-data-grid";
 
 interface Service {
   id: string;
@@ -270,7 +272,9 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     try {
       // Function to check if a brand exists
       const checkBrandExists = async (brandName: string, productId: string) => {
-        const response = await fetch(`/api/brands?name=${brandName}&productId=${productId}`);
+        const response = await fetch(
+          `/api/brands?name=${brandName}&productId=${productId}`
+        );
         if (response.ok) {
           const brands = await response.json();
           return brands.length > 0 ? brands[0].id : null; // Return the first brand ID if found
@@ -281,8 +285,11 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
       // Create stock ins
       await Promise.all(
         stockInInputs.map(async (stockIn) => {
-          let brandId = await checkBrandExists(stockIn.brandName, stockIn.productId);
-          
+          let brandId = await checkBrandExists(
+            stockIn.brandName,
+            stockIn.productId
+          );
+
           // If brandId is null, create a new brand
           if (!brandId) {
             const newBrandResponse = await fetch("/api/brands", {
@@ -324,15 +331,17 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
       await fetchStockIns();
       toast.success(`${stockInInputs.length} stock in(s) created successfully`);
       setShowForm(false);
-      setStockInInputs([{
-        serviceId: "",
-        productId: "",
-        brandId: "",
-        brandName: "",
-        quantity: 0,
-        pricePerUnit: 0,
-        comments: "",
-      }]);
+      setStockInInputs([
+        {
+          serviceId: "",
+          productId: "",
+          brandId: "",
+          brandName: "",
+          quantity: 0,
+          pricePerUnit: 0,
+          comments: "",
+        },
+      ]);
     } catch (error) {
       console.error("Error creating stock ins:", error);
       toast.error("Failed to create stock ins");
@@ -392,6 +401,115 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   const canEdit = permissions.includes("edit");
   const canDelete = permissions.includes("delete");
   const canView = permissions.includes("view");
+
+  const columns: GridColDef[] = [
+    {
+      field: "createdAt",
+      headerName: "Date",
+      flex: 1,
+      headerClassName: "table-header",
+      cellClassName: "table-cell",
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => new Date(params.value).toLocaleDateString(),
+    },
+    // { field: 'createdBy', headerName: 'User Name', flex: 1, headerClassName: 'table-header', cellClassName: 'table-cell', align: 'center', headerAlign: 'center' }, // Commented out
+    {
+      field: "brandName",
+      headerName: "Brand Name",
+      flex: 1,
+      headerClassName: "table-header",
+      cellClassName: "table-cell",
+      align: "center",
+      headerAlign: "center",
+    },
+    {
+      field: "productName",
+      headerName: "Product Name",
+      flex: 1,
+      headerClassName: "table-header",
+      cellClassName: "table-cell",
+      align: "center",
+      headerAlign: "center",
+    },
+    // {
+    //   field: "serviceName",
+    //   headerName: "Service Name",
+    //   flex: 1,
+    //   headerClassName: "table-header",
+    //   cellClassName: "table-cell",
+    //   align: "center",
+    //   headerAlign: "center",
+    // },
+    {
+      field: "quantity",
+      headerName: "Quantity",
+      flex: 1,
+      headerClassName: "table-header",
+      cellClassName: "table-cell",
+      align: "center",
+      headerAlign: "center",
+    },
+    {
+      field: "pricePerUnit",
+      headerName: "Unit Price",
+      flex: 1,
+      headerClassName: "table-header",
+      cellClassName: "table-cell",
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => `${params.value.toFixed(2)} Tk`,
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 1,
+      headerClassName: "table-header",
+      cellClassName: "table-cell",
+      sortable: false,
+      filterable: false,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => (
+        <div className="flex gap-2 justify-center items-center h-full mt-0">
+          {canView && (
+            <button
+              onClick={() => handleViewDetails(params.row)}
+              className="px-2 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition duration-200 text-sm"
+            >
+              <svg className="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              View
+            </button>
+          )}
+          {canEdit && (
+            <button
+              onClick={() => handleEdit(params.row)}
+              className="px-2 py-1 bg-green-50 text-green-600 hover:bg-green-100 rounded-md transition duration-200 text-sm"
+            >
+              <svg className="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Edit
+            </button>
+          )}
+          {canDelete && (
+            <button
+              onClick={() => handleDelete(params.row.id)}
+              className="px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-md transition duration-200 text-sm"
+            >
+              <svg className="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Delete
+            </button>
+          )}
+        </div>
+      ),
+    },
+  ];
 
   if (isLoading) {
     return (
@@ -709,142 +827,66 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  Date & Time
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  User Name
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  Brand Name
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  Product Name
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  Service Name
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  Quantity
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  Unit Price
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {stockIns.map((stockIn) => (
-                <tr
-                  key={stockIn.id}
-                  className="hover:bg-gray-50 transition duration-150"
-                >
-                  <td className="px-6 py-4 text-sm text-black">
-                    {new Date(stockIn.createdAt).toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-black">
-                    {stockIn.createdBy}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-black">
-                    {stockIn.brandName}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-black">
-                    {stockIn.productName}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-black">
-                    {stockIn.serviceName}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-black">
-                    {stockIn.quantity}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-black">
-                    {stockIn.pricePerUnit.toFixed(2)} Tk
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <div className="flex gap-2">
-                      {canView && (
-                        <button
-                          onClick={() => handleViewDetails(stockIn)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition duration-200"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                            />
-                          </svg>
-                          View
-                        </button>
-                      )}
-                      {canEdit && (
-                        <button
-                          onClick={() => handleEdit(stockIn)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-md transition duration-200"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                          </svg>
-                          Edit
-                        </button>
-                      )}
-                      {canDelete && (
-                        <button
-                          onClick={() => handleDelete(stockIn.id)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-md transition duration-200"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
-                          Delete
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <Box
+          sx={{
+            height: 700, // Adjusted height to fit the div
+            width: '100%', // Adjusted width to fit the div
+            "& .table-header": {
+              backgroundColor: "#f8fafc",
+              color: "#1e293b",
+              fontSize: "0.875rem",
+              fontWeight: 600,
+              padding: "0.5rem 1rem", // Adjusted padding for table header cells
+            },
+            "& .table-cell": { 
+              fontSize: "0.875rem", 
+              color: "#334155", 
+              padding: "0.5rem 1rem", // Adjusted padding for table cells
+            },
+            "& .MuiDataGrid-root": { border: "none" },
+            "& .MuiDataGrid-cell": { 
+              borderBottom: "1px solid #f1f5f9", 
+              padding: "0.5rem 1rem", // Adjusted padding for data grid cells
+            },
+            "& .MuiDataGrid-columnHeaders": {
+              borderBottom: "2px solid #e2e8f0",
+            },
+            "& .MuiDataGrid-toolbarContainer": {
+              padding: "1rem",
+              backgroundColor: "#ffffff",
+              borderBottom: "1px solid #f1f5f9",
+            },
+            "& .MuiButton-root": { color: "#475569" },
+            "& .MuiInputBase-root": {
+              backgroundColor: "#f8fafc",
+              borderRadius: "0.5rem",
+              padding: "0.5rem 1rem", // Adjusted padding for input base root
+            },
+          }}
+        >
+          <DataGrid
+            rows={stockIns}
+            columns={columns}
+            disableColumnFilter
+            disableColumnSelector
+            disableDensitySelector
+            slots={{ toolbar: GridToolbar }}
+            slotProps={{
+              toolbar: {
+                showQuickFilter: true,
+                quickFilterProps: { debounceMs: 500 },
+              },
+            }}
+            sx={{
+              "& .MuiDataGrid-row:hover": {
+                backgroundColor: "#f8fafc",
+              },
+              width: "100%", // Added to make the table wider
+              height: '100%', // Adjusted height to fit the div
+            }}
+          />
+        </Box>
       </div>
 
       {selectedStockIn && (
@@ -902,12 +944,15 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                       Quantity: {selectedStockIn.quantity}
                     </p>
                     <p className="text-gray-900">
-                      Price Per Unit: {selectedStockIn.pricePerUnit.toFixed(2)} Tk
+                      Price Per Unit: {selectedStockIn.pricePerUnit.toFixed(2)}{" "}
+                      Tk
                     </p>
                     <p className="text-gray-900">
-                      Total Value: {(
+                      Total Value:{" "}
+                      {(
                         selectedStockIn.quantity * selectedStockIn.pricePerUnit
-                      ).toFixed(2)} Tk
+                      ).toFixed(2)}{" "}
+                      Tk
                     </p>
                   </div>
                 </div>
