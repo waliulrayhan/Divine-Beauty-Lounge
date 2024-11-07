@@ -59,6 +59,10 @@ export async function POST(request: NextRequest) {
 
   try {
     const { productId, brandId, quantity, pricePerUnit, comments } = await request.json();
+    
+    // Log the incoming data for debugging
+    console.log("Creating stock in with data:", { productId, brandId, quantity, pricePerUnit, comments });
+
     const stockIn = await prisma.stockIn.create({
       data: {
         product: { connect: { id: productId } },

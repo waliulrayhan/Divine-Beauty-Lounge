@@ -268,43 +268,71 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Function to check if a brand exists
+      const checkBrandExists = async (brandName: string, productId: string) => {
+        const response = await fetch(`/api/brands?name=${brandName}&productId=${productId}`);
+        if (response.ok) {
+          const brands = await response.json();
+          return brands.length > 0 ? brands[0].id : null; // Return the first brand ID if found
+        }
+        return null;
+      };
+
+      // Create stock ins
       await Promise.all(
         stockInInputs.map(async (stockIn) => {
-          if (stockIn.productId && stockIn.brandName) {
-            await createBrand(stockIn.productId, stockIn.brandName);
+          let brandId = await checkBrandExists(stockIn.brandName, stockIn.productId);
+          
+          // If brandId is null, create a new brand
+          if (!brandId) {
+            const newBrandResponse = await fetch("/api/brands", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                name: stockIn.brandName,
+                productId: stockIn.productId, // Assuming you need to associate it with a product
+              }),
+            });
+
+            if (!newBrandResponse.ok) {
+              throw new Error("Failed to create new brand");
+            }
+
+            const newBrand = await newBrandResponse.json();
+            brandId = newBrand.id; // Use the newly created brand ID
+          }
+
+          // Now create the stock in with the valid brandId
+          const stockInResponse = await fetch("/api/stock-in", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              productId: stockIn.productId,
+              brandId: brandId, // Use the valid brandId
+              quantity: stockIn.quantity,
+              pricePerUnit: stockIn.pricePerUnit,
+              comments: stockIn.comments,
+            }),
+          });
+
+          if (!stockInResponse.ok) {
+            throw new Error("Failed to create stock in");
           }
         })
       );
 
-      const responses = await Promise.all(
-        stockInInputs.map((stockIn) =>
-          fetch("/api/stock-in", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(stockIn),
-          })
-        )
-      );
-
-      const hasError = responses.some((response) => !response.ok);
-      if (hasError) {
-        throw new Error("One or more stock ins failed to create");
-      }
-
       await fetchStockIns();
       toast.success(`${stockInInputs.length} stock in(s) created successfully`);
       setShowForm(false);
-      setStockInInputs([
-        {
-          serviceId: "",
-          productId: "",
-          brandId: "", // Add this
-          brandName: "",
-          quantity: 0,
-          pricePerUnit: 0,
-          comments: "",
-        },
-      ]);
+      setStockInInputs([{
+        serviceId: "",
+        productId: "",
+        brandId: "",
+        brandName: "",
+        quantity: 0,
+        pricePerUnit: 0,
+        comments: "",
+      }]);
     } catch (error) {
       console.error("Error creating stock ins:", error);
       toast.error("Failed to create stock ins");
