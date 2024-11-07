@@ -668,7 +668,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                 <div className="grid gap-6">
                   <div>
                     <label className="block text-sm font-medium text-black mb-2">
-                      Service <span className="text-red-500">*</span>
+                      Product Category <span className="text-red-500">*</span>
                     </label>
                     <select
                       name="serviceId"
@@ -677,7 +677,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                       required
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                     >
-                      <option value="">Select a service</option>
+                      <option value="">Select a Product Category</option>
                       {services.map((service) => (
                         <option key={service.id} value={service.id}>
                           {service.name}
@@ -959,10 +959,10 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                   </h4>
                   <div className="space-y-2">
                     <p className="text-gray-900">
-                      Product: {selectedStockIn.productName}
+                      Product Category: {selectedStockIn.serviceName}
                     </p>
                     <p className="text-gray-900">
-                      Service: {selectedStockIn.serviceName}
+                      Product: {selectedStockIn.productName}
                     </p>
                     <p className="text-gray-900">
                       Brand: {selectedStockIn.brandName}
