@@ -73,7 +73,7 @@ const CurrentStock: React.FC = () => {
   
       if (lastNotificationDate !== today) {
         data.forEach(async (item: StockItem) => {
-          if (item.currentStock <= 5) {
+          if (item.currentStock <= 2) {
             // Call the new API route to send notification
             const notificationResponse = await fetch('/api/send-notification', {
               method: 'POST',
