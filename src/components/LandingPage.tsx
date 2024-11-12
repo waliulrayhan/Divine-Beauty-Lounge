@@ -101,14 +101,18 @@ export default function LandingPage() {
             <div>
               <h4 className="text-lg font-semibold mb-4">Contact</h4>
               <ul className="space-y-2 text-[#D9CFF5]">
-                <li>Email: info@divinebeautylounge.com</li>
-                <li>Phone: (123) 456-7890</li>
+                <li>Email: booking.divinebeauty@gmail.com</li>
+                <li>Phone: (+880) 1714-134028</li>
               </ul>
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">Follow Us</h4>
               <div className="flex space-x-4">
-                {/* Add social media icons/links here */}
+                <a href="https://www.facebook.com/DivineBeautyLounge/" target="_blank" rel="noopener noreferrer">
+                  <svg className="w-6 h-6 text-[#3B5998]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5l-4 4m0-6l-4 4m4 5h4" />
+                  </svg>
+                </a>
               </div>
             </div>
           </div>
