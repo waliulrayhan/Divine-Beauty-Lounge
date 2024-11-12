@@ -11,12 +11,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 
   try {
-    const { productId, brandName, quantity, pricePerUnit, comments } = await request.json();
+    const { productId, brandId, quantity, pricePerUnit, comments } = await request.json();
     const stockIn = await prisma.stockIn.update({
       where: { id: params.id },
       data: {
         product: { connect: { id: productId } },
-        brandName,
+        brand: { connect: { id: brandId } },
         quantity: parseInt(quantity),
         pricePerUnit: parseFloat(pricePerUnit),
         comments,

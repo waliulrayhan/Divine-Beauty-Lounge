@@ -270,60 +270,87 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Function to check if a brand exists
-      const checkBrandExists = async (brandName: string, productId: string) => {
-        const response = await fetch(
-          `/api/brands?name=${brandName}&productId=${productId}`
-        );
-        if (response.ok) {
-          const brands = await response.json();
-          return brands.length > 0 ? brands[0].id : null; // Return the first brand ID if found
+        // Check if editing an existing stock in
+        if (editingStockIn) {
+            const response = await fetch(`/api/stock-in/${editingStockIn.id}`, {
+                method: "PUT", // Use PUT for updating
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    productId: stockInInputs[0].productId,
+                    brandId: stockInInputs[0].brandId, // Ensure brandId is included
+                    quantity: stockInInputs[0].quantity,
+                    pricePerUnit: stockInInputs[0].pricePerUnit,
+                    comments: stockInInputs[0].comments,
+                }), // Send the necessary fields for update
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to update stock in");
+            }
+
+            // Show success toast
+            toast.success("Stock in updated successfully");
+
+            // Reload the stock ins table
+            await fetchStockIns();
+
+            // Reset form and state
+            setShowForm(false);
+            setEditingStockIn(null);
+            setStockInInputs([
+                {
+                    serviceId: "",
+                    productId: "",
+                    brandId: "",
+                    brandName: "",
+                    quantity: 0,
+                    pricePerUnit: 0,
+                    comments: "",
+                },
+            ]);
+        } else {
+            // Create stock ins
+            await Promise.all(
+                stockInInputs.map(async (stockIn) => {
+                    const response = await fetch("/api/stock-in", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(stockIn),
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || "Failed to create stock ins");
+                    }
+                })
+            );
+
+            // Show success toast for creation
+            toast.success("Stock ins created successfully");
+
+            // Reload the stock ins table
+            await fetchStockIns();
+
+            // Reset form and state
+            setShowForm(false);
+            setStockInInputs([
+                {
+                    serviceId: "",
+                    productId: "",
+                    brandId: "",
+                    brandName: "",
+                    quantity: 0,
+                    pricePerUnit: 0,
+                    comments: "",
+                },
+            ]);
         }
-        return null;
-      };
-
-      // Create stock ins
-      await Promise.all(
-        stockInInputs.map(async (stockIn) => {
-          // Ensure we are using the selected brandId
-          const brandId = stockIn.brandId; // Use the brandId from the selected dropdown
-
-          // Now create the stock in with the valid brandId
-          const stockInResponse = await fetch("/api/stock-in", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              productId: stockIn.productId,
-              brandId: brandId, // Use the valid brandId from the dropdown
-              quantity: stockIn.quantity,
-              pricePerUnit: stockIn.pricePerUnit,
-              comments: stockIn.comments,
-            }),
-          });
-
-          if (!stockInResponse.ok) {
-            throw new Error("Failed to create stock in");
-          }
-        })
-      );
-
-      await fetchStockIns();
-      toast.success(`${stockInInputs.length} stock in(s) created successfully`);
-      setShowForm(false);
-      setStockInInputs([{
-          serviceId: "",
-          productId: "",
-          brandId: "",
-          brandName: "",
-          quantity: 0,
-          pricePerUnit: 0,
-          comments: "",
-      },]);
     } catch (error) {
-      console.error("Error creating stock ins:", error);
-      toast.error("Failed to create stock ins");
+        console.error("Error creating or updating stock ins:", error);
+        toast.error(error instanceof Error ? error.message : "Failed to process stock ins");
     }
-  };
+};
 
   const handleEdit = (stockIn: StockIn) => {
     setEditingStockIn(stockIn);
