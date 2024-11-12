@@ -164,47 +164,81 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Validate that required fields are filled
-      const hasEmptyFields = stockOutInputs.some(
-        (input) => !input.productId || !input.brandId || !input.quantity
-      );
+        // Validate that required fields are filled
+        const hasEmptyFields = stockOutInputs.some(
+            (input) => !input.productId || !input.brandId || !input.quantity
+        );
 
-      if (hasEmptyFields) {
-        toast.error("Please fill all required fields");
-        return;
-      }
+        if (hasEmptyFields) {
+            toast.error("Please fill all required fields");
+            return;
+        }
 
-      const response = await fetch("/api/stock-out", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(stockOutInputs), // Send entire array of inputs
-      });
+        // Prepare the stock out items to send
+        const stockOutItems = stockOutInputs.map(input => ({
+            productId: input.productId,
+            brandId: input.brandId,
+            quantity: input.quantity,
+            comments: input.comments,
+        }));
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create stock outs");
-      }
+        // Check if editing an existing stock out
+        if (editingStockOut) {
+            const response = await fetch(`/api/stock-out/${editingStockOut.id}`, {
+                method: "PUT", // Use PUT for updating
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    productId: stockOutInputs[0].productId,
+                    brandId: stockOutInputs[0].brandId,
+                    quantity: stockOutInputs[0].quantity,
+                    comments: stockOutInputs[0].comments,
+                }),
+            });
 
-      await fetchStockOuts();
-      toast.success(`Stock outs created successfully`);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to update stock out");
+            }
 
-      // Reset form
-      setShowForm(false);
-      setEditingStockOut(null);
-      setStockOutInputs([
-        {
-          serviceId: "",
-          productId: "",
-          brandId: "",
-          quantity: 0,
-          comments: "",
-        },
-      ]);
+            // Show success toast
+            toast.success("Stock out updated successfully");
+        } else {
+            // Create stock outs
+            const response = await fetch("/api/stock-out", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(stockOutItems), // Send the array of stock out items
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to create stock outs");
+            }
+
+            // Show success toast for creation
+            toast.success("Stock outs created successfully");
+        }
+
+        // Reload the stock outs table
+        await fetchStockOuts();
+
+        // Reset form and state
+        setShowForm(false);
+        setEditingStockOut(null);
+        setStockOutInputs([
+            {
+                serviceId: "",
+                productId: "",
+                brandId: "",
+                quantity: 0,
+                comments: "",
+            },
+        ]);
     } catch (error) {
-      console.error("Error creating stock outs:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to process stock outs"
-      );
+        console.error("Error creating or updating stock outs:", error);
+        toast.error(
+            error instanceof Error ? error.message : "Failed to process stock outs"
+        );
     }
   };
 
