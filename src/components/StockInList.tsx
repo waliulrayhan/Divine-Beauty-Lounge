@@ -285,29 +285,8 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
       // Create stock ins
       await Promise.all(
         stockInInputs.map(async (stockIn) => {
-          let brandId = await checkBrandExists(
-            stockIn.brandName,
-            stockIn.productId
-          );
-
-          // If brandId is null, create a new brand
-          if (!brandId) {
-            const newBrandResponse = await fetch("/api/brands", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                name: stockIn.brandName,
-                productId: stockIn.productId, // Assuming you need to associate it with a product
-              }),
-            });
-
-            if (!newBrandResponse.ok) {
-              throw new Error("Failed to create new brand");
-            }
-
-            const newBrand = await newBrandResponse.json();
-            brandId = newBrand.id; // Use the newly created brand ID
-          }
+          // Ensure we are using the selected brandId
+          const brandId = stockIn.brandId; // Use the brandId from the selected dropdown
 
           // Now create the stock in with the valid brandId
           const stockInResponse = await fetch("/api/stock-in", {
@@ -315,7 +294,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               productId: stockIn.productId,
-              brandId: brandId, // Use the valid brandId
+              brandId: brandId, // Use the valid brandId from the dropdown
               quantity: stockIn.quantity,
               pricePerUnit: stockIn.pricePerUnit,
               comments: stockIn.comments,
@@ -331,8 +310,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
       await fetchStockIns();
       toast.success(`${stockInInputs.length} stock in(s) created successfully`);
       setShowForm(false);
-      setStockInInputs([
-        {
+      setStockInInputs([{
           serviceId: "",
           productId: "",
           brandId: "",
@@ -340,8 +318,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
           quantity: 0,
           pricePerUnit: 0,
           comments: "",
-        },
-      ]);
+      },]);
     } catch (error) {
       console.error("Error creating stock ins:", error);
       toast.error("Failed to create stock ins");
@@ -716,80 +693,29 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                     <label className="block text-sm font-medium text-black mb-2">
                       Brand <span className="text-red-500">*</span>
                     </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        name="brandName"
-                        value={stockIn.brandName}
-                        onChange={(e) => {
-                          handleInputChange(index, e);
-                          if (stockIn.productId) {
-                            const searchTerm = e.target.value.toLowerCase();
-                            const filtered = (inputBrands[index] || []).filter(
-                              (brand) =>
-                                brand.productId === stockIn.productId &&
-                                brand.name.toLowerCase().includes(searchTerm)
-                            );
-                            setFilteredBrands((prev) => ({
-                              ...prev,
-                              [index]: filtered,
-                            }));
-                            setShowBrandSuggestions((prev) => ({
-                              ...prev,
-                              [index]: true,
-                            }));
-                          }
-                        }}
-                        onFocus={() => {
-                          if (stockIn.productId) {
-                            const filtered = (inputBrands[index] || []).filter(
-                              (brand) => brand.productId === stockIn.productId
-                            );
-                            setFilteredBrands((prev) => ({
-                              ...prev,
-                              [index]: filtered,
-                            }));
-                            setShowBrandSuggestions((prev) => ({
-                              ...prev,
-                              [index]: true,
-                            }));
-                          }
-                        }}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                        placeholder={
-                          stockIn.productId
-                            ? "Select or type new brand name"
-                            : "Select a product first"
-                        }
-                        disabled={!stockIn.productId}
-                      />
-                      {showBrandSuggestions[index] &&
-                        filteredBrands[index]?.length > 0 && (
-                          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                            {filteredBrands[index].map((brand) => (
-                              <div
-                                key={brand.id}
-                                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-700"
-                                onClick={() => {
-                                  const newInputs = [...stockInInputs];
-                                  newInputs[index] = {
-                                    ...newInputs[index],
-                                    brandId: brand.id,
-                                    brandName: brand.name,
-                                  };
-                                  setStockInInputs(newInputs);
-                                  setShowBrandSuggestions((prev) => ({
-                                    ...prev,
-                                    [index]: false,
-                                  }));
-                                }}
-                              >
-                                {brand.name}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                    </div>
+                    <select
+                      name="brandId"
+                      value={stockIn.brandId}
+                      onChange={(e) => {
+                        const selectedBrand = inputBrands[index]?.find(brand => brand.id === e.target.value);
+                        const newInputs = [...stockInInputs];
+                        newInputs[index] = {
+                          ...newInputs[index],
+                          brandId: selectedBrand?.id || "",
+                          brandName: selectedBrand?.name || "",
+                        };
+                        setStockInInputs(newInputs);
+                      }}
+                      required
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                    >
+                      <option value="">Select a brand</option>
+                      {(inputBrands[index] || []).map((brand) => (
+                        <option key={brand.id} value={brand.id}>
+                          {brand.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div>
