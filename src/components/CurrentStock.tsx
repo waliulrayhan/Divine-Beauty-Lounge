@@ -21,6 +21,43 @@ const CurrentStock: React.FC = () => {
     fetchCurrentStock();
   }, []);
 
+  // const fetchCurrentStock = async () => {
+  //   try {
+  //     const response = await fetch("/api/current-stock");
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+  //     const data = await response.json();
+  //     setStockItems(data);
+
+  //     // Check stock levels and send notifications
+  //     data.forEach(async (item: StockItem) => {
+  //       if (item.currentStock <= 5) {
+  //         // Call the new API route to send notification
+  //         const notificationResponse = await fetch('/api/send-notification', {
+  //           method: 'POST',
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //           },
+  //           body: JSON.stringify({
+  //             productName: item.productName,
+  //             currentStock: item.currentStock,
+  //           }),
+  //         });
+
+  //         if (!notificationResponse.ok) {
+  //           toast.error("Failed to send notification");
+  //         }
+  //       }
+  //     });
+  //   } catch (error) {
+  //     console.error("Error fetching current stock:", error);
+  //     toast.error("Failed to load current stock");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchCurrentStock = async () => {
     try {
       const response = await fetch("/api/current-stock");
@@ -29,27 +66,34 @@ const CurrentStock: React.FC = () => {
       }
       const data = await response.json();
       setStockItems(data);
-
+  
       // Check stock levels and send notifications
-      data.forEach(async (item: StockItem) => {
-        if (item.currentStock <= 5) {
-          // Call the new API route to send notification
-          const notificationResponse = await fetch('/api/send-notification', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              productName: item.productName,
-              currentStock: item.currentStock,
-            }),
-          });
-
-          if (!notificationResponse.ok) {
-            toast.error("Failed to send notification");
+      const lastNotificationDate = localStorage.getItem('lastNotificationDate');
+      const today = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+  
+      if (lastNotificationDate !== today) {
+        data.forEach(async (item: StockItem) => {
+          if (item.currentStock <= 5) {
+            // Call the new API route to send notification
+            const notificationResponse = await fetch('/api/send-notification', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                productName: item.productName,
+                currentStock: item.currentStock,
+              }),
+            });
+  
+            if (!notificationResponse.ok) {
+              toast.error("Failed to send notification");
+            }
           }
-        }
-      });
+        });
+        // Update the last notification date in local storage
+        localStorage.setItem('lastNotificationDate', today);
+      }
     } catch (error) {
       console.error("Error fetching current stock:", error);
       toast.error("Failed to load current stock");

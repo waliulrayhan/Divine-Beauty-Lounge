@@ -38,7 +38,7 @@ export default function Dashboard({ user, children }: DashboardProps) {
       {/* Sidebar */}
       <div
         className={`bg-gradient-to-br from-[#6B4FA0] to-[#4C306D] text-white ${
-          isSidebarOpen ? "w-72" : "w-20"
+          isSidebarOpen ? "w-72 bg-opacity-90" : "w-20"
         } space-y-2 py-8 px-4 absolute inset-y-0 left-0 transform md:relative transition-all duration-200 ease-in-out z-20 shadow-lg`}
       >
         <div className={`px-4 mb-8 ${!isSidebarOpen && "text-center"}`}>
