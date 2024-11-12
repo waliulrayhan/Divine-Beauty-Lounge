@@ -43,7 +43,7 @@ export default function Dashboard({ user, children }: DashboardProps) {
       >
         <div className={`px-4 mb-8 ${!isSidebarOpen && "text-center"}`}>
           {isSidebarOpen ? (
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-[#FAF8F5] to-[#F8E5B3] bg-clip-text text-transparent mb-2">Divine Beauty</h2>
+            <Link href="/dashboard" className="text-2xl font-bold bg-gradient-to-r from-[#FAF8F5] to-[#F8E5B3] bg-clip-text text-transparent mb-2">Divine Beauty</Link>
           ) : (
             <div className="flex justify-center">
               <svg
