@@ -12,8 +12,20 @@ export const sendStockNotification = async (productName: string, currentStock: n
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: process.env.SUPER_ADMIN_EMAIL, // super admin email
-    subject: 'Stock Alert: Low Stock Level',
-    text: `The stock for ${productName} has reached a low level of ${currentStock}. Please restock as soon as possible.`,
+    subject: 'Stock Alert: Urgent Attention Needed for Stock Replenishment',
+    text: `Dear Super Admin,
+
+We wanted to let you know that the stock for ${productName} has dropped to ${currentStock} units and is about to run out. Please arrange to restock it at your earliest convenience to prevent any service disruption.
+
+Thank you for your attention and swift action.
+
+Warm regards,
+Md. Waliul Islam Rayhan
+Developer, Divine Beauty Lounge
+Email: mdwaliulislamrayhan@gmail.com
+Phone: +8801303099926
+
+*Note: This is an automatically generated email. Please do not reply directly to this message.*`,
   };
 
   try {
