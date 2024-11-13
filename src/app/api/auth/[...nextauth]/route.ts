@@ -1,8 +1,9 @@
-import NextAuth, { AuthOptions } from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import prisma from "@/lib/prisma"; // Make sure this path matches your actual prisma client path
+import prisma from "@/lib/prisma";
 
-export const authOptions: AuthOptions = {
+// Configure the NextAuth options
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -28,11 +29,11 @@ export const authOptions: AuthOptions = {
             throw new Error("Invalid password");
           }
 
-          return { 
-            id: user.id, 
-            email: user.email, 
+          return {
+            id: user.id,
+            email: user.email,
             username: user.username,
-            role: user.role 
+            role: user.role,
           };
         } catch (error) {
           console.error("Authorization error:", (error as Error).message);
@@ -58,15 +59,17 @@ export const authOptions: AuthOptions = {
     },
   },
   pages: {
-    signIn: "/login", // Redirect to your login page on failed sign-in
+    signIn: "/login",
   },
   session: {
-    strategy: "jwt", // The correct session strategy
+    strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
 };
 
+// Create the handler for GET and POST
 const handler = NextAuth(authOptions);
 
+// Export the handler and the authOptions separately
 export { handler as GET, handler as POST };
