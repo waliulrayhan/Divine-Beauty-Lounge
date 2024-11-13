@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const session = await getServerSession(authOptions);
 
   if (!session || !session.user?.email) {
@@ -51,7 +51,7 @@ export async function PUT(request: NextRequest) {
     const isSuperAdmin = session.user.role === 'SUPER_ADMIN';
     
     // Define updateData based on user role
-    const updateData: any = isSuperAdmin 
+    const updateData: Partial<typeof userData> = isSuperAdmin 
       ? {
           username: userData.username,
           phoneNumber: userData.phoneNumber,

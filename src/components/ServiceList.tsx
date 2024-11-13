@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { toast } from 'react-toastify';
-import { usePermissions } from '@/hooks/usePermissions';
 import Box from '@mui/material/Box';
 import { DataGrid, GridToolbar, GridColDef } from '@mui/x-data-grid';
 
@@ -23,16 +21,10 @@ interface ServiceListProps {
 }
 
 const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
-  const { data: session } = useSession();
   const [services, setServices] = useState<Service[]>([]);
-  const [newService, setNewService] = useState({
-    name: '',
-    description: '',
-  });
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const { can, loading } = usePermissions('service');
   const [serviceInputs, setServiceInputs] = useState([{
     name: '',
     description: '',
@@ -188,34 +180,24 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
   };
 
   const columns: GridColDef[] = [
-    { 
-      field: 'name', 
-      headerName: 'Product category Name', 
+    {
+      field: 'name',
+      headerName: 'Product category Name',
       flex: 1,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
       align: 'center',
       headerAlign: 'center'
     },
-    { 
-      field: 'description', 
-      headerName: 'Description', 
+    {
+      field: 'description',
+      headerName: 'Description',
       flex: 2,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
       align: 'center',
       headerAlign: 'center'
     },
-    // { 
-    //   field: 'serviceCharge', 
-    //   headerName: 'Service Charge', 
-    //   flex: 1,
-    //   headerClassName: 'table-header',
-    //   cellClassName: 'table-cell',
-    //   align: 'center',
-    //   headerAlign: 'center',
-    //   renderCell: (params) => `${params.value} Tk`,
-    // },
     {
       field: 'actions',
       headerName: 'Actions',

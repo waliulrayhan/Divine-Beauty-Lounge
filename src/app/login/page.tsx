@@ -105,7 +105,7 @@ export default function LoginPage() {
         </form>
         <div className="mt-6 text-center">
           <span className="text-[#333333] text-sm">
-            Don't have email and password?{" "}
+            Don&apos;t have email and password?{" "}
           </span>
           <Link href="#" className="text-[#6B4FA0] hover:text-[#4C306D] text-sm font-medium transition-colors duration-200">
             Contact Admin

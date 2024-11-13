@@ -20,7 +20,7 @@ interface Product {
 interface Brand {
   id: string;
   name: string;
-  productId: string; // Add this line
+  productId: string;
 }
 
 interface StockOut {
@@ -44,8 +44,6 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
   const { data: session } = useSession();
   const [stockOuts, setStockOuts] = useState<StockOut[]>([]);
   const [services, setServices] = useState<Service[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
   const [stockOutInputs, setStockOutInputs] = useState([
     {
       serviceId: "",
@@ -57,15 +55,9 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
   ]);
   const [editingStockOut, setEditingStockOut] = useState<StockOut | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [selectedStockOut, setSelectedStockOut] = useState<StockOut | null>(
-    null
-  );
-  const [inputProducts, setInputProducts] = useState<{
-    [key: number]: Product[];
-  }>({});
-  const [inputBrands, setInputBrands] = useState<{ [key: number]: Brand[] }>(
-    {}
-  );
+  const [selectedStockOut, setSelectedStockOut] = useState<StockOut | null>(null);
+  const [inputProducts, setInputProducts] = useState<{ [key: number]: Product[] }>({});
+  const [inputBrands, setInputBrands] = useState<{ [key: number]: Brand[] }>({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -111,7 +103,6 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setProducts(data); // Keep this for backward compatibility
       setInputProducts((prev) => ({
         ...prev,
         [index]: data,
@@ -129,7 +120,6 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setBrands(data); // Keep this for backward compatibility
       setInputBrands((prev) => ({
         ...prev,
         [index]: data,

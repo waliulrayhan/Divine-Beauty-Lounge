@@ -13,9 +13,18 @@ interface DashboardContentProps {
   } | null;
 }
 
+interface QuickStats {
+  totalServices: number;
+  totalProducts: number;
+  totalBrands: number;
+  totalStockInEntries: number;
+  totalStockOutEntries: number;
+  lowStockProducts: number;
+}
+
 const DashboardContent: React.FC<DashboardContentProps> = ({ user }) => {
   const [loading, setLoading] = useState(true);
-  const [quickStats, setQuickStats] = useState<any>(null); // State for quick stats
+  const [quickStats, setQuickStats] = useState<QuickStats | null>(null); // Updated type
   const router = useRouter(); // Initialize useRouter
 
   useEffect(() => {
@@ -55,34 +64,34 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ user }) => {
         <h4 className="text-2xl font-semibold text-gray-800 mb-4">Quick Stats</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
           <div className="flex items-center px-5 py-6 shadow-lg rounded-lg bg-white border border-gray-200" onClick={() => router.push('/service-list')}>
-            <FaUsers className="text-4xl text-blue-500 mr-4" /> {/* Changed icon color to a relevant user color */}
+            <FaUsers className="text-4xl text-blue-500 mr-4" />
             <div className="mx-5">
-              <h4 className="text-2xl font-semibold text-gray-700"> {/* Changed text color to a darker shade */}
+              <h4 className="text-2xl font-semibold text-gray-700">
                 {quickStats?.totalServices || 0}
               </h4>
-              <div className="text-gray-700"> {/* Changed text color to a darker shade */}
-                Total Product Categorys
+              <div className="text-gray-700">
+                Total Product Categories
               </div>
             </div>
           </div>
           <div className="flex items-center px-5 py-6 shadow-lg rounded-lg bg-white border border-gray-200" onClick={() => router.push('/product-list')}>
-            <FaBox className="text-4xl text-blue-500 mr-4" /> {/* Changed icon color to a relevant box color */}
+            <FaBox className="text-4xl text-blue-500 mr-4" />
             <div className="mx-5">
-              <h4 className="text-2xl font-semibold text-gray-700"> {/* Changed text color to a darker shade */}
+              <h4 className="text-2xl font-semibold text-gray-700">
                 {quickStats?.totalProducts || 0}
               </h4>
-              <div className="text-gray-700"> {/* Changed text color to a darker shade */}
+              <div className="text-gray-700">
                 Total Products
               </div>
             </div>
           </div>
           <div className="flex items-center px-5 py-6 shadow-lg rounded-lg bg-white border border-gray-200" onClick={() => router.push('/brand-management')}>
-            <FaCalculator className="text-4xl text-green-500 mr-4" /> {/* Changed icon color to a relevant green color */}
+            <FaCalculator className="text-4xl text-green-500 mr-4" />
             <div className="mx-5">
-              <h4 className="text-2xl font-semibold text-gray-700"> {/* Changed text color to a darker shade */}
+              <h4 className="text-2xl font-semibold text-gray-700">
                 {quickStats?.totalBrands || 0}
               </h4>
-              <div className="text-gray-700"> {/* Changed text color to a darker shade */}
+              <div className="text-gray-700">
                 Total Brands
               </div>
             </div>
@@ -90,34 +99,34 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ user }) => {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
           <div className="flex items-center px-5 py-6 shadow-lg rounded-lg bg-white border border-gray-200" onClick={() => router.push('/stock-in')}>
-            <FaArrowUp className="text-4xl text-green-500 mr-4" /> {/* Changed icon color to a relevant green color */}
+            <FaArrowUp className="text-4xl text-green-500 mr-4" />
             <div className="mx-5">
-              <h4 className="text-2xl font-semibold text-gray-700"> {/* Changed text color to a darker shade */}
+              <h4 className="text-2xl font-semibold text-gray-700">
                 {quickStats?.totalStockInEntries || 0}
               </h4>
-              <div className="text-gray-700"> {/* Changed text color to a darker shade */}
+              <div className="text-gray-700">
                 Total Stock In Entries
               </div>
             </div>
           </div>
           <div className="flex items-center px-5 py-6 shadow-lg rounded-lg bg-white border border-gray-200" onClick={() => router.push('/stock-out')}>
-            <FaArrowDown className="text-4xl text-red-500 mr-4" /> {/* Changed icon color to a relevant red color */}
+            <FaArrowDown className="text-4xl text-red-500 mr-4" />
             <div className="mx-5">
-              <h4 className="text-2xl font-semibold text-gray-700"> {/* Changed text color to a darker shade */}
+              <h4 className="text-2xl font-semibold text-gray-700">
                 {quickStats?.totalStockOutEntries || 0}
               </h4>
-              <div className="text-gray-700"> {/* Changed text color to a darker shade */}
+              <div className="text-gray-700">
                 Total Stock Out Entries
               </div>
             </div>
           </div>
           <div className="flex items-center px-5 py-6 shadow-lg rounded-lg bg-white border border-gray-200" onClick={() => router.push('/current-stock')}>
-            <FaExclamationCircle className="text-4xl text-yellow-500 mr-4" /> {/* Changed icon color to a relevant yellow color */}
+            <FaExclamationCircle className="text-4xl text-yellow-500 mr-4" />
             <div className="mx-5">
-              <h4 className="text-2xl font-semibold text-gray-700"> {/* Changed text color to a darker shade */}
+              <h4 className="text-2xl font-semibold text-gray-700">
                 {quickStats?.lowStockProducts || 0}
               </h4>
-              <div className="text-gray-700"> {/* Changed text color to a darker shade */}
+              <div className="text-gray-700">
                 Low Stock Products
               </div>
             </div>

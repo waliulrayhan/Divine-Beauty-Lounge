@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     const formattedBrands = brands.map(brand => ({
       id: brand.id,
       name: brand.name,
-      productId: brand.product.id,  // Make sure this is included
+      productId: brand.product.id,
       productName: brand.product.name,
       serviceName: brand.product.service.name,
     }));
@@ -55,12 +55,11 @@ export async function POST(request: NextRequest) {
   try {
     const { name, productId } = await request.json();
     
-    // Check if brand name already exists
     const existingBrand = await prisma.brand.findFirst({
       where: {
         name: {
           equals: name,
-          mode: 'insensitive' // Case-insensitive comparison
+          mode: 'insensitive'
         }
       }
     });

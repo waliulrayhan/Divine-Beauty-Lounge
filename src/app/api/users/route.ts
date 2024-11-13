@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const session = await getServerSession(authOptions);
 
   if (!session || !['SUPER_ADMIN', 'NORMAL_ADMIN'].includes(session.user?.role)) {
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         jobEndDate: true,
         isActive: true,
         role: true,
-        permissions: session.user.role === 'SUPER_ADMIN', // Only include permissions for SUPER_ADMIN
+        permissions: session.user.role === 'SUPER_ADMIN' ? true : false, // Include permissions only for SUPER_ADMIN
       },
     });
     return NextResponse.json(users);

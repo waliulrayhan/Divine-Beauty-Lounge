@@ -51,7 +51,8 @@ const ProfileManagement = () => {
             ? new Date(data.jobEndDate).toISOString().split("T")[0]
             : null,
         });
-      } catch (error) {
+      } catch {
+        // Removed the 'error' variable since it was unused
         toast.error("Failed to fetch profile");
       } finally {
         setIsLoading(false);
@@ -73,7 +74,8 @@ const ProfileManagement = () => {
       if (!response.ok) throw new Error("Failed to update profile");
 
       toast.success("Profile updated successfully");
-    } catch (error) {
+    } catch {
+      // Removed the 'error' variable since it was unused
       toast.error("Failed to update profile");
     }
   };

@@ -29,19 +29,14 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
   const { data: session } = useSession();
   const [products, setProducts] = useState<Product[]>([]);
   const [services, setServices] = useState<Service[]>([]);
-  const [newProduct, setNewProduct] = useState({
-    name: '',
-    description: '',
-    serviceId: '',
-  });
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productInputs, setProductInputs] = useState([{
     name: '',
     description: '',
     serviceId: '',
   }]);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -164,7 +159,6 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
-    // Reset the productInputs array with the current product data
     setProductInputs([{
       name: product.name,
       description: product.description,
@@ -204,9 +198,9 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
   console.log("Can delete:", canDelete);
 
   const columns: GridColDef[] = [
-    { 
-      field: 'name', 
-      headerName: 'Product Name', 
+    {
+      field: 'name',
+      headerName: 'Product Name',
       flex: 1,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
@@ -214,9 +208,9 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
       align: 'center',
       headerAlign: 'center'
     },
-    { 
-      field: 'description', 
-      headerName: 'Description', 
+    {
+      field: 'description',
+      headerName: 'Description',
       flex: 2,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
@@ -224,9 +218,9 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
       align: 'center',
       headerAlign: 'center'
     },
-    { 
-      field: 'serviceName', 
-      headerName: 'Product Category Name', 
+    {
+      field: 'serviceName',
+      headerName: 'Product Category Name',
       flex: 1,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',

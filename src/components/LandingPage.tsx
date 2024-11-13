@@ -31,7 +31,7 @@ export default function LandingPage() {
                   Streamline Your Beauty Business Inventory
                 </h2>
                 <p className="text-xl text-[#333333] mb-8">
-                  Effortlessly manage your salon's inventory, track products, and boost efficiency with our comprehensive inventory management system.
+                  Effortlessly manage your salon&apos;s inventory, track products, and boost efficiency with our comprehensive inventory management system.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Link
