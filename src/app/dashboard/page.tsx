@@ -32,8 +32,14 @@ const DashboardPage: NextPage = () => {
     return <div>Access Denied</div>;
   }
 
+  // Create a safeUser object to ensure email is a string
+  const safeUser = {
+    ...session.user,
+    email: session.user.email ?? '', // Ensure email is a string
+  };
+
   return (
-    <Dashboard user={session.user}>
+    <Dashboard user={safeUser}>
       <DashboardContent user={userData} />
     </Dashboard>
   );
