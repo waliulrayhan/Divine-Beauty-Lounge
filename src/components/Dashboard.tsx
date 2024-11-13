@@ -33,6 +33,8 @@ export default function Dashboard({ user, children }: DashboardProps) {
     localStorage.setItem("sidebarState", JSON.stringify(newState));
   };
 
+// Test Branch Check
+
   return (
     <div className="min-h-screen flex bg-[#FAF8F5]">
       {/* Sidebar */}
