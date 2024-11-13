@@ -8,8 +8,8 @@ import SessionProvider from "@/components/SessionProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Beauty IMS",
-  description: "A simple app with authentication",
+  title: "Divine-Beauty-Lounge",
+  description: "Streamline Your Beauty Business Inventory",
 };
 
 export default async function RootLayout({
