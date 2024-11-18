@@ -76,6 +76,60 @@ export async function GET() {
     // Sort current stock by brand name
     currentStock.sort((a, b) => a.brandName.localeCompare(b.brandName));
 
+    // Get stock in statistics with quantity and value calculations
+    const stockInStats = await prisma.stockIn.aggregate({
+      _sum: {
+        quantity: true,
+        pricePerUnit: true,
+      },
+    });
+
+    // Calculate total stock in value
+    const stockInDetails = await prisma.stockIn.findMany({
+      select: {
+        quantity: true,
+        pricePerUnit: true,
+      },
+    });
+    
+    const totalStockInValue = stockInDetails.reduce(
+      (sum, item) => sum + (item.quantity * item.pricePerUnit),
+      0
+    );
+
+    // Get stock out quantities
+    const stockOutStats = await prisma.stockOut.aggregate({
+      _sum: {
+        quantity: true,
+      },
+    });
+
+    // Calculate stock out value based on the most recent stock in price for each item
+    const stockOuts = await prisma.stockOut.findMany({
+      include: {
+        product: true,
+        brand: true,
+      },
+    });
+
+    let totalStockOutValue = 0;
+    for (const stockOut of stockOuts) {
+      // Get the most recent stock in price for this product/brand combination
+      const mostRecentStockIn = await prisma.stockIn.findFirst({
+        where: {
+          productId: stockOut.productId,
+          brandId: stockOut.brandId,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      if (mostRecentStockIn) {
+        totalStockOutValue += stockOut.quantity * mostRecentStockIn.pricePerUnit;
+      }
+    }
+
     return NextResponse.json({
       totalServices,
       totalProducts,
@@ -84,6 +138,10 @@ export async function GET() {
       totalStockOutEntries,
       lowStockProducts,
       currentStock,
+      stockInQuantity: stockInStats._sum.quantity || 0,
+      stockOutQuantity: stockOutStats._sum.quantity || 0,
+      totalStockInValue: totalStockInValue || 0,
+      totalStockOutValue: totalStockOutValue || 0,
     });
   } catch (error) {
     console.error("Error fetching quick stats:", error);
