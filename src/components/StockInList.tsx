@@ -739,7 +739,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
         <Box
           sx={{
-            height: 700, // Adjusted height to fit the div
+            height: 800, // Adjusted height to fit the div
             width: "100%", // Adjusted width to fit the div
             "& .table-header": {
               backgroundColor: "#f8fafc",
