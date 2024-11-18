@@ -110,7 +110,6 @@ export default function UserManagement() {
       const url = editingUser ? `/api/users/${editingUser.id}` : "/api/users";
       const method = editingUser ? "PUT" : "POST";
 
-      // Ensure all features have 'view' permission before submission
       const updatedPermissions = { ...newUser.permissions };
       (["service", "product", "stockIn", "stockOut"] as const).forEach(
         (feature) => {
@@ -128,7 +127,6 @@ export default function UserManagement() {
         permissions: JSON.stringify(updatedPermissions),
       };
 
-      // Remove password field if it's empty or if we're editing
       if (editingUser || !userData.password) {
         delete userData.password;
       }
@@ -324,108 +322,129 @@ export default function UserManagement() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   if (session?.user?.role !== "SUPER_ADMIN") {
-    return <div className="text-black">Access Denied</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-5xl mb-4">
+            <svg className="w-24 h-24 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Access Denied</h1>
+          <p className="text-gray-600">You don&apos;t have permission to access this page.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-800">User Management</h2>
-        <button
-          onClick={() => {
-            setEditingUser(null);
-            setNewUser({
-              employeeId: "",
-              username: "",
-              email: "",
-              phoneNumber: "",
-              nidNumber: "",
-              jobStartDate: "",
-              jobEndDate: "",
-              isActive: true,
-              role: "NORMAL_ADMIN",
-              permissions: {
-                service: ["view"],
-                product: ["view"],
-                stockIn: ["view"],
-                stockOut: ["view"],
-              },
-            });
-            setShowForm(true);
-          }}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition duration-200 flex items-center gap-2 shadow-lg"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-          Add New User
-        </button>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                User Management
+              </h2>
+              <button
+                onClick={() => {
+                  setEditingUser(null);
+                  setNewUser({
+                    employeeId: "",
+                    username: "",
+                    email: "",
+                    phoneNumber: "",
+                    nidNumber: "",
+                    jobStartDate: "",
+                    jobEndDate: "",
+                    isActive: true,
+                    role: "NORMAL_ADMIN",
+                    permissions: {
+                      service: ["view"],
+                      product: ["view"],
+                      stockIn: ["view"],
+                      stockOut: ["view"],
+                    },
+                  });
+                  setShowForm(true);
+                }}
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add New User
+              </button>
+            </div>
+          </div>
 
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-        <Box sx={{ 
-          height: 800, 
-          width: '100%',
-          '& .table-header': {
-            backgroundColor: '#f8fafc',
-            color: '#1e293b',
-            fontSize: '0.875rem',
-            fontWeight: 600,
-          },
-          '& .table-cell': {
-            fontSize: '0.875rem',
-            color: '#334155',
-          },
-          '& .MuiDataGrid-root': {
-            border: 'none',
-          },
-          '& .MuiDataGrid-cell': {
-            borderBottom: '1px solid #f1f5f9',
-          },
-          '& .MuiDataGrid-columnHeaders': {
-            borderBottom: '2px solid #e2e8f0',
-          },
-          '& .MuiDataGrid-toolbarContainer': {
-            padding: '1rem',
-            backgroundColor: '#ffffff',
-            borderBottom: '1px solid #f1f5f9',
-          },
-          '& .MuiButton-root': {
-            color: '#475569',
-          },
-          '& .MuiInputBase-root': {
-            backgroundColor: '#f8fafc',
-            borderRadius: '0.5rem',
-            padding: '0.25rem 0.5rem',
-          },
-        }}>
-          <DataGrid
-            rows={users}
-            columns={columns}
-            disableColumnFilter
-            disableColumnSelector
-            disableDensitySelector
-            slots={{ toolbar: GridToolbar }}
-            slotProps={{
-              toolbar: {
-                showQuickFilter: true,
-                quickFilterProps: { debounceMs: 500 },
-              },
-            }}
-            sx={{
-              '& .MuiDataGrid-row:hover': {
-                backgroundColor: '#f8fafc',
-              },
-            }}
-          />
-        </Box>
+          <Box sx={{ 
+            height: 800, 
+            width: '100%',
+            '& .table-header': {
+              backgroundColor: '#f8fafc',
+              color: '#1e293b',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+            },
+            '& .table-cell': {
+              fontSize: '0.875rem',
+              color: '#334155',
+            },
+            '& .MuiDataGrid-root': {
+              border: 'none',
+            },
+            '& .MuiDataGrid-cell': {
+              borderBottom: '1px solid #f1f5f9',
+            },
+            '& .MuiDataGrid-columnHeaders': {
+              borderBottom: '2px solid #e2e8f0',
+            },
+            '& .MuiDataGrid-toolbarContainer': {
+              padding: '1rem',
+              backgroundColor: '#ffffff',
+              borderBottom: '1px solid #f1f5f9',
+            },
+            '& .MuiButton-root': {
+              color: '#475569',
+            },
+            '& .MuiInputBase-root': {
+              backgroundColor: '#f8fafc',
+              borderRadius: '0.5rem',
+              padding: '0.25rem 0.5rem',
+            },
+          }}>
+            <DataGrid
+              rows={users}
+              columns={columns}
+              disableColumnFilter
+              disableColumnSelector
+              disableDensitySelector
+              slots={{ toolbar: GridToolbar }}
+              slotProps={{
+                toolbar: {
+                  showQuickFilter: true,
+                  quickFilterProps: { debounceMs: 500 },
+                },
+              }}
+              sx={{
+                '& .MuiDataGrid-row:hover': {
+                  backgroundColor: '#f8fafc',
+                },
+              }}
+            />
+          </Box>
+        </div>
       </div>
 
       {showForm && (
