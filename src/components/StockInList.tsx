@@ -6,6 +6,8 @@ import { toast } from "react-toastify";
 import Link from "next/link";
 import Box from "@mui/material/Box";
 import { DataGrid, GridToolbar, GridColDef } from "@mui/x-data-grid";
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 
 interface Service {
   id: string;
@@ -139,7 +141,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
       const data = await response.json();
       setInputBrands((prev) => ({
         ...prev,
-        [index]: data,
+        [index]: data.filter((brand: Brand) => brand.productId === productId),
       }));
     } catch (error) {
       console.error("Error fetching brands:", error);
@@ -239,41 +241,64 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
           },
         ]);
       } else {
-        // Create stock ins
         await Promise.all(
           stockInInputs.map(async (stockIn) => {
-            const response = await fetch("/api/stock-in", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(stockIn),
+            let brandId = stockIn.brandId;
+            
+            if (!brandId && stockIn.brandName) {
+              const brandResponse = await fetch('/api/brands', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  name: stockIn.brandName,
+                  productId: stockIn.productId,
+                }),
+              });
+
+              if (!brandResponse.ok) {
+                const errorData = await brandResponse.json();
+                throw new Error(errorData.error || 'Failed to create brand');
+              }
+
+              const newBrand = await brandResponse.json();
+              brandId = newBrand.id;
+            }
+
+            const response = await fetch('/api/stock-in', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                ...stockIn,
+                brandId,
+              }),
             });
 
             if (!response.ok) {
               const errorData = await response.json();
-              throw new Error(errorData.error || "Failed to create stock ins");
+              throw new Error(errorData.error || 'Failed to create stock ins');
             }
           })
         );
 
-        toast.success("Stock ins created successfully");
+        toast.success('Stock ins created successfully');
         await fetchStockIns();
         setShowForm(false);
         setStockInInputs([
           {
-            serviceId: "",
-            productId: "",
-            brandId: "",
-            brandName: "",
+            serviceId: '',
+            productId: '',
+            brandId: '',
+            brandName: '',
             quantity: 0,
             pricePerUnit: 0,
-            comments: "",
+            comments: '',
           },
         ]);
       }
     } catch (error) {
-      console.error("Error creating or updating stock ins:", error);
+      console.error('Error creating or updating stock ins:', error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to process stock ins"
+        error instanceof Error ? error.message : 'Failed to process stock ins'
       );
     }
   };
@@ -644,26 +669,71 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                     <label className="block text-sm font-medium text-black mb-2">
                       Brand <span className="text-red-500">*</span>
                     </label>
-                    <select
-                      name="brandId"
-                      value={stockIn.brandId}
-                      onChange={(e) => handleInputChange(index, e)}
-                      required
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                    >
-                      <option value="">Select a brand</option>
-                      {(inputBrands[index] || [])
-                        .filter(
-                          (brand) =>
-                            !stockIn.productId ||
-                            brand.productId === stockIn.productId
-                        )
-                        .map((brand) => (
-                          <option key={brand.id} value={brand.id}>
-                            {brand.name}
-                          </option>
-                        ))}
-                    </select>
+                    <Autocomplete
+                      value={stockIn.brandId ? { 
+                        id: stockIn.brandId, 
+                        name: stockIn.brandName 
+                      } : null}
+                      onChange={(_, newValue) => {
+                        const newInputs = [...stockInInputs];
+                        if (newValue && typeof newValue === 'object' && 'id' in newValue) {
+                          newInputs[index] = {
+                            ...newInputs[index],
+                            brandId: newValue.id,
+                            brandName: newValue.name,
+                          };
+                        } else if (newValue && typeof newValue === 'string') {
+                          newInputs[index] = {
+                            ...newInputs[index],
+                            brandId: '',
+                            brandName: newValue,
+                          };
+                        } else {
+                          newInputs[index] = {
+                            ...newInputs[index],
+                            brandId: '',
+                            brandName: '',
+                          };
+                        }
+                        setStockInInputs(newInputs);
+                      }}
+                      options={
+                        stockIn.productId 
+                          ? (inputBrands[index] || []).map(brand => ({ 
+                              id: brand.id, 
+                              name: brand.name 
+                            }))
+                          : []
+                      }
+                      getOptionLabel={(option: string | { id: string; name: string }) => {
+                        if (typeof option === 'string') return option;
+                        return option.name || '';
+                      }}
+                      isOptionEqualToValue={(option, value) => {
+                        if (!option || !value) return false;
+                        return option.id === value.id;
+                      }}
+                      freeSolo
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          className="w-full bg-white"
+                          placeholder={stockIn.productId ? "Select or type brand name" : "Select a product first"}
+                          onChange={(e) => {
+                            const newInputs = [...stockInInputs];
+                            newInputs[index] = {
+                              ...newInputs[index],
+                              brandId: '',
+                              brandName: e.target.value,
+                            };
+                            setStockInInputs(newInputs);
+                          }}
+                        />
+                      )}
+                      disabled={!stockIn.productId}
+                      className="w-full"
+                    />
                   </div>
 
                   <div>
