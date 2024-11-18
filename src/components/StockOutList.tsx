@@ -674,7 +674,7 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
         <Box
           sx={{
-            height: 700,
+            height: 800,
             width: "100%",
             "& .table-header": {
               backgroundColor: "#f8fafc",

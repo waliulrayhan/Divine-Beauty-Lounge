@@ -306,7 +306,7 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
 
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
         <Box sx={{ 
-          height: 600, 
+          height: 800, 
           width: '100%',
           '& .table-header': {
             backgroundColor: '#f8fafc',
