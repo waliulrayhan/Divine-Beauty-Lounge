@@ -18,6 +18,12 @@ interface Product {
   serviceId: string;
 }
 
+interface Brand {
+  id: string;
+  name: string;
+  productId: string;
+}
+
 interface StockIn {
   id: string;
   productId: string;
@@ -34,12 +40,6 @@ interface StockIn {
 
 interface StockInListProps {
   permissions: string[];
-}
-
-interface Brand {
-  id: string;
-  name: string;
-  productId: string;
 }
 
 const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
@@ -647,25 +647,22 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                     <select
                       name="brandId"
                       value={stockIn.brandId}
-                      onChange={(e) => {
-                        const selectedBrand = inputBrands[index]?.find(brand => brand.id === e.target.value);
-                        const newInputs = [...stockInInputs];
-                        newInputs[index] = {
-                          ...newInputs[index],
-                          brandId: selectedBrand?.id || "",
-                          brandName: selectedBrand?.name || "",
-                        };
-                        setStockInInputs(newInputs);
-                      }}
+                      onChange={(e) => handleInputChange(index, e)}
                       required
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                     >
                       <option value="">Select a brand</option>
-                      {(inputBrands[index] || []).map((brand) => (
-                        <option key={brand.id} value={brand.id}>
-                          {brand.name}
-                        </option>
-                      ))}
+                      {(inputBrands[index] || [])
+                        .filter(
+                          (brand) =>
+                            !stockIn.productId ||
+                            brand.productId === stockIn.productId
+                        )
+                        .map((brand) => (
+                          <option key={brand.id} value={brand.id}>
+                            {brand.name}
+                          </option>
+                        ))}
                     </select>
                   </div>
 
