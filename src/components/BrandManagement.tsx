@@ -195,8 +195,8 @@ const BrandManagement: React.FC = () => {
 
   const columns: GridColDef[] = [
     { 
-      field: 'name', 
-      headerName: 'Brand Name', 
+      field: 'serviceName', 
+      headerName: 'Product Category', 
       flex: 1,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',
@@ -215,8 +215,8 @@ const BrandManagement: React.FC = () => {
       headerAlign: 'center'
     },
     { 
-      field: 'serviceName', 
-      headerName: 'Product Category', 
+      field: 'name', 
+      headerName: 'Brand Name', 
       flex: 1,
       headerClassName: 'table-header',
       cellClassName: 'table-cell',

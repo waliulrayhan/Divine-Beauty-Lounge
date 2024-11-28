@@ -293,8 +293,8 @@ const ProfileManagement = () => {
                   }
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 text-gray-800 focus:ring-2 focus:ring-indigo-500"
                 >
-                  <option value="SUPER_ADMIN">Super Admin</option>
-                  <option value="NORMAL_ADMIN">Normal Admin</option>
+                  <option value="SUPER_ADMIN">Admin</option>
+                  <option value="NORMAL_ADMIN">User</option>
                 </select>
               </div>
             )}

@@ -104,8 +104,8 @@ const CurrentStock: React.FC = () => {
 
   const columns: GridColDef<StockItem>[] = [
     {
-      field: "brandName",
-      headerName: "Brand Name",
+      field: "serviceName",
+      headerName: "Product Category",
       flex: 1,
       headerClassName: "table-header",
       cellClassName: "table-cell",
@@ -124,8 +124,8 @@ const CurrentStock: React.FC = () => {
       headerAlign: "center",
     },
     {
-      field: "serviceName",
-      headerName: "Product Category",
+      field: "brandName",
+      headerName: "Brand Name",
       flex: 1,
       headerClassName: "table-header",
       cellClassName: "table-cell",

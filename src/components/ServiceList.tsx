@@ -423,7 +423,7 @@ const ServiceList: React.FC<ServiceListProps> = ({ permissions }) => {
                   onClick={addServiceInput}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
                 >
-                  Add Another Product Category
+                  Add Another Entry
                 </button>
               )}
               <button
