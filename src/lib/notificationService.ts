@@ -22,7 +22,6 @@ Thank you for your attention and swift action.
 Warm regards,
 Md. Waliul Islam Rayhan
 Developer, Divine Beauty Lounge
-Email: mdwaliulislamrayhan@gmail.com
 
 **Note: This is an automatically generated email. Please do not reply directly to this message.**`,
   };

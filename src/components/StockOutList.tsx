@@ -329,8 +329,8 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
       renderCell: (params) => new Date(params.value).toLocaleDateString(),
     },
     {
-      field: "brandName",
-      headerName: "Brand Name",
+      field: "serviceName",
+      headerName: "Product Category",
       flex: 1,
       headerClassName: "table-header",
       cellClassName: "table-cell",
@@ -347,8 +347,8 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
       headerAlign: "center",
     },
     {
-      field: "serviceName",
-      headerName: "Product Category",
+      field: "brandName",
+      headerName: "Brand Name",
       flex: 1,
       headerClassName: "table-header",
       cellClassName: "table-cell",
@@ -802,7 +802,7 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
                 <div className="flex gap-4">
                   <div className="flex-1 bg-gray-50 rounded-lg p-4">
                     <h4 className="text-sm font-semibold text-gray-500 mb-2">
-                      Created By
+                      Removed By
                     </h4>
                     <p className="text-gray-900">
                       {selectedStockOut.createdBy}
@@ -811,7 +811,7 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
 
                   <div className="flex-1 bg-gray-50 rounded-lg p-4">
                     <h4 className="text-sm font-semibold text-gray-500 mb-2">
-                      Created At
+                      Removed At
                     </h4>
                     <p className="text-gray-900">
                       {new Date(selectedStockOut.createdAt).toLocaleString()}

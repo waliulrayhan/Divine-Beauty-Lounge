@@ -368,8 +368,8 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     },
     // { field: 'createdBy', headerName: 'User Name', flex: 1, headerClassName: 'table-header', cellClassName: 'table-cell', align: 'center', headerAlign: 'center' }, // Commented out
     {
-      field: "brandName",
-      headerName: "Brand Name",
+      field: "serviceName",
+      headerName: "Service Name",
       flex: 1,
       headerClassName: "table-header",
       cellClassName: "table-cell",
@@ -385,15 +385,15 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
       align: "center",
       headerAlign: "center",
     },
-    // {
-    //   field: "serviceName",
-    //   headerName: "Service Name",
-    //   flex: 1,
-    //   headerClassName: "table-header",
-    //   cellClassName: "table-cell",
-    //   align: "center",
-    //   headerAlign: "center",
-    // },
+    {
+      field: "brandName",
+      headerName: "Brand Name",
+      flex: 1,
+      headerClassName: "table-header",
+      cellClassName: "table-cell",
+      align: "center",
+      headerAlign: "center",
+    },
     {
       field: "quantity",
       headerName: "Quantity",
@@ -403,16 +403,16 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
       align: "center",
       headerAlign: "center",
     },
-    {
-      field: "pricePerUnit",
-      headerName: "Unit Price",
-      flex: 1,
-      headerClassName: "table-header",
-      cellClassName: "table-cell",
-      align: "center",
-      headerAlign: "center",
-      renderCell: (params) => `${params.value.toFixed(2)} Tk`,
-    },
+    // {
+    //   field: "pricePerUnit",
+    //   headerName: "Unit Price",
+    //   flex: 1,
+    //   headerClassName: "table-header",
+    //   cellClassName: "table-cell",
+    //   align: "center",
+    //   headerAlign: "center",
+    //   renderCell: (params) => `${params.value.toFixed(2)} Tk`,
+    // },
     {
       field: "actions",
       headerName: "Actions",
@@ -792,7 +792,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                   onClick={addAnotherStockIn}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
                 >
-                  Add More
+                  Add Another Entry
                 </button>
               )}
               <button
@@ -946,7 +946,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                 <div className="flex gap-4">
                   <div className="flex-1 bg-gray-50 rounded-lg p-4">
                     <h4 className="text-sm font-semibold text-gray-500 mb-2">
-                      Created By
+                      Added By
                     </h4>
                     <p className="text-gray-900">{selectedStockIn.createdBy}</p>
                   </div>

@@ -215,6 +215,16 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
 
   const columns: GridColDef[] = [
     {
+      field: "serviceName",
+      headerName: "Product Category Name",
+      flex: 1,
+      headerClassName: "table-header",
+      cellClassName: "table-cell",
+      type: "string",
+      align: "center",
+      headerAlign: "center",
+    },
+    {
       field: "name",
       headerName: "Product Name",
       flex: 1,
@@ -228,16 +238,6 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
       field: "description",
       headerName: "Description",
       flex: 2,
-      headerClassName: "table-header",
-      cellClassName: "table-cell",
-      type: "string",
-      align: "center",
-      headerAlign: "center",
-    },
-    {
-      field: "serviceName",
-      headerName: "Product Category Name",
-      flex: 1,
       headerClassName: "table-header",
       cellClassName: "table-cell",
       type: "string",
@@ -546,7 +546,7 @@ const ProductList: React.FC<ProductListProps> = ({ permissions }) => {
                   onClick={addProductInput}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
                 >
-                  Add Another Product
+                  Add Another Entry
                 </button>
               )}
               <button
