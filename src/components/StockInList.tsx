@@ -1,13 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
-import Link from "next/link";
 import Box from "@mui/material/Box";
 import { DataGrid, GridToolbar, GridColDef } from "@mui/x-data-grid";
-import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
 
 interface Service {
   id: string;
@@ -36,7 +32,6 @@ interface StockInListProps {
 }
 
 const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
-  const { data: session } = useSession();
   const [stockIns, setStockIns] = useState<StockIn[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [stockInInputs, setStockInInputs] = useState([
