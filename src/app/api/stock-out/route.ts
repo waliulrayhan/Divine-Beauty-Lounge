@@ -21,22 +21,18 @@ export async function GET() {
             },
           },
         },
-        brand: {
-          select: { name: true },
-        },
         createdBy: {
           select: { username: true },
         },
       },
       orderBy: { createdAt: 'desc' },
     });
+    
     const formattedStockOuts = stockOuts.map(stockOut => ({
       id: stockOut.id,
       productId: stockOut.productId,
       productName: stockOut.product.name,
       serviceName: stockOut.product.service.name,
-      brandId: stockOut.brandId,
-      brandName: stockOut.brand.name,
       quantity: stockOut.quantity,
       comments: stockOut.comments,
       createdBy: stockOut.createdBy.username,
@@ -63,20 +59,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid request format' }, { status: 400 });
     }
 
-    // Check available stock and get brand names for all items first
+    // Check available stock for all items first
     const stockChecks = await Promise.all(
-      stockOutItems.map(async ({ productId, brandId, quantity }) => {
-        const availableStock = await getAvailableStock(productId, brandId);
-        // Fetch brand information
-        const brand = await prisma.brand.findUnique({
-          where: { id: brandId },
-          select: { name: true }
-        });
-
+      stockOutItems.map(async ({ productId, quantity }) => {
+        const availableStock = await getAvailableStock(productId);
         return {
           productId,
-          brandId,
-          brandName: brand?.name || 'Unknown Brand',
           requested: quantity,
           available: availableStock,
           isValid: quantity <= availableStock
@@ -88,7 +76,7 @@ export async function POST(request: NextRequest) {
     const insufficientStock = stockChecks.find(check => !check.isValid);
     if (insufficientStock) {
       return NextResponse.json({
-        error: `Insufficient stock for one or more items. Brand "${insufficientStock.brandName}": Available: ${insufficientStock.available}, Requested: ${insufficientStock.requested}`
+        error: `Insufficient stock. Available: ${insufficientStock.available}, Requested: ${insufficientStock.requested}`
       }, { status: 400 });
     }
 
@@ -98,10 +86,9 @@ export async function POST(request: NextRequest) {
         prisma.stockOut.create({
           data: {
             product: { connect: { id: item.productId } },
-            brand: { connect: { id: item.brandId } },
             quantity: parseInt(item.quantity),
             comments: item.comments || null,
-            createdBy: { connect: { email: session.user.email! } }, // Add non-null assertion
+            createdBy: { connect: { email: session.user.email! } },
           },
         })
       )

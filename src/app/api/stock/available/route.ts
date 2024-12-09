@@ -4,17 +4,16 @@ import { getAvailableStock } from '@/lib/stockCalculations';
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const productId = searchParams.get('productId');
-  const brandId = searchParams.get('brandId');
 
-  if (!productId || !brandId) {
+  if (!productId) {
     return NextResponse.json(
-      { error: 'Product ID and Brand ID are required' },
+      { error: 'Product ID is required' },
       { status: 400 }
     );
   }
 
   try {
-    const availableStock = await getAvailableStock(productId, brandId);
+    const availableStock = await getAvailableStock(productId);
     return NextResponse.json({ availableStock });
   } catch (error) {
     console.error('Error checking available stock:', error);

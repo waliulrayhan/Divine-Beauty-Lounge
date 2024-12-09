@@ -17,19 +17,11 @@ interface Product {
   serviceId: string;
 }
 
-interface Brand {
-  id: string;
-  name: string;
-  productId: string;
-}
-
 interface StockOut {
   id: string;
   productId: string;
   productName: string;
   serviceName: string;
-  brandId: string;
-  brandName: string;
   quantity: number;
   comments: string;
   createdBy: string;
@@ -48,7 +40,6 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
     {
       serviceId: "",
       productId: "",
-      brandId: "",
       quantity: 0,
       comments: "",
     },
@@ -57,7 +48,6 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
   const [showForm, setShowForm] = useState(false);
   const [selectedStockOut, setSelectedStockOut] = useState<StockOut | null>(null);
   const [inputProducts, setInputProducts] = useState<{ [key: number]: Product[] }>({});
-  const [inputBrands, setInputBrands] = useState<{ [key: number]: Brand[] }>({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -113,28 +103,9 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
     }
   };
 
-  const fetchBrands = async (productId: string, index: number) => {
-    try {
-      const response = await fetch(`/api/brands?productId=${productId}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      setInputBrands((prev) => ({
-        ...prev,
-        [index]: data,
-      }));
-    } catch (error) {
-      console.error("Error fetching brands:", error);
-      toast.error("Failed to load brands");
-    }
-  };
-
   const handleInputChange = (
     index: number,
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     const newInputs = [...stockOutInputs];
@@ -146,89 +117,79 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
 
     if (name === "serviceId") {
       fetchProducts(value, index);
-    } else if (name === "productId") {
-      fetchBrands(value, index);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-        // Validate that required fields are filled
-        const hasEmptyFields = stockOutInputs.some(
-            (input) => !input.productId || !input.brandId || !input.quantity
-        );
+      // Validate that required fields are filled
+      const hasEmptyFields = stockOutInputs.some(
+        (input) => !input.productId || !input.quantity
+      );
 
-        if (hasEmptyFields) {
-            toast.error("Please fill all required fields");
-            return;
+      if (hasEmptyFields) {
+        toast.error("Please fill all required fields");
+        return;
+      }
+
+      // Prepare the stock out items to send
+      const stockOutItems = stockOutInputs.map(input => ({
+        productId: input.productId,
+        quantity: input.quantity,
+        comments: input.comments,
+        brandId: null,
+      }));
+
+      if (editingStockOut) {
+        const response = await fetch(`/api/stock-out/${editingStockOut.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            productId: stockOutInputs[0].productId,
+            quantity: stockOutInputs[0].quantity,
+            comments: stockOutInputs[0].comments,
+            brandId: null,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to update stock out");
         }
 
-        // Prepare the stock out items to send
-        const stockOutItems = stockOutInputs.map(input => ({
-            productId: input.productId,
-            brandId: input.brandId,
-            quantity: input.quantity,
-            comments: input.comments,
-        }));
+        toast.success("Stock out updated successfully");
+      } else {
+        const response = await fetch("/api/stock-out", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(stockOutItems),
+        });
 
-        // Check if editing an existing stock out
-        if (editingStockOut) {
-            const response = await fetch(`/api/stock-out/${editingStockOut.id}`, {
-                method: "PUT", // Use PUT for updating
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    productId: stockOutInputs[0].productId,
-                    brandId: stockOutInputs[0].brandId,
-                    quantity: stockOutInputs[0].quantity,
-                    comments: stockOutInputs[0].comments,
-                }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Failed to update stock out");
-            }
-
-            // Show success toast
-            toast.success("Stock out updated successfully");
-        } else {
-            // Create stock outs
-            const response = await fetch("/api/stock-out", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(stockOutItems), // Send the array of stock out items
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Failed to create stock outs");
-            }
-
-            // Show success toast for creation
-            toast.success("Stock outs created successfully");
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to create stock outs");
         }
 
-        // Reload the stock outs table
-        await fetchStockOuts();
+        toast.success("Stock outs created successfully");
+      }
 
-        // Reset form and state
-        setShowForm(false);
-        setEditingStockOut(null);
-        setStockOutInputs([
-            {
-                serviceId: "",
-                productId: "",
-                brandId: "",
-                quantity: 0,
-                comments: "",
-            },
-        ]);
+      await fetchStockOuts();
+      setShowForm(false);
+      setEditingStockOut(null);
+      setStockOutInputs([
+        {
+          serviceId: "",
+          productId: "",
+          quantity: 0,
+          comments: "",
+        },
+      ]);
     } catch (error) {
-        console.error("Error creating or updating stock outs:", error);
-        toast.error(
-            error instanceof Error ? error.message : "Failed to process stock outs"
-        );
+      console.error("Error creating or updating stock outs:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to process stock outs"
+      );
     }
   };
 
@@ -239,17 +200,16 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
         serviceId:
           services.find((s) => s.name === stockOut.serviceName)?.id || "",
         productId: stockOut.productId,
-        brandId: stockOut.brandId,
         quantity: stockOut.quantity,
         comments: stockOut.comments,
       },
     ]);
     setShowForm(true);
-    fetchProducts(
-      services.find((s) => s.name === stockOut.serviceName)?.id || "",
-      0
-    );
-    fetchBrands(stockOut.productId, 0);
+    
+    const serviceId = services.find((s) => s.name === stockOut.serviceName)?.id;
+    if (serviceId) {
+      fetchProducts(serviceId, 0);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -276,7 +236,6 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
 
   const addAnotherStockOut = () => {
     const currentIndex = stockOutInputs.length;
-    // Copy products and brands from the last entry if they exist
     if (currentIndex > 0) {
       const lastIndex = currentIndex - 1;
       if (inputProducts[lastIndex]) {
@@ -285,19 +244,12 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
           [currentIndex]: inputProducts[lastIndex],
         }));
       }
-      if (inputBrands[lastIndex]) {
-        setInputBrands((prev) => ({
-          ...prev,
-          [currentIndex]: inputBrands[lastIndex],
-        }));
-      }
     }
     setStockOutInputs([
       ...stockOutInputs,
       {
         serviceId: "",
         productId: "",
-        brandId: "",
         quantity: 0,
         comments: "",
       },
@@ -340,15 +292,6 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
     {
       field: "productName",
       headerName: "Product Name",
-      flex: 1,
-      headerClassName: "table-header",
-      cellClassName: "table-cell",
-      align: "center",
-      headerAlign: "center",
-    },
-    {
-      field: "brandName",
-      headerName: "Brand Name",
       flex: 1,
       headerClassName: "table-header",
       cellClassName: "table-cell",
@@ -595,32 +538,6 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
 
                   <div>
                     <label className="block text-sm font-medium text-black mb-2">
-                      Brand <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      name="brandId"
-                      value={stockOut.brandId}
-                      onChange={(e) => handleInputChange(index, e)}
-                      required
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                    >
-                      <option value="">Select a brand</option>
-                      {(inputBrands[index] || [])
-                        .filter(
-                          (brand) =>
-                            !stockOut.productId ||
-                            brand.productId === stockOut.productId
-                        )
-                        .map((brand) => (
-                          <option key={brand.id} value={brand.id}>
-                            {brand.name}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-black mb-2">
                       Quantity <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -772,9 +689,6 @@ const StockOutList: React.FC<StockOutListProps> = ({ permissions }) => {
                     </p>
                     <p className="text-gray-900">
                       Product: {selectedStockOut.productName}
-                    </p>
-                    <p className="text-gray-900">
-                      Brand: {selectedStockOut.brandName}
                     </p>
                   </div>
                 </div>

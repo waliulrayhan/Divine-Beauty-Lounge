@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from "@/lib/authOptions";
+import { getAvailableStock } from '@/lib/stockCalculations';
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -12,6 +13,22 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
   try {
     const { productId, quantity, comments } = await request.json();
+
+    // Check if there's enough stock for the update
+    const currentStockOut = await prisma.stockOut.findUnique({
+      where: { id: params.id },
+      select: { quantity: true }
+    });
+
+    const availableStock = await getAvailableStock(productId);
+    const stockDifference = quantity - (currentStockOut?.quantity || 0);
+
+    if (stockDifference > availableStock) {
+      return NextResponse.json({
+        error: `Insufficient stock. Available: ${availableStock}, Additional requested: ${stockDifference}`
+      }, { status: 400 });
+    }
+
     const stockOut = await prisma.stockOut.update({
       where: { id: params.id },
       data: {

@@ -3,6 +3,19 @@ import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from "@/lib/authOptions";
 
+interface StockRecord {
+  quantity: number;
+}
+
+interface CurrentStockItem {
+  id: string;
+  productName: string;
+  serviceName: string;
+  totalStockIn: number;
+  totalStockOut: number;
+  currentStock: number;
+}
+
 export async function GET() {
   const session = await getServerSession(authOptions);
 
@@ -11,14 +24,10 @@ export async function GET() {
   }
 
   try {
-    // Get all brands with their related product and service information
-    const brands = await prisma.brand.findMany({
+    // Get all products with their related service and stock information
+    const products = await prisma.product.findMany({
       include: {
-        product: {
-          include: {
-            service: true,
-          },
-        },
+        service: true,
         stockIns: {
           select: {
             quantity: true,
@@ -32,31 +41,32 @@ export async function GET() {
       },
     });
 
-    // Calculate current stock for each brand
-    const currentStock = brands.map(brand => {
-      const totalStockIn = brand.stockIns.reduce(
-        (sum, record) => sum + record.quantity, 
+    // Calculate current stock for each product
+    const currentStock: CurrentStockItem[] = products.map(product => {
+      const totalStockIn = product.stockIns.reduce(
+        (sum: number, record: StockRecord) => sum + record.quantity, 
         0
       );
       
-      const totalStockOut = brand.stockOuts.reduce(
-        (sum, record) => sum + record.quantity, 
+      const totalStockOut = product.stockOuts.reduce(
+        (sum: number, record: StockRecord) => sum + record.quantity, 
         0
       );
 
       return {
-        id: brand.id,
-        brandName: brand.name,
-        productName: brand.product.name,
-        serviceName: brand.product.service.name,
+        id: product.id,
+        productName: product.name,
+        serviceName: product.service.name,
         totalStockIn,
         totalStockOut,
         currentStock: totalStockIn - totalStockOut,
       };
     });
 
-    // Sort by brand name
-    currentStock.sort((a, b) => a.brandName.localeCompare(b.brandName));
+    // Sort by product name
+    currentStock.sort((a: CurrentStockItem, b: CurrentStockItem) => 
+      a.productName.localeCompare(b.productName)
+    );
 
     return NextResponse.json(currentStock);
   } catch (error) {
