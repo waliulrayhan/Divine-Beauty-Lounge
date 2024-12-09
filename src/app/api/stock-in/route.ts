@@ -20,9 +20,6 @@ export async function GET() {
             },
           },
         },
-        brand: {
-          select: { name: true },
-        },
         createdBy: {
           select: { username: true },
         },
@@ -35,10 +32,7 @@ export async function GET() {
       productId: stockIn.productId,
       productName: stockIn.product.name,
       serviceName: stockIn.product.service.name,
-      brandId: stockIn.brandId,
-      brandName: stockIn.brand.name,
       quantity: stockIn.quantity,
-      pricePerUnit: stockIn.pricePerUnit,
       comments: stockIn.comments,
       createdBy: stockIn.createdBy.username,
       createdAt: stockIn.createdAt,
@@ -58,17 +52,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { productId, brandId, quantity, pricePerUnit, comments } = await request.json();
+    const { productId, quantity, comments } = await request.json();
     
-    // Log the incoming data for debugging
-    console.log("Creating stock in with data:", { productId, brandId, quantity, pricePerUnit, comments });
-
     const stockIn = await prisma.stockIn.create({
       data: {
         product: { connect: { id: productId } },
-        brand: { connect: { id: brandId } },
         quantity: parseInt(quantity),
-        pricePerUnit: parseFloat(pricePerUnit),
         comments,
         createdBy: { connect: { email: session.user.email } },
       },

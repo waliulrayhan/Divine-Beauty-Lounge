@@ -20,21 +20,12 @@ interface Product {
   serviceId: string;
 }
 
-interface Brand {
-  id: string;
-  name: string;
-  productId: string;
-}
-
 interface StockIn {
   id: string;
   productId: string;
   productName: string;
   serviceName: string;
-  brandId: string;
-  brandName: string;
   quantity: number;
-  pricePerUnit: number;
   comments: string;
   createdBy: string;
   createdAt: string;
@@ -52,10 +43,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     {
       serviceId: "",
       productId: "",
-      brandId: "",
-      brandName: "",
       quantity: 0,
-      pricePerUnit: 0,
       comments: "",
     },
   ]);
@@ -63,7 +51,6 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   const [showForm, setShowForm] = useState(false);
   const [selectedStockIn, setSelectedStockIn] = useState<StockIn | null>(null);
   const [inputProducts, setInputProducts] = useState<{ [key: number]: Product[] }>({});
-  const [inputBrands, setInputBrands] = useState<{ [key: number]: Brand[] }>({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -132,28 +119,9 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     }
   };
 
-  const fetchBrands = async (productId: string, index: number) => {
-    try {
-      const response = await fetch(`/api/brands?productId=${productId}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      setInputBrands((prev) => ({
-        ...prev,
-        [index]: data.filter((brand: Brand) => brand.productId === productId),
-      }));
-    } catch (error) {
-      console.error("Error fetching brands:", error);
-      toast.error("Failed to load brands");
-    }
-  };
-
   const handleInputChange = (
     index: number,
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     const newInputs = [...stockInInputs];
@@ -166,8 +134,6 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
 
     if (name === "serviceId") {
       fetchProducts(value, index);
-    } else if (name === "productId") {
-      fetchBrands(value, index);
     }
   };
 
@@ -187,10 +153,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
       {
         serviceId: "",
         productId: "",
-        brandId: "",
-        brandName: "",
         quantity: 0,
-        pricePerUnit: 0,
         comments: "",
       },
     ]);
@@ -206,16 +169,13 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Check if editing an existing stock in
       if (editingStockIn) {
         const response = await fetch(`/api/stock-in/${editingStockIn.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             productId: stockInInputs[0].productId,
-            brandId: stockInInputs[0].brandId,
             quantity: stockInInputs[0].quantity,
-            pricePerUnit: stockInInputs[0].pricePerUnit,
             comments: stockInInputs[0].comments,
           }),
         });
@@ -233,43 +193,18 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
           {
             serviceId: "",
             productId: "",
-            brandId: "",
-            brandName: "",
             quantity: 0,
-            pricePerUnit: 0,
             comments: "",
           },
         ]);
       } else {
         await Promise.all(
           stockInInputs.map(async (stockIn) => {
-            let brandId = stockIn.brandId;
-            
-            if (!brandId && stockIn.brandName) {
-              const brandResponse = await fetch('/api/brands', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  name: stockIn.brandName,
-                  productId: stockIn.productId,
-                }),
-              });
-
-              if (!brandResponse.ok) {
-                const errorData = await brandResponse.json();
-                throw new Error(errorData.error || 'Failed to create brand');
-              }
-
-              const newBrand = await brandResponse.json();
-              brandId = newBrand.id;
-            }
-
             const response = await fetch('/api/stock-in', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 ...stockIn,
-                brandId,
               }),
             });
 
@@ -287,10 +222,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
           {
             serviceId: '',
             productId: '',
-            brandId: '',
-            brandName: '',
             quantity: 0,
-            pricePerUnit: 0,
             comments: '',
           },
         ]);
@@ -310,10 +242,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
         serviceId:
           services.find((s) => s.name === stockIn.serviceName)?.id || "",
         productId: stockIn.productId,
-        brandId: stockIn.brandId || "",
-        brandName: stockIn.brandName,
         quantity: stockIn.quantity,
-        pricePerUnit: stockIn.pricePerUnit,
         comments: stockIn.comments || "",
       },
     ]);
@@ -321,9 +250,6 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     const serviceId = services.find((s) => s.name === stockIn.serviceName)?.id;
     if (serviceId) {
       fetchProducts(serviceId, 0);
-      if (stockIn.productId) {
-        fetchBrands(stockIn.productId, 0);
-      }
     }
 
     setShowForm(true);
@@ -369,7 +295,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     // { field: 'createdBy', headerName: 'User Name', flex: 1, headerClassName: 'table-header', cellClassName: 'table-cell', align: 'center', headerAlign: 'center' }, // Commented out
     {
       field: "serviceName",
-      headerName: "Service Name",
+      headerName: "Product Category",
       flex: 1,
       headerClassName: "table-header",
       cellClassName: "table-cell",
@@ -379,15 +305,6 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
     {
       field: "productName",
       headerName: "Product Name",
-      flex: 1,
-      headerClassName: "table-header",
-      cellClassName: "table-cell",
-      align: "center",
-      headerAlign: "center",
-    },
-    {
-      field: "brandName",
-      headerName: "Brand Name",
       flex: 1,
       headerClassName: "table-header",
       cellClassName: "table-cell",
@@ -534,7 +451,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
             </button>
           )}
 
-          {session?.user?.role === "SUPER_ADMIN" && (
+          {/* {session?.user?.role === "SUPER_ADMIN" && (
             <Link
               href="/brand-management"
               className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1 inline-flex items-center gap-2"
@@ -554,7 +471,7 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
               </svg>
               Manage Brand Name
             </Link>
-          )}
+          )} */}
         </div>
       </div>
       {showForm && (
@@ -667,77 +584,6 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
 
                   <div>
                     <label className="block text-sm font-medium text-black mb-2">
-                      Brand <span className="text-red-500">*</span>
-                    </label>
-                    <Autocomplete
-                      value={stockIn.brandId ? { 
-                        id: stockIn.brandId, 
-                        name: stockIn.brandName 
-                      } : null}
-                      onChange={(_, newValue) => {
-                        const newInputs = [...stockInInputs];
-                        if (newValue && typeof newValue === 'object' && 'id' in newValue) {
-                          newInputs[index] = {
-                            ...newInputs[index],
-                            brandId: newValue.id,
-                            brandName: newValue.name,
-                          };
-                        } else if (newValue && typeof newValue === 'string') {
-                          newInputs[index] = {
-                            ...newInputs[index],
-                            brandId: '',
-                            brandName: newValue,
-                          };
-                        } else {
-                          newInputs[index] = {
-                            ...newInputs[index],
-                            brandId: '',
-                            brandName: '',
-                          };
-                        }
-                        setStockInInputs(newInputs);
-                      }}
-                      options={
-                        stockIn.productId 
-                          ? (inputBrands[index] || []).map(brand => ({ 
-                              id: brand.id, 
-                              name: brand.name 
-                            }))
-                          : []
-                      }
-                      getOptionLabel={(option: string | { id: string; name: string }) => {
-                        if (typeof option === 'string') return option;
-                        return option.name || '';
-                      }}
-                      isOptionEqualToValue={(option, value) => {
-                        if (!option || !value) return false;
-                        return option.id === value.id;
-                      }}
-                      freeSolo
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          className="w-full bg-white"
-                          placeholder={stockIn.productId ? "Select or type brand name" : "Select a product first"}
-                          onChange={(e) => {
-                            const newInputs = [...stockInInputs];
-                            newInputs[index] = {
-                              ...newInputs[index],
-                              brandId: '',
-                              brandName: e.target.value,
-                            };
-                            setStockInInputs(newInputs);
-                          }}
-                        />
-                      )}
-                      disabled={!stockIn.productId}
-                      className="w-full"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-black mb-2">
                       Quantity <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -747,24 +593,6 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                       onChange={(e) => handleInputChange(index, e)}
                       required
                       min="1"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-black mb-2">
-                      Price Per Unit <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      name="pricePerUnit"
-                      value={
-                        stockIn.pricePerUnit === 0 ? "" : stockIn.pricePerUnit
-                      }
-                      onChange={(e) => handleInputChange(index, e)}
-                      required
-                      min="0"
-                      step="0.01"
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                     />
                   </div>
@@ -908,9 +736,6 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                     <p className="text-gray-900">
                       Product: {selectedStockIn.productName}
                     </p>
-                    <p className="text-gray-900">
-                      Brand: {selectedStockIn.brandName}
-                    </p>
                   </div>
                 </div>
 
@@ -921,17 +746,6 @@ const StockInList: React.FC<StockInListProps> = ({ permissions }) => {
                   <div className="space-y-2">
                     <p className="text-gray-900">
                       Quantity: {selectedStockIn.quantity}
-                    </p>
-                    <p className="text-gray-900">
-                      Price Per Unit: {selectedStockIn.pricePerUnit.toFixed(2)}{" "}
-                      Tk
-                    </p>
-                    <p className="text-gray-900">
-                      Total Value:{" "}
-                      {(
-                        selectedStockIn.quantity * selectedStockIn.pricePerUnit
-                      ).toFixed(2)}{" "}
-                      Tk
                     </p>
                   </div>
                 </div>
