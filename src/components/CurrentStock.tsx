@@ -5,7 +5,6 @@ import { DataGrid, GridToolbar, GridColDef } from "@mui/x-data-grid";
 
 interface StockItem {
   id: string;
-  brandName: string;
   productName: string;
   serviceName: string;
   totalStockIn: number;
@@ -116,16 +115,6 @@ const CurrentStock: React.FC = () => {
     {
       field: "productName",
       headerName: "Product",
-      flex: 1,
-      headerClassName: "table-header",
-      cellClassName: "table-cell",
-      type: "string",
-      align: "center",
-      headerAlign: "center",
-    },
-    {
-      field: "brandName",
-      headerName: "Brand Name",
       flex: 1,
       headerClassName: "table-header",
       cellClassName: "table-cell",

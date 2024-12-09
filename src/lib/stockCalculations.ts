@@ -1,26 +1,16 @@
 import prisma from './prisma';
 
-export async function getAvailableStock(productId: string, brandId: string) {
+export async function getAvailableStock(productId: string) {
   // Get total stock in
   const stockIns = await prisma.stockIn.findMany({
-    where: {
-      productId,
-      brandId
-    },
-    select: {
-      quantity: true
-    }
+    where: { productId },
+    select: { quantity: true }
   });
 
   // Get total stock out
   const stockOuts = await prisma.stockOut.findMany({
-    where: {
-      productId,
-      brandId
-    },
-    select: {
-      quantity: true
-    }
+    where: { productId },
+    select: { quantity: true }
   });
 
   const totalStockIn = stockIns.reduce((sum, record) => sum + record.quantity, 0);

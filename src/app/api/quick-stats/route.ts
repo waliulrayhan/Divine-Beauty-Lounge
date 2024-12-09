@@ -11,29 +11,15 @@ export async function GET() {
   }
 
   try {
-    // Count total number of services
     const totalServices = await prisma.service.count();
-
-    // Count total number of products
     const totalProducts = await prisma.product.count();
-
-    // Count total number of brands
-    const totalBrands = await prisma.brand.count();
-
-    // Count total stock entries
     const totalStockInEntries = await prisma.stockIn.count();
-
-    // Count total stock out entries
     const totalStockOutEntries = await prisma.stockOut.count();
 
-    // Get all brands with their related product and service information for current stock
-    const brands = await prisma.brand.findMany({
+    // Get all products with their stock information
+    const products = await prisma.product.findMany({
       include: {
-        product: {
-          include: {
-            service: true,
-          },
-        },
+        service: true,
         stockIns: {
           select: {
             quantity: true,
@@ -47,23 +33,22 @@ export async function GET() {
       },
     });
 
-    // Calculate current stock for each brand
-    const currentStock = brands.map((brand) => {
-      const totalStockIn = brand.stockIns.reduce(
+    // Calculate current stock for each product
+    const currentStock = products.map((product) => {
+      const totalStockIn = product.stockIns.reduce(
         (sum, record) => sum + record.quantity,
         0
       );
 
-      const totalStockOut = brand.stockOuts.reduce(
+      const totalStockOut = product.stockOuts.reduce(
         (sum, record) => sum + record.quantity,
         0
       );
 
       return {
-        id: brand.id,
-        brandName: brand.name,
-        productName: brand.product.name,
-        serviceName: brand.product.service.name,
+        id: product.id,
+        productName: product.name,
+        serviceName: product.service.name,
         totalStockIn,
         totalStockOut,
         currentStock: totalStockIn - totalStockOut,
@@ -73,75 +58,28 @@ export async function GET() {
     // Count products with low stock (current stock <= 2)
     const lowStockProducts = currentStock.filter(item => item.currentStock <= 2).length;
 
-    // Sort current stock by brand name
-    currentStock.sort((a, b) => a.brandName.localeCompare(b.brandName));
-
-    // Get stock in statistics with quantity and value calculations
+    // Get total quantities
     const stockInStats = await prisma.stockIn.aggregate({
       _sum: {
         quantity: true,
-        pricePerUnit: true,
       },
     });
 
-    // Calculate total stock in value
-    const stockInDetails = await prisma.stockIn.findMany({
-      select: {
-        quantity: true,
-        pricePerUnit: true,
-      },
-    });
-    
-    const totalStockInValue = stockInDetails.reduce(
-      (sum, item) => sum + (item.quantity * item.pricePerUnit),
-      0
-    );
-
-    // Get stock out quantities
     const stockOutStats = await prisma.stockOut.aggregate({
       _sum: {
         quantity: true,
       },
     });
 
-    // Calculate stock out value based on the most recent stock in price for each item
-    const stockOuts = await prisma.stockOut.findMany({
-      include: {
-        product: true,
-        brand: true,
-      },
-    });
-
-    let totalStockOutValue = 0;
-    for (const stockOut of stockOuts) {
-      // Get the most recent stock in price for this product/brand combination
-      const mostRecentStockIn = await prisma.stockIn.findFirst({
-        where: {
-          productId: stockOut.productId,
-          brandId: stockOut.brandId,
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-      });
-
-      if (mostRecentStockIn) {
-        totalStockOutValue += stockOut.quantity * mostRecentStockIn.pricePerUnit;
-      }
-    }
-
     return NextResponse.json({
       totalServices,
       totalProducts,
-      totalBrands,
       totalStockInEntries,
       totalStockOutEntries,
       lowStockProducts,
       currentStock,
       stockInQuantity: stockInStats._sum.quantity || 0,
       stockOutQuantity: stockOutStats._sum.quantity || 0,
-      totalStockInValue: totalStockInValue || 0,
-      totalStockOutValue: totalStockOutValue || 0,
     });
   } catch (error) {
     console.error("Error fetching quick stats:", error);
