@@ -176,7 +176,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ user }) => {
               </div>
             </div>
           </section>
-
+{/* 
           <section>
             <h4 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
               <span className="bg-indigo-100 p-1.5 rounded-lg mr-2">
@@ -222,7 +222,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ user }) => {
                 </div>
               </div>
             </div>
-          </section>
+          </section> */}
         </div>
       </div>
     </div>
